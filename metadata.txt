@@ -1,0 +1,45 @@
+# This file contains metadata for your plugin. Beginning
+# with version 1.8 this is the preferred way to supply information about a
+# plugin. The current method of embedding metadata in __init__.py will
+# be supported until version 2.0
+
+# This file should be included when you package your plugin.
+
+# Mandatory items:
+
+[general]
+name=VectorMCDA
+qgisMinimumVersion=2.0
+#qgisMaximumVersion=2.99
+description=Performs geographic multi criteria decision making.
+category=Vector
+version=0.1
+
+# end of mandatory metadata
+
+# Optional items:
+
+# Uncomment the following line and add your changelog entries:
+# changelog= new social tab and rules extraction tabs
+
+# tags are comma separated with spaces allowed
+tags=Sustainability, Geographic MCDA, Vector
+
+homepage=http://maplab.alwaysdata.net/geoMCDA.html
+tracker=http://hub.qgis.org/projects/geoMCDA/
+repository=https://github.com/gmassei/geoMCDA
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version
+deprecated=False
+
+about= VectorMCDA is a QGIS plugin that  use several MCDA algorithms performing a multicriteria analysis in a geographical environmental
+
+
+# Author contact information
+author= Gianluca Massei, Antonio Boggia
+email=g_massa@libero.it
+
+

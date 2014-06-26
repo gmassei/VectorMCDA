@@ -1,0 +1,5 @@
+# for rebuild:
+
+rm *.pyc
+pyuic4 -o ui_geoSUIT.py geoSUIT.ui
+pyrcc4 -o resources.py resources.qrc
