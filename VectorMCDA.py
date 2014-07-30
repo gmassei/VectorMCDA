@@ -37,8 +37,8 @@ class LayerLoader:
 		self.actionWeightedSum = QAction( "geoWeightedSum", self.iface.mainWindow() )
 		self.actionWeightedSum.triggered.connect(self.runGeoWeightedSum )
 		
-		self.actionIdealPoint = QAction( "geoIdealPoint", self.iface.mainWindow() )
-		self.actionIdealPoint.triggered.connect(self.runGeoIdealPoint )
+		self.actionTOPSIS = QAction( "geoTOPSIS", self.iface.mainWindow() )
+		self.actionTOPSIS.triggered.connect(self.runGeoTOPSIS )
 		
 		self.actionFuzzy = QAction( "geoFuzzy", self.iface.mainWindow() )
 		self.actionFuzzy.triggered.connect(self.runGeoFuzzy )
@@ -56,7 +56,7 @@ class LayerLoader:
 		self.actionXMCDA.triggered.connect(self.runGeoXMCDA )
 		
 		# aggiunge il plugin alla toolbar
-		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionIdealPoint,\
+		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionTOPSIS,\
 			self.actionFuzzy,self.actionElectre,self.actionRegime, \
 			self.actionRSDB,self.actionXMCDA])
 		self.menu = self.iface.pluginMenu()
@@ -66,7 +66,7 @@ class LayerLoader:
 	def unload(self):	# rimuove dalla GUI i pulsanti aggiunti dal plugin
 		#self.iface.removeToolBarIcon( self.action )
 		self.iface.removePluginMenu( "&geoWeightedSum", self.actionWeightedSum )
-		self.iface.removePluginMenu( "&geoIdealPoint", self.actionIdealPoint )
+		self.iface.removePluginMenu( "&geoTOPSIS", self.actionTOPSIS )
 		self.iface.removePluginMenu( "&geoFuzzy", self.actionFuzzy )
 		self.iface.removePluginMenu( "&geoElectre", self.actionElectre )
 		self.iface.removePluginMenu( "&geoRegime", self.actionRegime )
@@ -79,9 +79,9 @@ class LayerLoader:
 		dlg = geoWeightedSumDialog(self.iface)
 		dlg.exec_()
 		
-	def runGeoIdealPoint(self):	# richiamato al click sull'azione
-		from geoIdealPoint import geoIdealPointDialog
-		dlg = geoIdealPointDialog(self.iface)
+	def runGeoTOPSIS(self):	# richiamato al click sull'azione
+		from geoTOPSIS import geoTOPSISDialog
+		dlg = geoTOPSISDialog(self.iface)
 		dlg.exec_()
 	
 	def runGeoFuzzy(self):	# richiamato al click sull'azione
@@ -90,7 +90,7 @@ class LayerLoader:
 		dlg.exec_()
 		
 	def runGeoElectre(self):	# richiamato al click sull'azione
-		from VectorElectre import geoElectreDialog
+		from geoElectre import geoElectreDialog
 		dlg = geoElectreDialog(self.iface)
 		dlg.exec_()
 		

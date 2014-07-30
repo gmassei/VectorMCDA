@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>693</width>
+    <height>657</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>694</width>
+    <height>700</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>6</pointsize>
+   </font>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>geo TOPSIS</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetDefaultConstraint</enum>
+   </property>
+   <item row="0" column="0">
+    <widget class="QToolBox" name="toolBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="font">
+      <font>
+       <family>MS Shell Dlg 2</family>
+       <pointsize>10</pointsize>
+       <weight>9</weight>
+       <italic>true</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">
+font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <property name="tabSpacing">
+      <number>6</number>
+     </property>
+     <widget class="QWidget" name="EnvironmentaleQTbox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>675</width>
+        <height>579</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Environmental criteria</string>
+      </attribute>
+      <widget class="QComboBox" name="EnvlistFieldsCBox">
+       <property name="geometry">
+        <rect>
+         <x>88</x>
+         <y>62</y>
+         <width>364</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QLabel" name="EnvLbl">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>9</y>
+         <width>51</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Layer     </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="EnvMapNameLbl">
+       <property name="geometry">
+        <rect>
+         <x>69</x>
+         <y>8</y>
+         <width>431</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>MS Shell Dlg 2</family>
+         <pointsize>10</pointsize>
+         <weight>9</weight>
+         <italic>true</italic>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="EnvTEdit">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>440</y>
+         <width>531</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>2</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QLabel" name="EnvFieldsLbl">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>62</y>
+         <width>34</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Fields</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SetBtnHelp">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>470</y>
+         <width>102</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+      <widget class="Line" name="line_2">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>36</y>
+         <width>657</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="Line" name="line_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>400</y>
+         <width>660</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QTabWidget" name="EnvTabWidget">
+       <property name="geometry">
+        <rect>
+         <x>14</x>
+         <y>105</y>
+         <width>655</width>
+         <height>281</height>
+        </rect>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tab_5">
+        <attribute name="title">
+         <string>Standard</string>
+        </attribute>
+        <widget class="QTableWidget" name="EnvWeighTableWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>11</y>
+           <width>630</width>
+           <height>191</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="gridStyle">
+          <enum>Qt::DotLine</enum>
+         </property>
+         <property name="rowCount">
+          <number>0</number>
+         </property>
+         <attribute name="horizontalHeaderCascadingSectionResizes">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderCascadingSectionResizes">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderHighlightSections">
+          <bool>true</bool>
+         </attribute>
+        </widget>
+        <widget class="QPushButton" name="EnvGetWeightBtn">
+         <property name="geometry">
+          <rect>
+           <x>540</x>
+           <y>220</y>
+           <width>104</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>104</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Apply</string>
+         </property>
+        </widget>
+        <widget class="QProgressBar" name="EnvProgressBar">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>220</y>
+           <width>521</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_6">
+        <attribute name="title">
+         <string>Advanced</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;colun vs row &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </attribute>
+        <widget class="QPushButton" name="EnvCalculateBtn">
+         <property name="geometry">
+          <rect>
+           <x>530</x>
+           <y>210</y>
+           <width>110</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>111</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Calculate weight</string>
+         </property>
+        </widget>
+        <widget class="QTableWidget" name="EnvTableWidget">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>15</y>
+           <width>630</width>
+           <height>181</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::IgnoreAction</enum>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="Line" name="line_3">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>58</y>
+         <width>20</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+      <widget class="Line" name="line_6">
+       <property name="geometry">
+        <rect>
+         <x>554</x>
+         <y>58</y>
+         <width>20</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="EnvRemoveFieldBtn">
+       <property name="geometry">
+        <rect>
+         <x>590</x>
+         <y>62</y>
+         <width>72</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Remove</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="EnvAddFieldBtn">
+       <property name="geometry">
+        <rect>
+         <x>465</x>
+         <y>62</y>
+         <width>72</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SetBtnQuit">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>440</y>
+         <width>102</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Quit</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SetBtnAbout">
+       <property name="geometry">
+        <rect>
+         <x>560</x>
+         <y>500</y>
+         <width>102</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>About</string>
+       </property>
+      </widget>
+      <zorder>EnvRemoveFieldBtn</zorder>
+      <zorder>EnvAddFieldBtn</zorder>
+      <zorder>EnvlistFieldsCBox</zorder>
+      <zorder>EnvLbl</zorder>
+      <zorder>EnvMapNameLbl</zorder>
+      <zorder>EnvTEdit</zorder>
+      <zorder>EnvFieldsLbl</zorder>
+      <zorder>SetBtnHelp</zorder>
+      <zorder>line_2</zorder>
+      <zorder>line_4</zorder>
+      <zorder>EnvTabWidget</zorder>
+      <zorder>line_3</zorder>
+      <zorder>line_6</zorder>
+      <zorder>SetBtnQuit</zorder>
+      <zorder>SetBtnAbout</zorder>
+     </widget>
+     <widget class="QWidget" name="AnalysisQTBox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>675</width>
+        <height>549</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Analysis</string>
+      </attribute>
+      <widget class="QPushButton" name="GraphBtn">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>120</y>
+         <width>90</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Graph</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="LblGraphic">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>170</y>
+         <width>518</width>
+         <height>251</height>
+        </rect>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="RenderBtn">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>40</y>
+         <width>90</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load maps</string>
+       </property>
+      </widget>
+      <widget class="Line" name="line">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>90</y>
+         <width>644</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="LabelListFieldsCBox">
+       <property name="geometry">
+        <rect>
+         <x>107</x>
+         <y>123</y>
+         <width>419</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>22</x>
+         <y>125</y>
+         <width>64</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Label field</string>
+       </property>
+      </widget>
+      <widget class="QDialogButtonBox" name="AnlsBtnBox">
+       <property name="geometry">
+        <rect>
+         <x>565</x>
+         <y>504</y>
+         <width>86</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>161</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load thematic maps</string>
+       </property>
+      </widget>
+      <widget class="Line" name="line_14">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>10</y>
+         <width>644</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spinBoxClasNum">
+       <property name="geometry">
+        <rect>
+         <x>360</x>
+         <y>40</y>
+         <width>42</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="value">
+        <number>5</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>40</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Classes in maps</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="9"/>
+ <tabstops>
+  <tabstop>EnvAddFieldBtn</tabstop>
+  <tabstop>EnvRemoveFieldBtn</tabstop>
+  <tabstop>EnvTEdit</tabstop>
+  <tabstop>GraphBtn</tabstop>
+  <tabstop>SetBtnHelp</tabstop>
+  <tabstop>EnvlistFieldsCBox</tabstop>
+  <tabstop>RenderBtn</tabstop>
+  <tabstop>LabelListFieldsCBox</tabstop>
+  <tabstop>AnlsBtnBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

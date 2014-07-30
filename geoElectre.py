@@ -34,13 +34,13 @@ import htmlGraph
 try:
 	import numpy as np
 except ImportError, e:
-	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoElectre', "Plugin error"), \
+	QCoreApplication.translate('geoElectre', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 from ui_geoWeightedSum import Ui_Dialog
 
-class geoWeightedSumDialog(QDialog, Ui_Dialog):
+class geoElectreDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
 		'''costruttore'''
 		QDialog.__init__(self, iface.mainWindow())
@@ -70,7 +70,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)
 		pathSource=os.path.dirname(sourceIn)
-		outFile="geoWeightedSum.shp"
+		outFile="geoElectre.shp"
 		sourceOut=os.path.join(pathSource,outFile)
 		#self.OutlEdt.setText(str(sourceOut))
 
@@ -260,7 +260,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			List=[]
 			for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
 				if pref=='gain':
-					value=(wgt*(r-minF)/(maxF-minF))  #cres: x-min / max - min
+					value=(r-minF)/(maxF-minF)  #cres: x-min / max - min
 				else:
 					value=(wgt*(maxF-r)/(maxF-minF))  #dec: max-x / max-min
 				List.append(value)
@@ -268,29 +268,75 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTEdit.append(str(WeightedSumVaList))
 		return WeightedSumVaList
 
-	
-	def ElaborateAttributeTable(self):
-		"""Standardization fields values in range [0-1]"""
+	def Attributes2Matrix(self):
 		matrix=[]
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
 		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
-		provider=self.activeLayer.dataProvider()
-		if provider.fieldNameIndex("geoWSM")==-1:
-			self.AddDecisionField(self.activeLayer,"geoWSM")
-		fldValue = provider.fieldNameIndex("geoWSM") #obtain classify field index from its name
-		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-		minField=[provider.minimumValue( f ) for f in fids]
-		maxField=[provider.maximumValue( f ) for f in fids]
 		
 		fields = self.activeLayer.pendingFields()
 		features= self.activeLayer.getFeatures()
-		matrix=[]
 		for feat in features:
 			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
 			matrix.append(row)
 		matrix=np.array(matrix, dtype = 'float32')
-		WeightedSumVaList=self.ComputeWeightedSumValue(preference,weight,matrix,minField,maxField)
+		return matrix
+	
+	
+	def StandardizeMatrix(self,preference,weight,matrix,minField,maxField):
+	""" """
+	StdMatrix=[]
+	for row in matrix:
+		List=[]
+		for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
+			if pref=='gain':
+				value=((r-minF)/(maxF-minF))  #cres: x-min / max - min
+			else:
+				value=((maxF-r)/(maxF-minF))  #dec: max-x / max-min
+			List.append(value)
+		StdMatrix.append(sum(List))
+	self.EnvTEdit.append(str(StdMatrix))
+	return StdMatrix
+	
+	def ConcordanceMatrix(self, matrix,weight):
+		concordance=[]
+		for row1 in matrix:
+			crow=[]
+			value=0
+			for row2 in matrix:
+				for r1,r2,w in zip(row1,row2,weight):
+					if r1>r2:
+						value=value+w
+				crow.append(value)
+			concordance.append(crow)
+		return concordance
+		
+	def DiscordanceMatrix(self, matrix,weight):
+		return 0
+		
+	def ConcordanceIndex(self):
+		return 0
+		
+	def DiscordanceIndex(self):
+	
+	def ElaborateAttributeTable(self):
+		"""Standardization fields values in range [0-1]"""
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
+		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
+		provider=self.activeLayer.dataProvider()
+		if provider.fieldNameIndex("geoElectre")==-1:
+			self.AddDecisionField(self.activeLayer,"geoElectre")
+		fldValue = provider.fieldNameIndex("geoElectre") #obtain classify field index from its name
+		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
+		minField=[provider.minimumValue( f ) for f in fids]
+		maxField=[provider.maximumValue( f ) for f in fids]
+		
+		matrix= Attributes2Matrix()
+		matrix=StandardizeMatrix(preference,weight,matrix,minField,maxField):
+		
+		concordanceMatrix=Concordance(matrix)
+		discordanceMatrix=Discordance(matrix)
 		
 		feat = QgsFeature()
 		self.activeLayer.startEditing()
