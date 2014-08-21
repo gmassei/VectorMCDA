@@ -1,13 +1,13 @@
 import os
 import operator
 
-def BuilHTMLGraph(geoWSMValue,labels):
-	header=["label","geoWSM"]
+def BuilHTMLGraph(ListValue,labels,ranks):
+	header=["label",ranks]
 	data=[]
 	for i in range(len(labels)):
 		row=[]
 		row.append(labels[i])
-		row.append(geoWSMValue[i])
+		row.append(ListValue[i])
 		data.append(row)
 	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 	data = sorted(data, key=operator.itemgetter(-1),reverse=True)

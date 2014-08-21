@@ -2,8 +2,9 @@
 
 """
 /***************************************************************************
-Name			: geoWeightedSum
-Description		: geographical MCDA with Weighted Sum Model (WSM)
+Name			: geoElectre
+Description		: geographical MCDA with Electre model (ranking with concordance 
+					and discordance index)
 Date			: June 20, 2014
 copyright		: Gianluca Massei  (developper) 
 email			: (g_massa@libero.it)
@@ -30,6 +31,7 @@ from qgis.gui import *
 import os
 import webbrowser
 import htmlGraph
+import csv
 
 try:
 	import numpy as np
@@ -38,7 +40,7 @@ except ImportError, e:
 	QCoreApplication.translate('geoElectre', "Couldn't import Python module. [Message: %s]" % e))
 	
 
-from ui_geoWeightedSum import Ui_Dialog
+from ui_geoElectre import Ui_Dialog
 
 class geoElectreDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
@@ -101,7 +103,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		#self.LblLogo.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"icon.png")))
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
-		
+		setting=self.csv2setting()
+		self.setting2table(setting)
 
 
 	def GetFieldNames(self, layer):
@@ -125,7 +128,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		"""Prepare and compile tbale in GUI"""
 		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
 		Envfields=[f for f in self.GetFieldNames(self.activeLayer)]
-############################################################################################################################
+#######################################################################################
 		self.EnvTableWidget.setColumnCount(len(Envfields))
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
@@ -258,11 +261,11 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		WeightedSumVaList=[]
 		for row in matrix:
 			List=[]
-			for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
+			for r,minF, maxF, pref in zip(row, minField,maxField,preference):
 				if pref=='gain':
-					value=(r-minF)/(maxF-minF)  #cres: x-min / max - min
+					value=(r-minF)/(maxF)#-minF)  #cres: x-min / max - min
 				else:
-					value=(wgt*(maxF-r)/(maxF-minF))  #dec: max-x / max-min
+					value=(maxF-r)/(maxF)#-minF)  #dec: max-x / max-min
 				List.append(value)
 			WeightedSumVaList.append(sum(List))
 		self.EnvTEdit.append(str(WeightedSumVaList))
@@ -273,7 +276,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
 		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
-		
 		fields = self.activeLayer.pendingFields()
 		features= self.activeLayer.getFeatures()
 		for feat in features:
@@ -284,65 +286,131 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	
 	
 	def StandardizeMatrix(self,preference,weight,matrix,minField,maxField):
-	""" """
-	StdMatrix=[]
-	for row in matrix:
-		List=[]
-		for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
-			if pref=='gain':
-				value=((r-minF)/(maxF-minF))  #cres: x-min / max - min
-			else:
-				value=((maxF-r)/(maxF-minF))  #dec: max-x / max-min
-			List.append(value)
-		StdMatrix.append(sum(List))
-	self.EnvTEdit.append(str(StdMatrix))
-	return StdMatrix
+		""" """
+		StdMatrix=[]
+		for row in matrix:
+			List=[]
+			for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
+				if pref=='gain':
+					value=((r-minF)/(maxF-minF)) #cres: x-min / max - min
+				else:
+					value=((maxF-r)/(maxF-minF))  #dec: max-x / max-min
+				List.append(value)
+			StdMatrix.append(List)
+		return StdMatrix
 	
 	def ConcordanceMatrix(self, matrix,weight):
 		concordance=[]
 		for row1 in matrix:
 			crow=[]
-			value=0
 			for row2 in matrix:
+				value=0
 				for r1,r2,w in zip(row1,row2,weight):
 					if r1>r2:
 						value=value+w
 				crow.append(value)
 			concordance.append(crow)
 		return concordance
+
+	def DiscordanceMatrix(self, matrix):
+		discordance=[]
+		for row1 in matrix:
+			drow=[]
+			value=0
+			for row2 in matrix:
+				for r1,r2 in zip(row1,row2):
+					if (r1-r2)>value:
+						value=(r1-r2)
+					else:
+						value=value
+				drow.append(value)
+			discordance.append(drow)
+		return discordance
 		
-	def DiscordanceMatrix(self, matrix,weight):
-		return 0
-		
-	def ConcordanceIndex(self):
-		return 0
-		
-	def DiscordanceIndex(self):
 	
+	def ConcordanceIndex(self,concordance):
+		concIndx=[]
+		concordance=np.array(concordance, dtype = 'float32')
+		for i in range(len(concordance)):
+			row=concordance[i]
+			col=concordance[:,i]
+			value=sum(row)-sum(col)
+			concIndx.append(value)
+		return concIndx
+		
+	def DiscordanceIndex(self,discordance):
+		discIndx=[]
+		discordance=np.array(discordance, dtype = 'float32')
+		for i in range(len(discordance[0])):
+			row=discordance[i]
+			col=discordance[:,i]
+			value=sum(row)-sum(col)
+			discIndx.append(value)
+		return discIndx
+	
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
+		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setting.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		write.writerow(preference)
+		csvFile.close()
+		
+	def csv2setting(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		setting=[]
+		try:
+			with open(os.path.join(currentDIR,'setting.csv')) as csvFile:
+				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
+				for row in csvReader:
+					setting.append(row)
+			return setting
+		except:
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
+
+	def setting2table(self,setting):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		for i in range(len(criteria)):
+			for l in range(len(setting[0])):
+				if criteria[i]==setting[0][l]:
+					self.EnvWeighTableWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
+					self.EnvWeighTableWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
+		
 	def ElaborateAttributeTable(self):
 		"""Standardization fields values in range [0-1]"""
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
 		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
-		if provider.fieldNameIndex("geoElectre")==-1:
-			self.AddDecisionField(self.activeLayer,"geoElectre")
-		fldValue = provider.fieldNameIndex("geoElectre") #obtain classify field index from its name
+		if provider.fieldNameIndex("geoConc")==-1:
+			self.AddDecisionField(self.activeLayer,"geoConc")
+		fldValue = provider.fieldNameIndex("geoConc") #obtain classify field index from its name
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
+
+		matrix= self.Attributes2Matrix()
 		
-		matrix= Attributes2Matrix()
-		matrix=StandardizeMatrix(preference,weight,matrix,minField,maxField):
+		matrix=self.StandardizeMatrix(preference,weight,matrix,minField,maxField)
+		print '\n'+str(matrix)
+		concordanceMatrix=self.ConcordanceMatrix(matrix,weight)
+		discordanceMatrix=self.DiscordanceMatrix(matrix)
+		print concordanceMatrix
 		
-		concordanceMatrix=Concordance(matrix)
-		discordanceMatrix=Discordance(matrix)
+		concIndx=self.ConcordanceIndex(concordanceMatrix)
+		print concIndx
+		self.setting2csv()
+		
 		
 		feat = QgsFeature()
 		self.activeLayer.startEditing()
-		for WSM,feat in zip(WeightedSumVaList,self.activeLayer.getFeatures()):
+		for conc,feat in zip(concIndx,self.activeLayer.getFeatures()):
 			features=feat.attributes()
-			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(WSM,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(conc,4))
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0
@@ -360,6 +428,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		provider = layer.dataProvider()
 		minimum = provider.minimumValue( fieldIndex )
 		maximum = provider.maximumValue( fieldIndex )
+		print minimum, maximum
 		RangeList = []
 		Opacity = 1
 		for c,i in zip(classes,range(len(classes))):
@@ -367,7 +436,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoWSM'
+			field=='geoConc'
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -387,9 +456,9 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		layer = self.activeLayer
 		#QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 		#layer = QgsVectorLayer(self.OutlEdt.text(), "geosustainability", "ogr")
-		layer = QgsVectorLayer(layer.source(), 'geoWSM', 'ogr')
+		#layer = QgsVectorLayer(layer.source(), 'geoConcordance', 'ogr')
 		QgsMapLayerRegistry.instance().addMapLayer(layer)
-		fields=['geoWSM']
+		fields=['geoConc']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
@@ -427,8 +496,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoUmbriaSUIT', "Plugin error"), \
-			QCoreApplication.translate('geoWeightedSum', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
+			QMessageBox.information(None, QCoreApplication.translate('geoElectre', "Plugin error"), \
+			QCoreApplication.translate('geoElectre', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
@@ -467,12 +536,12 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoWSMValue=self.ExtractAttributeValue('geoWSM')
+		geoConcValue=self.ExtractAttributeValue('geoConc')
 		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels)
+		htmlGraph.BuilHTMLGraph(geoConcValue,labels,'Concordance')
 		return 0
 
 

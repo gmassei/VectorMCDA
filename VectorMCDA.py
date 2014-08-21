@@ -32,7 +32,7 @@ class LayerLoader:
 		# creiamo l'azione che lancerà il plugin
 		
 		self.geoMCDAmenu = QMenu(QCoreApplication.translate("vectorMCDA", "&vectorMCDA"))
-		#self.geoMCDAmenu.setIcon(QIcon(":/plugins/VectorMCDA/icons/decision.png"))
+		self.geoMCDAmenu.setIcon(QIcon(":/plugins/VectorMCDA/icons/decision.png"))
         
 		self.actionWeightedSum = QAction( "geoWeightedSum", self.iface.mainWindow() )
 		self.actionWeightedSum.triggered.connect(self.runGeoWeightedSum )
@@ -45,10 +45,7 @@ class LayerLoader:
 		
 		self.actionElectre = QAction( "geoElectre", self.iface.mainWindow() )
 		self.actionElectre.triggered.connect(self.runGeoElectre )
-		
-		self.actionRegime = QAction( "geoRegime", self.iface.mainWindow() )
-		self.actionRegime.triggered.connect(self.runGeoRegime )
-		
+				
 		self.actionRSDB = QAction( "geoRSDB", self.iface.mainWindow() )
 		self.actionRSDB.triggered.connect(self.runGeoRSDB )
 		
@@ -57,8 +54,7 @@ class LayerLoader:
 		
 		# aggiunge il plugin alla toolbar
 		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionTOPSIS,\
-			self.actionFuzzy,self.actionElectre,self.actionRegime, \
-			self.actionRSDB,self.actionXMCDA])
+			self.actionFuzzy,self.actionElectre,self.actionRSDB,self.actionXMCDA])
 		self.menu = self.iface.pluginMenu()
 		self.menu.addMenu( self.geoMCDAmenu ) 
 		
@@ -69,7 +65,6 @@ class LayerLoader:
 		self.iface.removePluginMenu( "&geoTOPSIS", self.actionTOPSIS )
 		self.iface.removePluginMenu( "&geoFuzzy", self.actionFuzzy )
 		self.iface.removePluginMenu( "&geoElectre", self.actionElectre )
-		self.iface.removePluginMenu( "&geoRegime", self.actionRegime )
 		self.iface.removePluginMenu( "&geoRSDB", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoXMCDA", self.actionXMCDA )
 		 
@@ -94,13 +89,9 @@ class LayerLoader:
 		dlg = geoElectreDialog(self.iface)
 		dlg.exec_()
 		
-	def runGeoRegime(self):	# richiamato al click sull'azione
-		from VectorRegime import geoRegimeDialog
-		dlg = geoRegimeDialog(self.iface)
-		dlg.exec_()
 		
 	def runGeoRSDB(self):	# richiamato al click sull'azione
-		from VectorRSDB import geoRSDBDialog
+		from geoRSDB import geoRSDBDialog
 		dlg = geoRSDBDialog(self.iface)
 		dlg.exec_()
 		
