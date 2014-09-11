@@ -34,17 +34,15 @@ import csv
 try:
 	import numpy as np
 except ImportError, e:
-	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
+	QCoreApplication.translate('geoFuzzy', "Couldn't import Python module. [Message: %s]" % e))
 	
 
-
-#import DOMLEM
 import htmlGraph
 
-from ui_geoTOPSIS import Ui_Dialog
+from ui_geoFuzzy import Ui_Dialog
 
-class geoTOPSISDialog(QDialog, Ui_Dialog):
+class geoFuzzyDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
 		'''costruttore'''
 		QDialog.__init__(self, iface.mainWindow())
@@ -72,7 +70,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
-		outputFile="geoTOPSIS.shp"
+		outputFile="geoFuzzy.shp"
 		sourceOut=os.path.join(pathSource,outputFile)
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
@@ -84,16 +82,14 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
-		EnvSetLabel=["Label","Weigths","Preference","Ideal point", "Worst point "]
+		EnvSetLabel=["Hedges","First", "Second", "Third","Fourth"]
+
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
-		self.EnvParameterWidget.setRowCount(5)
+		self.EnvParameterWidget.setRowCount(len(EnvSetLabel))
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-			#self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("1.0"))
-			#self.EnvParameterWidget.setItem(2,r,QTableWidgetItem("gain"))
-		#retrieve signal for modified cell
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.updateTable()
 		try:
@@ -101,8 +97,13 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		except:
 			pass
 #################################################################################
+		header = self.EnvParameterWidget.horizontalHeader()
+		header.sectionClicked.connect(self.ReverseValues)
+#################################################################################
+
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
+
 
 	def GetFieldNames(self, layer):
 		"""retrive field names from active map/layer"""
@@ -121,6 +122,17 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.OutlEdt.insert(outvLayer)
 		return outvLayer
 		
+	def coloTable(self):
+		rows=self.EnvParameterWidget.rowCount()
+		cols=self.EnvParameterWidget.columnCount()
+		for r in range(rows):
+			if r==1:
+				for c in range(cols):
+					self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,165,0))
+			elif r>1:
+				for c in range(cols):
+					self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,0,0))
+		return 0
 		
 	def updateTable(self):
 		"""Prepare and compile table in GUI"""
@@ -131,41 +143,36 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(fields)
 		self.EnvTableWidget.setRowCount(len(fields))
 		self.EnvTableWidget.setVerticalHeaderLabels(fields)
-		EnvSetLabel=["Label","Weigths","Preference","Ideal point", "Worst point "]
+		EnvSetLabel=["Hedges","First", "Second", "Third","Fourth"]
 		self.EnvParameterWidget.setColumnCount(len(fields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(fields)
-		self.EnvParameterWidget.setRowCount(5)
+		self.EnvParameterWidget.setRowCount(len(EnvSetLabel))
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(fields)):
-			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("*"))
-			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("1.0"))
-			self.EnvParameterWidget.setItem(2,r,QTableWidgetItem("gain"))
-		self.updateGUIIdealPoint()
+			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
+		self.updateGUIFuzzy()
+		self.coloTable()
 		return 0
 
 
-	def updateGUIIdealPointFctn(self,TableWidget,WeighTableWidget,provider):
+	def updateFuzzyFctn(self,TableWidget,WeighTableWidget,provider):
 		"""base function for updateGUIIdealPoint()"""
 		criteria=[TableWidget.verticalHeaderItem(f).text() for f in range(TableWidget.columnCount())]
-		preference=[str(WeighTableWidget.item(2, c).text()) for c in range(WeighTableWidget.columnCount())]
+		#preference=[str(WeighTableWidget.item(2, c).text()) for c in range(WeighTableWidget.columnCount())]
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
-		for r in range(len(preference)):
-			if preference[r]=='gain':
-				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(maxField[r])))#ideal point
-				WeighTableWidget.setItem(4,r,QTableWidgetItem(str(minField[r])))#worst point
-			elif preference[r]=='cost':
-				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(minField[r])))
-				WeighTableWidget.setItem(4,r,QTableWidgetItem(str(maxField[r])))
-			else:
-				WeighTableWidget.setItem(3,r,QTableWidgetItem("0"))
-				WeighTableWidget.setItem(4,r,QTableWidgetItem("0"))
+		for r in range(len(criteria)):
+			WeighTableWidget.setItem(0,r,QTableWidgetItem(str(1.0)))
+			WeighTableWidget.setItem(1,r,QTableWidgetItem(str(minField[r])))#
+			WeighTableWidget.setItem(2,r,QTableWidgetItem(str(maxField[r])))#
+			WeighTableWidget.setItem(3,r,QTableWidgetItem(str(maxField[r])))
+			WeighTableWidget.setItem(4,r,QTableWidgetItem(str(maxField[r])))
 	
-	def updateGUIIdealPoint(self):
+	def updateGUIFuzzy(self):
 		provider=self.activeLayer.dataProvider() #provider=self.active_layer.dataProvider() 
 		##Environmental
-		self.updateGUIIdealPointFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
+		self.updateFuzzyFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
 		return 0
 
 	def addFieldFctn(self,listFields,TableWidget,WeighTableWidget):
@@ -177,10 +184,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		##############
 		WeighTableWidget.insertColumn(WeighTableWidget.columnCount())
 		WeighTableWidget.setHorizontalHeaderItem((WeighTableWidget.columnCount()-1),QTableWidgetItem(listFields))
-		WeighTableWidget.setItem(1,(WeighTableWidget.columnCount()-1),QTableWidgetItem("1.0"))
-		WeighTableWidget.setItem(2,(WeighTableWidget.columnCount()-1),QTableWidgetItem("gain"))
-		WeighTableWidget.setItem(3,(WeighTableWidget.columnCount()-1),QTableWidgetItem("0.0"))
-		WeighTableWidget.setItem(4,(WeighTableWidget.columnCount()-1),QTableWidgetItem("0.0"))
+		self.updateGUIFuzzy()
 		return 0
 			
 	def AddField(self):
@@ -194,7 +198,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		i=TableWidget.currentColumn()
 		j=WeighTableWidget.currentColumn()
 		if i == -1 and j== -1:
-			QMessageBox.warning(self.iface.mainWindow(), "geoTOPSYS",
+			QMessageBox.warning(self.iface.mainWindow(), "geoFuzzy",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		elif i != -1:
 			TableWidget.removeColumn(i)
@@ -221,34 +225,45 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
 			return 0
 		except ValueError:
-			QMessageBox.warning(self.iface.mainWindow(), "geoTOPSYS",
+			QMessageBox.warning(self.iface.mainWindow(), "geoFuzzy",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
 
 	def ChangeValue(self):
-		"""Event for change gain/cost"""
+		"""Event for change values"""
 		cell=self.EnvParameterWidget.currentItem()
 		r=cell.row()
 		c=cell.column()
-		first=self.EnvParameterWidget.item(3, c).text()
-		second=self.EnvParameterWidget.item(4, c).text()
-		if cell.row()==2:
-			val=cell.text()
-			if val=="cost":
-				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("gain"))
-			elif val=="gain":
-				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("cost"))
+		if r>0:
+			if (self.EnvParameterWidget.item(r, c).backgroundColor().getRgb())== \
+				(QtGui.QColor(255,165,0).getRgb()):
+				self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,0,0))
 			else:
-				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
-			self.EnvParameterWidget.setItem(3,c, QTableWidgetItem(second))
-			self.EnvParameterWidget.setItem(4,c, QTableWidgetItem(first))
-		
-			
+				self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,165,0))
+	
+	def ReverseValues(self):
+		cell=self.EnvParameterWidget.currentItem()
+		c=cell.column()
+		first=self.EnvParameterWidget.item(1,cell.column()).text()
+		second=self.EnvParameterWidget.item(2,cell.column()).text()
+		third=self.EnvParameterWidget.item(3,cell.column()).text()
+		fourth=self.EnvParameterWidget.item(4,cell.column()).text()
+		print first,second,third,fourth
+		self.EnvParameterWidget.setItem(1,cell.column(),QTableWidgetItem(fourth))
+		self.EnvParameterWidget.setItem(2,cell.column(),QTableWidgetItem(third))
+		self.EnvParameterWidget.setItem(3,cell.column(),QTableWidgetItem(second))
+		self.EnvParameterWidget.setItem(4,cell.column(),QTableWidgetItem(first))
+		self.coloTable()
+	
+	
 	def Elaborate(self):
-		matrix=self.StandardizationIdealPoint()
-		self.RelativeCloseness(matrix)
-		#self.OveralValue()
+		matrix=self.Attributes2Matrix()
+		FzyMatrix=self.FuzzifiedMatrix(matrix)
+		FzyMatrix=self.LinguisticModification(FzyMatrix)
+		fzyIntersection=self.IntersectionMatrix(FzyMatrix)
+		fzyUnion=self.UnionMatrix(FzyMatrix)
+		self.OveralValue(fzyIntersection, fzyUnion)
 		self.setModal(True)
 		return 0
 #############################################################################################################
@@ -269,8 +284,8 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(round(weight[i],2))))
 			return weight, eigenvalues, eigenvector
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoTOPSYS', "Plugin error"), \
-			QCoreApplication.translate('geoTOPSYS', "Couldn't import Python module 'numpy'.  You can install 'numpy' \
+			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
+			QCoreApplication.translate('geoFuzzy', "Couldn't import Python module 'numpy'.  You can install 'numpy' \
 			with the following command: sudo easy_install numpy'.<br> or you can use 32bit version of QGS. [Message: %s]" % e))
 			return
 
@@ -286,7 +301,6 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 	def AnalyticHierarchyProcess(self):
 		"""Calculate weight from matrix of pairwise comparison """
-			
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		pairwise=[[float(self.EnvTableWidget.item(r, c).text()) for r in range(len(criteria))] for c in range(len(criteria))]
 		weight, eigenvalues, eigenvector=self.calculateWeight(pairwise)
@@ -311,78 +325,133 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 
 ###########################################################################################
-	def ExtractFieldSumSquare(self,field):
-		"""Retrive single field value from attributes table"""
-		provider=self.activeLayer.dataProvider()
-		fid=provider.fieldNameIndex(field)
-		listValue=[]
-		for feat in self.activeLayer.getFeatures():
-			attribute=feat.attributes()[fid]
-			listValue.append(attribute)
-		listValue=[pow(l,2) for l in listValue]
-		return (sum(listValue)**(0.5))
-	
-	def StandardizationIdealPoint(self):
-		"""Perform STEP 1 and STEP 2 of TOPSIS algorithm"""
+
+	def Attributes2Matrix(self):
+		matrix=[]
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		fields = self.activeLayer.pendingFields()
+		features= self.activeLayer.getFeatures()
+		for feat in features:
+			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
+			matrix.append(row)
+		matrix=np.array(matrix, dtype = 'float32')
+		return matrix
+		
+	def RetriveXvalues(self):
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		weight=[ round(w/sum(weight),4) for w in weight ]
+		firsth=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		second=[float(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		third=[float(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		fourth=[float(self.EnvParameterWidget.item(4, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		return firsth,second,third,fourth
+		
+	def binaryYvalue(self,values):
+		yValue=[]
+		for co in values:
+			if co == QtGui.QColor(255,165,0).getRgb():
+				yValue.append(0)
+			else:
+				yValue.append(1)
+		return yValue
+	
+	def RetriveYvalues(self):
+		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() \
+			for f in range(self.EnvParameterWidget.columnCount())]
+		firsth=[self.EnvParameterWidget.item(1, c).backgroundColor().getRgb() \
+			for c in range(self.EnvParameterWidget.columnCount())]
+		second=[self.EnvParameterWidget.item(2, c).backgroundColor().getRgb() \
+			for c in range(self.EnvParameterWidget.columnCount())]
+		third=[self.EnvParameterWidget.item(3, c).backgroundColor().getRgb() \
+			for c in range(self.EnvParameterWidget.columnCount())]
+		fourth=[self.EnvParameterWidget.item(4, c).backgroundColor().getRgb() \
+			for c in range(self.EnvParameterWidget.columnCount())]
+		firsth=self.binaryYvalue(firsth)
+		second=self.binaryYvalue(second)
+		third=self.binaryYvalue(third)
+		fourth=self.binaryYvalue(fourth)
+		print firsth,second,third,fourth
+		return firsth,second,third,fourth
+	
+	def Regression(self,Xvalues,Yvalue):
+		"""y = slope*x+intercept 
+		scipy.stats.linregress(x,y)"""
+		try:  
+			import numpy as np
+			Xvalues=np.array(Xvalues)
+			Yvalues=np.array(Yvalue)
+			regFunct=np.polyfit(Xvalues, Yvalues, 3)
+			valuer = np.poly1d(regFunct)
+			print Xvalues
+			print Yvalues
+			return valuer
+		except ImportError, e:
+			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
+			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'stast' from scipy. [Message: %s]" % e))  
+	
+	
+	def FuzzifiedMatrix(self,matrix):
+		""" """
+		FzyMatrix=[]
+		xfirsth,xsecond,xthird,xfourth=self.RetriveXvalues()
+		yfirsth,ysecond,ythird,yfourth=self.RetriveYvalues()
+		for i in range(len(xfirsth)):
+			Xvalue=[xfirsth[i],xsecond[i],xthird[i],xfourth[i]]
+			Yvalue=[yfirsth[i],ysecond[i],ythird[i],yfourth[i]]
+			col=matrix[:,i]
+			valuer=self.Regression(Xvalue,Yvalue)
+			fzycol=[round(valuer(c),4) for c in col]
+			FzyMatrix.append(fzycol)
+		FzyMatrix=np.array(FzyMatrix, dtype = 'float32')
+		print [float(c) for c in FzyMatrix.transpose()[0]]
+		return FzyMatrix.transpose()
+			
+	
+	def LinguisticModification(self,matrix):
+		"""+++"""
+		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		weight=[round(w/sum(weight),4) for w in weight ]
+		matrixStd=[]
 		for c,w in zip(range(len(criteria)),weight):
-			self.EnvParameterWidget.setItem(1,c,QTableWidgetItem(str(w))) 
+			self.EnvParameterWidget.setItem(0,c,QTableWidgetItem(str(w))) 
 		self.EnvGetWeightBtn.setEnabled(False)
 		provider=self.activeLayer.dataProvider()
 		feat = QgsFeature()
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-		#self.EnvTEdit.append(str(dict(zip(fids,[(field) for field in criteria]))))
-		sumSquareColumn=[self.ExtractFieldSumSquare(field) for field in criteria]
-		matrix=[]
-		for feat in self.activeLayer.getFeatures():
-			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
-			matrix.append(row)
-		matrix=np.array(matrix, dtype = 'float32')
-		matrixStd=[]
 		for row in matrix:
-			rowStd=[]
-			for f,w,sSq in zip(row,weight,sumSquareColumn): #N.B. verifica corretto allineamento con i pesi
-				value=(float(f)/float(sSq))*w   # TOPSIS algorithm: STEP 1 and STEP 2
-				rowStd.append(value)
-			matrixStd.append(rowStd)
+			print [float(f) for f in row]
+			print str(weight)
+			rowMod=[(float(f)**w) for f,w in zip(row,weight)]
+			matrixStd.append(rowMod)
 		return matrixStd
+	
+	def IntersectionMatrix(self,matrix):
+		intersection=[min(row) for row in matrix]
+		return intersection
 		
+	def UnionMatrix(self,matrix):
+		union=[max(row) for row in matrix]
+		return union
 			
-	def RelativeCloseness(self, matrix):
+	def OveralValue(self, fzyIntersection, fzyUnion):
 		""" Calculate Environmental and Socio-Economicos distance from ideal point"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		idealPoint=[float(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		sumSquareColumnList=[self.ExtractFieldSumSquare(field) for field in criteria]
-		idealPoint=[float(self.EnvParameterWidget.item(3, c).text())/sumSquareColumnList[c]*weight[c] \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		worstPoint=[float(self.EnvParameterWidget.item(4, c).text())/sumSquareColumnList[c]*weight[c] \
-			for c in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
-		if provider.fieldNameIndex("geoTOPSYS")==-1:
-			self.AddDecisionField(self.activeLayer,"geoTOPSYS")
-		fldValue = provider.fieldNameIndex("geoTOPSYS") #obtain classify field index from its name
+		if provider.fieldNameIndex("geoFuzzy")==-1:
+			self.AddDecisionField(self.activeLayer,"geoFuzzy")
+		fldValue = provider.fieldNameIndex("geoFuzzy") #obtain classify field index from its name
 		self.EnvTEdit.append("done") #   setText
-		#self.EnvTEdit.append(str(idealPoint)+"#"+str(worstPoint))
 		features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-
 		##################################################################
 		self.activeLayer.startEditing()
 		self.EnvProgressBar.setRange(1,features)
 		progress=0
-		relativeClosenessList=[]
-		for row in matrix:
-			IP=WP=0
-			for f,idp,wrp in zip(row,idealPoint,worstPoint):
-				IP =IP+(float(f-idp)**2)   # TOPSIS algorithm: STEP 4
-				WP =WP+(float(f-wrp)**2)
-			relativeClosenessList.append((WP**(0.5))/((WP**(0.5))+(IP**(0.5))))
-		for feat,relativeCloseness in zip(self.activeLayer.getFeatures(),relativeClosenessList):
+		for feat,fzyValue in zip(self.activeLayer.getFeatures(),fzyIntersection):
 			progress=progress+1
-			self.activeLayer.changeAttributeValue(feat.id(), fldValue, round(float(relativeCloseness),4))
+			self.activeLayer.changeAttributeValue(feat.id(), fldValue, round(float(fzyValue),4))
 			self.EnvProgressBar.setValue(progress)
 		self.activeLayer.commitChanges()
 		self.EnvProgressBar.setValue(1)
@@ -408,7 +477,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoTOPSIS'
+			field=='geoFuzzy'
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -427,9 +496,9 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
 		layer = self.activeLayer
-		layer = QgsVectorLayer(layer.source(), 'geoTOPSYS', 'ogr')
+		layer = QgsVectorLayer(layer.source(), 'geoFuzzy', 'ogr')
 		QgsMapLayerRegistry.instance().addMapLayer(layer)
-		fields=['geoTOPSYS']
+		fields=['geoFuzzy']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
@@ -463,8 +532,8 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoUmbriaSUIT', "Plugin error"), \
-			QCoreApplication.translate('geoTOPSIS', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
+			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
+			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
@@ -475,8 +544,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def BuildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
 
-		geoWSMValue=self.ExtractAttributeValue('geoTOPSIS')
-		
+		geoFuzzyValue=self.ExtractAttributeValue('geoFuzzy')
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
@@ -487,15 +555,11 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		width = 0.8     # the width of the bars: can also be len(x) sequence
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		#p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
-		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
-		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
-		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
+		p1 = plt.bar((xpos), geoFuzzyValue, width=width, color='g',align='center') # yerr=womenStd)
 		plt.ylabel('Scores')
-		plt.title('geoTOPSIS')
+		plt.title('geoFuzzy')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoTOPSIS'))
+		plt.legend((p1[0]), ('geoFuzzy'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')
@@ -503,12 +567,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoWSMValue=self.ExtractAttributeValue('geoTOPSIS')
+		geoFuzzyValue=self.ExtractAttributeValue('geoFuzzy')
 		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels)
+		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels)
 		return 0
 
 
@@ -520,7 +584,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		Visualize an About window.
 		"""
 
-		QMessageBox.about(self, "About TOPSIS model",
+		QMessageBox.about(self, "About Fuzzy MCDA model",
 		"""
 			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
 		""")

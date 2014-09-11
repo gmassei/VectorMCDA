@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'geoWeightedSum.ui'
+# Form implementation generated from reading ui file '.\geoWeightedSum.ui'
 #
-# Created: Sun Jun 22 23:01:32 2014
+# Created: Mon Aug 25 18:06:40 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -109,25 +109,25 @@ class Ui_Dialog(object):
         self.EnvTabWidget.setObjectName(_fromUtf8("EnvTabWidget"))
         self.tab_5 = QtGui.QWidget()
         self.tab_5.setObjectName(_fromUtf8("tab_5"))
-        self.EnvWeighTableWidget = QtGui.QTableWidget(self.tab_5)
-        self.EnvWeighTableWidget.setGeometry(QtCore.QRect(10, 21, 630, 141))
+        self.EnvParameterWidget = QtGui.QTableWidget(self.tab_5)
+        self.EnvParameterWidget.setGeometry(QtCore.QRect(10, 21, 630, 141))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.EnvWeighTableWidget.sizePolicy().hasHeightForWidth())
-        self.EnvWeighTableWidget.setSizePolicy(sizePolicy)
-        self.EnvWeighTableWidget.setAcceptDrops(False)
-        self.EnvWeighTableWidget.setAutoFillBackground(True)
-        self.EnvWeighTableWidget.setDragEnabled(True)
-        self.EnvWeighTableWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        self.EnvWeighTableWidget.setShowGrid(True)
-        self.EnvWeighTableWidget.setGridStyle(QtCore.Qt.DotLine)
-        self.EnvWeighTableWidget.setRowCount(0)
-        self.EnvWeighTableWidget.setObjectName(_fromUtf8("EnvWeighTableWidget"))
-        self.EnvWeighTableWidget.setColumnCount(0)
-        self.EnvWeighTableWidget.horizontalHeader().setCascadingSectionResizes(False)
-        self.EnvWeighTableWidget.verticalHeader().setCascadingSectionResizes(False)
-        self.EnvWeighTableWidget.verticalHeader().setHighlightSections(True)
+        sizePolicy.setHeightForWidth(self.EnvParameterWidget.sizePolicy().hasHeightForWidth())
+        self.EnvParameterWidget.setSizePolicy(sizePolicy)
+        self.EnvParameterWidget.setAcceptDrops(False)
+        self.EnvParameterWidget.setAutoFillBackground(True)
+        self.EnvParameterWidget.setDragEnabled(True)
+        self.EnvParameterWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.EnvParameterWidget.setShowGrid(True)
+        self.EnvParameterWidget.setGridStyle(QtCore.Qt.DotLine)
+        self.EnvParameterWidget.setRowCount(0)
+        self.EnvParameterWidget.setObjectName(_fromUtf8("EnvParameterWidget"))
+        self.EnvParameterWidget.setColumnCount(0)
+        self.EnvParameterWidget.horizontalHeader().setCascadingSectionResizes(False)
+        self.EnvParameterWidget.verticalHeader().setCascadingSectionResizes(False)
+        self.EnvParameterWidget.verticalHeader().setHighlightSections(True)
         self.EnvGetWeightBtn = QtGui.QPushButton(self.tab_5)
         self.EnvGetWeightBtn.setGeometry(QtCore.QRect(540, 190, 104, 24))
         self.EnvGetWeightBtn.setMaximumSize(QtCore.QSize(104, 16777215))
@@ -201,7 +201,7 @@ class Ui_Dialog(object):
         self.SetBtnQuit.setObjectName(_fromUtf8("SetBtnQuit"))
         self.toolBox.addItem(self.EnvironmentaleQTbox, _fromUtf8(""))
         self.AnalysisQTBox = QtGui.QWidget()
-        self.AnalysisQTBox.setGeometry(QtCore.QRect(0, 0, 676, 570))
+        self.AnalysisQTBox.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.AnalysisQTBox.setObjectName(_fromUtf8("AnalysisQTBox"))
         self.GraphBtn = QtGui.QPushButton(self.AnalysisQTBox)
         self.GraphBtn.setGeometry(QtCore.QRect(567, 73, 75, 23))

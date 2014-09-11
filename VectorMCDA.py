@@ -22,11 +22,27 @@ email                : g_massa@libero.it
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+import resources
+# Import the code for the dialog
+import os.path, sys
 
-class LayerLoader:
+class vMCDA:
 
 	def __init__(self, iface):
-		self.iface = iface	# salviamo il riferimento all'interfaccia di QGis
+		# Save the reference to the QGIS interface
+		self.iface = iface
+		#initialize plugin directory
+		self.pluginDir = os.path.dirname(__file__)
+		# initialize locale
+		locale = QSettings().value("locale/userLocale")[0:2]
+		localePath = os.path.join(self.pluginDir, 'i18n', 'opeNoise_{}.qm'.format(locale))
+
+		if os.path.exists(localePath):
+			self.translator = QTranslator()
+			self.translator.load(localePath)
+
+			if qVersion() > '4.3.3':
+				QCoreApplication.installTranslator(self.translator)
 
 	def initGui(self):	# aggiunge alla GUI di QGis i pulsanti per richiamare il plugin
 		# creiamo l'azione che lancerà il plugin
@@ -34,7 +50,7 @@ class LayerLoader:
 		self.geoMCDAmenu = QMenu(QCoreApplication.translate("vectorMCDA", "&vectorMCDA"))
 		self.geoMCDAmenu.setIcon(QIcon(":/plugins/VectorMCDA/icons/decision.png"))
         
-		self.actionWeightedSum = QAction( "geoWeightedSum", self.iface.mainWindow() )
+		self.actionWeightedSum = QAction("geoWeightedSum",self.iface.mainWindow() )
 		self.actionWeightedSum.triggered.connect(self.runGeoWeightedSum )
 		
 		self.actionTOPSIS = QAction( "geoTOPSIS", self.iface.mainWindow() )
@@ -80,7 +96,7 @@ class LayerLoader:
 		dlg.exec_()
 	
 	def runGeoFuzzy(self):	# richiamato al click sull'azione
-		from VectorFuzzy import geoFuzzyDialog
+		from geoFuzzy import geoFuzzyDialog
 		dlg = geoFuzzyDialog(self.iface)
 		dlg.exec_()
 		
@@ -96,7 +112,7 @@ class LayerLoader:
 		dlg.exec_()
 		
 	def runGeoXMCDA(self):	# richiamato al click sull'azione
-		from VectorXMCDA import geoXMCDADialog
+		from geoXMCDA import geoXMCDADialog
 		dlg = geoXMCDADialog(self.iface)
 		dlg.exec_()
 

@@ -1,5 +1,5 @@
 <RCC> 
   <qresource prefix="/plugins/VectorMCDA" > 
-    <file>decision.png</file> 
+    <file>icons/decision.png</file> 
   </qresource> 
 </RCC> 

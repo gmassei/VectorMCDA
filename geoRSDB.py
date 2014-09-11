@@ -85,15 +85,6 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		#retrieve signal for modified cell
 		self.CritWeighTableWidget.cellClicked[(int,int)].connect(self.ChangeValue)
 
-	#def GetFieldNames(self, layer):
-		#"""retrive field names from active map/layer"""
-		#fields = layer.dataProvider().fields()
-		#field_list = []
-		#for field in fields:
-			#if field.typeName()!='String':
-				#field_list.append(str(field.name()))
-		#return field_list
-
 	def GetFieldNames(self, layer):
 		field_map = layer.dataProvider().fields()
 		field_list = []

@@ -85,17 +85,17 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
 		EnvSetLabel=["Weigths","Preference"]
-		self.EnvWeighTableWidget.setColumnCount(len(Envfields))
-		self.EnvWeighTableWidget.setHorizontalHeaderLabels(Envfields)
-		self.EnvWeighTableWidget.setRowCount(2)
-		self.EnvWeighTableWidget.setVerticalHeaderLabels(EnvSetLabel)
+		self.EnvParameterWidget.setColumnCount(len(Envfields))
+		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
+		self.EnvParameterWidget.setRowCount(2)
+		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-			self.EnvWeighTableWidget.setItem(0,r,QTableWidgetItem("1.0"))
-			self.EnvWeighTableWidget.setItem(1,r,QTableWidgetItem("gain"))
+			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
+			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		#retrieve signal for modified cell
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
-		self.EnvWeighTableWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
 #################################################################################
 		#currentDir=unicode(os.path.abspath( os.path.dirname(__file__)))
 		#self.LblLogo.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"icon.png")))
@@ -132,14 +132,14 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
 
 		EnvSetLabel=["Weigths","Preference"]
-		self.EnvWeighTableWidget.setColumnCount(len(Envfields))
-		self.EnvWeighTableWidget.setHorizontalHeaderLabels(Envfields)
-		self.EnvWeighTableWidget.setRowCount(2)
-		self.EnvWeighTableWidget.setVerticalHeaderLabels(EnvSetLabel)
+		self.EnvParameterWidget.setColumnCount(len(Envfields))
+		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
+		self.EnvParameterWidget.setRowCount(2)
+		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 
 		for r in range(len(Envfields)):
-			self.EnvWeighTableWidget.setItem(0,r,QTableWidgetItem("1.0"))
-			self.EnvWeighTableWidget.setItem(1,r,QTableWidgetItem("gain"))
+			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
+			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		return 0
 
 
@@ -151,10 +151,10 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderItem((self.EnvTableWidget.columnCount()-1),QTableWidgetItem(f))
 		self.EnvTableWidget.setVerticalHeaderItem((self.EnvTableWidget.rowCount()-1),QTableWidgetItem(f))
 		##############
-		self.EnvWeighTableWidget.insertColumn(self.EnvWeighTableWidget.columnCount())
-		self.EnvWeighTableWidget.setHorizontalHeaderItem((self.EnvWeighTableWidget.columnCount()-1),QTableWidgetItem(f))
-		self.EnvWeighTableWidget.setItem(0,(self.EnvWeighTableWidget.columnCount()-1),QTableWidgetItem("1.0"))
-		self.EnvWeighTableWidget.setItem(1,(self.EnvWeighTableWidget.columnCount()-1),QTableWidgetItem("gain"))
+		self.EnvParameterWidget.insertColumn(self.EnvParameterWidget.columnCount())
+		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
+		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
+		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
 
 		return 0
 
@@ -163,18 +163,18 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		"""Remove field in table in GUI"""
 		f=self.EnvlistFieldsCBox.currentText()
 		i=self.EnvTableWidget.currentColumn()
-		j=self.EnvWeighTableWidget.currentColumn()
+		j=self.EnvParameterWidget.currentColumn()
 		if i == -1 and j== -1:
 			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		elif i != -1:
 			self.EnvTableWidget.removeColumn(i)
 			self.EnvTableWidget.removeRow(i)
-			self.EnvWeighTableWidget.removeColumn(i)
+			self.EnvParameterWidget.removeColumn(i)
 		elif j != -1:
 			self.EnvTableWidget.removeColumn(j)
 			self.EnvTableWidget.removeRow(j)
-			self.EnvWeighTableWidget.removeColumn(j)
+			self.EnvParameterWidget.removeColumn(j)
 		return 0
 
 
@@ -194,14 +194,14 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 
 	def ChangeValue(self):
 		"""Event for change gain/cost"""
-		cell=self.EnvWeighTableWidget.currentItem()
+		cell=self.EnvParameterWidget.currentItem()
 		val=cell.text()
 		if val=="cost":
-			self.EnvWeighTableWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("gain"))
+			self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("gain"))
 		elif val=="gain":
-			self.EnvWeighTableWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("cost"))
+			self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("cost"))
 		else:
-			self.EnvWeighTableWidget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
+			self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
 		return 0
 
 	def calculateWeight(self,pairwise):
@@ -215,7 +215,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		weight.tolist() #convert array(numpy)  to vector
 		weight=[ w/sum(weight) for w in weight ]
 		for i in range(len(weight)):
-			self.EnvWeighTableWidget.setItem(0,i,QTableWidgetItem(str(round(weight[i],2))))
+			self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(round(weight[i],2))))
 		return weight, eigenvalues,  eigenvector
 
 
@@ -273,8 +273,8 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		"""Standardization fields values in range [0-1]"""
 		matrix=[]
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
-		weight=[float(self.EnvWeighTableWidget.item(0, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
-		preference=[str(self.EnvWeighTableWidget.item(1, c).text()) for c in range(self.EnvWeighTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
 		if provider.fieldNameIndex("geoWSM")==-1:
 			self.AddDecisionField(self.activeLayer,"geoWSM")

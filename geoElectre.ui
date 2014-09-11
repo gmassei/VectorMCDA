@@ -229,7 +229,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <attribute name="title">
          <string>Standard</string>
         </attribute>
-        <widget class="QTableWidget" name="EnvWeighTableWidget">
+        <widget class="QTableWidget" name="EnvParameterWidget">
          <property name="geometry">
           <rect>
            <x>10</x>
