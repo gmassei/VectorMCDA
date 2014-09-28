@@ -304,7 +304,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 					value=(wgt*(maxF-r)/(maxF-minF))  #dec: max-x / max-min
 				List.append(value)
 			WeightedSumVaList.append(sum(List))
-		self.EnvTEdit.append(str(WeightedSumVaList))
+		#self.EnvTEdit.append(str(WeightedSumVaList))
 		return WeightedSumVaList
 
 	
@@ -361,7 +361,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoWSM'
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -378,11 +377,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
-		layer = self.activeLayer
-		#QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-		#layer = QgsVectorLayer(self.OutlEdt.text(), "geosustainability", "ogr")
-		layer = QgsVectorLayer(layer.source(), 'geoWSM', 'ogr')
-		QgsMapLayerRegistry.instance().addMapLayer(layer)
 		fields=['geoWSM']
 		for f in fields:
 			self.Symbolize(f)
@@ -421,7 +415,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoUmbriaSUIT', "Plugin error"), \
+			QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
 			QCoreApplication.translate('geoWeightedSum', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))

@@ -424,7 +424,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		provider = layer.dataProvider()
 		minimum = provider.minimumValue( fieldIndex )
 		maximum = provider.maximumValue( fieldIndex )
-		print minimum, maximum
 		RangeList = []
 		Opacity = 1
 		for c,i in zip(classes,range(len(classes))):
@@ -432,7 +431,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field==str(field)
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -449,8 +447,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
-		layer = self.activeLayer
-		QgsMapLayerRegistry.instance().addMapLayer(layer)
 		fields=['geoConc','geoDisc']
 		for f in fields:
 			self.Symbolize(f)
@@ -529,8 +525,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoConcValue=self.ExtractAttributeValue('geoConcordance')
-		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
+		geoConcValue=self.ExtractAttributeValue('geoConc')
+		geoDiscValue=self.ExtractAttributeValue('geoDisc')
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]

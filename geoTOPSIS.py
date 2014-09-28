@@ -408,7 +408,6 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoTOPSIS'
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -426,9 +425,6 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
-		layer = self.activeLayer
-		layer = QgsVectorLayer(layer.source(), 'geoTOPSYS', 'ogr')
-		QgsMapLayerRegistry.instance().addMapLayer(layer)
 		fields=['geoTOPSYS']
 		for f in fields:
 			self.Symbolize(f)

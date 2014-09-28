@@ -519,7 +519,6 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoFuzzy'
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -537,10 +536,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
-		layer = self.activeLayer
-		layer = QgsVectorLayer(layer.source(), 'geoFuzzy', 'ogr')
-		QgsMapLayerRegistry.instance().addMapLayer(layer)
-		fields=['geoFuzzy']
+		fields=['geoFzyAND','geoFzyOR']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
@@ -609,16 +605,13 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoFuzzyValue=self.ExtractAttributeValue('geoFuzzy')
+		geoFuzzyValue=self.ExtractAttributeValue('geoFzyAND')
 		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels,"geoFuzzy")
+		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels,"geoFzyAND")
 		return 0
-
-
-
 
 ###################################################################################################
 	def about(self):

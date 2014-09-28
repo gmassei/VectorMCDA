@@ -36,7 +36,7 @@ def BuilHTMLGraph(ListValue,labels,model):
 	HTMLfile.write(str(data[r]))
 	HTMLfile.write("\n]);\n")
 	HTMLfile.write("""	var optionsBar = {
-			  title: 'bars of sustainability',
+			  title: 'bars of rating',
 			  legend:{position:'in'},
 			};
 				var chartBar = new google.visualization.ColumnChart(document.getElementById('bar_div'));
@@ -47,7 +47,7 @@ def BuilHTMLGraph(ListValue,labels,model):
 	HTMLfile.write("""
 	  </head>
 	  <body>
-	  <div id="logo" class="container"><h1>Graph of sustainability</h1>
+	  <div id="logo" class="container"><h1>Graph of rating</h1>
 		<br></br>
 		<div id="bar_div" style="width: 1350px; height: 750px;"  border='0'></div>
 		<br><hr>
