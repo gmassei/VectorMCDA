@@ -508,7 +508,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels)
+		htmlGraph.BuilHTMLGraph(geoWSMValue,labels,"geoTOPSIS")
 		return 0
 
 

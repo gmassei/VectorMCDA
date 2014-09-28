@@ -96,11 +96,15 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
 		except:
 			pass
+		setting=self.csv2setting()
+		try:
+			self.setting2table(setting)
+		except:
+			pass
 #################################################################################
 		header = self.EnvParameterWidget.horizontalHeader()
 		header.sectionClicked.connect(self.ReverseValues)
 #################################################################################
-
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
 
@@ -326,6 +330,38 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 
 ###########################################################################################
 
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		#preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setFuzzy.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		#write.writerow(preference)
+		csvFile.close()
+		
+	def csv2setting(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		setting=[]
+		try:
+			with open(os.path.join(currentDIR,'setFuzzy.csv')) as csvFile:
+				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
+				for row in csvReader:
+					setting.append(row)
+			return setting
+		except:
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
+
+	def setting2table(self,setting):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		for i in range(len(criteria)):
+			for l in range(len(setting[0])):
+				if criteria[i]==setting[0][l]:
+					self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
+					#self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
+					
 	def Attributes2Matrix(self):
 		matrix=[]
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
@@ -404,7 +440,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			fzycol=[round(valuer(c),4) for c in col]
 			FzyMatrix.append(fzycol)
 		FzyMatrix=np.array(FzyMatrix, dtype = 'float32')
-		print [float(c) for c in FzyMatrix.transpose()[0]]
+		#print [float(c) for c in FzyMatrix.transpose()[0]]
 		return FzyMatrix.transpose()
 			
 	
@@ -421,8 +457,8 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		feat = QgsFeature()
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		for row in matrix:
-			print [float(f) for f in row]
-			print str(weight)
+			#print [float(f) for f in row]
+			#print str(weight)
 			rowMod=[(float(f)**w) for f,w in zip(row,weight)]
 			matrixStd.append(rowMod)
 		return matrixStd
@@ -439,23 +475,29 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		""" Calculate Environmental and Socio-Economicos distance from ideal point"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
-		if provider.fieldNameIndex("geoFuzzy")==-1:
-			self.AddDecisionField(self.activeLayer,"geoFuzzy")
-		fldValue = provider.fieldNameIndex("geoFuzzy") #obtain classify field index from its name
-		self.EnvTEdit.append("done") #   setText
+		if provider.fieldNameIndex("geoFzyAND")==-1:
+			self.AddDecisionField(self.activeLayer,"geoFzyAND")
+		if provider.fieldNameIndex("geoFzyOR")==-1:
+			self.AddDecisionField(self.activeLayer,"geoFzyOR")
+		fldValueAND = provider.fieldNameIndex("geoFzyAND") #obtain classify field index from its name
+		fldValueOR = provider.fieldNameIndex("geoFzyOR") #obtain classify field index from its name
 		features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		##################################################################
 		self.activeLayer.startEditing()
 		self.EnvProgressBar.setRange(1,features)
 		progress=0
-		for feat,fzyValue in zip(self.activeLayer.getFeatures(),fzyIntersection):
+		for feat,fzyValueAND,fzyValueOR in zip(self.activeLayer.getFeatures(),\
+				fzyIntersection,fzyUnion):
 			progress=progress+1
-			self.activeLayer.changeAttributeValue(feat.id(), fldValue, round(float(fzyValue),4))
+			self.activeLayer.changeAttributeValue(feat.id(), fldValueAND, round(float(fzyValueAND),4))
+			self.activeLayer.changeAttributeValue(feat.id(), fldValueOR, round(float(fzyValueOR),4))
 			self.EnvProgressBar.setValue(progress)
 		self.activeLayer.commitChanges()
 		self.EnvProgressBar.setValue(1)
 		##################################################################
+		self.EnvTEdit.append("done") #   setText
+		self.setting2csv()
 		return 0
 
 ###########################################################################################
@@ -572,7 +614,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels)
+		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels,"geoFuzzy")
 		return 0
 
 

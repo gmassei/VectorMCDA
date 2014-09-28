@@ -2,7 +2,7 @@
 
 """
 /***************************************************************************
-Name			: geoElectre
+Name			: geoConcordance
 Description		: geographical MCDA with Electre model (ranking with concordance 
 					and discordance index)
 Date			: June 20, 2014
@@ -36,8 +36,8 @@ import csv
 try:
 	import numpy as np
 except ImportError, e:
-	QMessageBox.information(None, QCoreApplication.translate('geoElectre', "Plugin error"), \
-	QCoreApplication.translate('geoElectre', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
+	QCoreApplication.translate('geoConcordance', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 from ui_geoElectre import Ui_Dialog
@@ -72,7 +72,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)
 		pathSource=os.path.dirname(sourceIn)
-		outFile="geoElectre.shp"
+		outFile="geoConcordance.shp"
 		sourceOut=os.path.join(pathSource,outFile)
 		#self.OutlEdt.setText(str(sourceOut))
 
@@ -104,7 +104,10 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
 		setting=self.csv2setting()
-		self.setting2table(setting)
+		try:
+			self.setting2table(setting)
+		except:
+			pass
 
 
 	def GetFieldNames(self, layer):
@@ -270,6 +273,38 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		matrix=np.array(matrix, dtype = 'float32')
 		return matrix
 	
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setConcordance.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		write.writerow(preference)
+		csvFile.close()
+		
+	def csv2setting(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		setting=[]
+		try:
+			with open(os.path.join(currentDIR,'setConcordance.csv')) as csvFile:
+				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
+				for row in csvReader:
+					setting.append(row)
+			return setting
+		except:
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
+
+	def setting2table(self,setting):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		for i in range(len(criteria)):
+			for l in range(len(setting[0])):
+				if criteria[i]==setting[0][l]:
+					self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
+					self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
+					
 	
 	def StandardizeMatrix(self,preference,weight,matrix,minField,maxField):
 		""" """
@@ -334,37 +369,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			discIndx.append(value)
 		return discIndx
 	
-	def setting2csv(self):
-		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
-		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		csvFile=open(os.path.join(currentDIR,'setting.csv'),"wb")
-		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
-		write.writerow(criteria)
-		write.writerow(weight)
-		write.writerow(preference)
-		csvFile.close()
-		
-	def csv2setting(self):
-		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
-		setting=[]
-		try:
-			with open(os.path.join(currentDIR,'setting.csv')) as csvFile:
-				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
-				for row in csvReader:
-					setting.append(row)
-			return setting
-		except:
-			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
 
-	def setting2table(self,setting):
-		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
-		for i in range(len(criteria)):
-			for l in range(len(setting[0])):
-				if criteria[i]==setting[0][l]:
-					self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
-					self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
 		
 	def ElaborateAttributeTable(self):
 		"""Standardization fields values in range [0-1]"""
@@ -374,7 +379,10 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		provider=self.activeLayer.dataProvider()
 		if provider.fieldNameIndex("geoConc")==-1:
 			self.AddDecisionField(self.activeLayer,"geoConc")
-		fldValue = provider.fieldNameIndex("geoConc") #obtain classify field index from its name
+		fldConcValue = provider.fieldNameIndex("geoConc") #obtain classify field index from its name
+		if provider.fieldNameIndex("geoDisc")==-1:
+			self.AddDecisionField(self.activeLayer,"geoDisc")
+		fldDiscValue = provider.fieldNameIndex("geoDisc") #obtain classify field index from its name
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
@@ -382,21 +390,23 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		matrix= self.Attributes2Matrix()
 		
 		matrix=self.StandardizeMatrix(preference,weight,matrix,minField,maxField)
-		print '\n'+str(matrix)
+		#print '\n'+str(matrix)
 		concordanceMatrix=self.ConcordanceMatrix(matrix,weight)
 		discordanceMatrix=self.DiscordanceMatrix(matrix)
-		print concordanceMatrix
+		#print concordanceMatrix,discordanceMatrix
 		
 		concIndx=self.ConcordanceIndex(concordanceMatrix)
-		print concIndx
+		discIndx=self.DiscordanceIndex(discordanceMatrix)
+		#print concIndx,discIndx
 		self.setting2csv()
 		
 		
-		feat = QgsFeature()
+		#feat = QgsFeature()
 		self.activeLayer.startEditing()
-		for conc,feat in zip(concIndx,self.activeLayer.getFeatures()):
+		for conc,disc,feat in zip(concIndx,discIndx,self.activeLayer.getFeatures()):
 			features=feat.attributes()
-			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(conc,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldConcValue,round(conc,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldDiscValue,round(disc,4))
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0
@@ -422,7 +432,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			field=='geoConc'
+			field==str(field)
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
 			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
@@ -440,11 +450,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
 		layer = self.activeLayer
-		#QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-		#layer = QgsVectorLayer(self.OutlEdt.text(), "geosustainability", "ogr")
-		#layer = QgsVectorLayer(layer.source(), 'geoConcordance', 'ogr')
 		QgsMapLayerRegistry.instance().addMapLayer(layer)
-		fields=['geoConc']
+		fields=['geoConc','geoDisc']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
@@ -482,8 +489,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoElectre', "Plugin error"), \
-			QCoreApplication.translate('geoElectre', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
+			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
+			QCoreApplication.translate('geoConcordance', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
@@ -494,7 +501,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	def BuildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
 
-		geoWSMValue=self.ExtractAttributeValue('geoWSM')
+		geoConcordanceValue=self.ExtractAttributeValue('geoConc')
 		
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
@@ -512,9 +519,9 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
 		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
 		plt.ylabel('Scores')
-		plt.title('geoWSM')
+		plt.title('geoConcordance')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoWSM'))
+		plt.legend((p1[0]), ('geoConcordance'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')
@@ -522,7 +529,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoConcValue=self.ExtractAttributeValue('geoConc')
+		geoConcValue=self.ExtractAttributeValue('geoConcordance')
 		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
@@ -539,7 +546,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		Visualize an About window.
 		"""
 
-		QMessageBox.about(self, "About weighted sum model (WSM)",
+		QMessageBox.about(self, "About concordance and discordance model (WSM)",
 		"""
 			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
 		""")

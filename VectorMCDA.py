@@ -22,9 +22,11 @@ email                : g_massa@libero.it
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from qgis.core import *
 import resources
 # Import the code for the dialog
 import os.path, sys
+import webbrowser
 
 class vMCDA:
 
@@ -48,7 +50,7 @@ class vMCDA:
 		# creiamo l'azione che lancerà il plugin
 		
 		self.geoMCDAmenu = QMenu(QCoreApplication.translate("vectorMCDA", "&vectorMCDA"))
-		self.geoMCDAmenu.setIcon(QIcon(":/plugins/VectorMCDA/icons/decision.png"))
+		self.geoMCDAmenu.setIcon(QIcon(":/plugins/VectorMCDA/icons/Tree.png"))
         
 		self.actionWeightedSum = QAction("geoWeightedSum",self.iface.mainWindow() )
 		self.actionWeightedSum.triggered.connect(self.runGeoWeightedSum )
@@ -59,7 +61,7 @@ class vMCDA:
 		self.actionFuzzy = QAction( "geoFuzzy", self.iface.mainWindow() )
 		self.actionFuzzy.triggered.connect(self.runGeoFuzzy )
 		
-		self.actionElectre = QAction( "geoElectre", self.iface.mainWindow() )
+		self.actionElectre = QAction( "geoConcordance", self.iface.mainWindow() )
 		self.actionElectre.triggered.connect(self.runGeoElectre )
 				
 		self.actionRSDB = QAction( "geoRSDB", self.iface.mainWindow() )
@@ -80,39 +82,75 @@ class vMCDA:
 		self.iface.removePluginMenu( "&geoWeightedSum", self.actionWeightedSum )
 		self.iface.removePluginMenu( "&geoTOPSIS", self.actionTOPSIS )
 		self.iface.removePluginMenu( "&geoFuzzy", self.actionFuzzy )
-		self.iface.removePluginMenu( "&geoElectre", self.actionElectre )
+		self.iface.removePluginMenu( "&geoConcordance", self.actionElectre )
 		self.iface.removePluginMenu( "&geoRSDB", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoXMCDA", self.actionXMCDA )
 		 
 
 	def runGeoWeightedSum(self):	# richiamato al click sull'azione
 		from geoWeightedSum import geoWeightedSumDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoWeightedSumDialog(self.iface)
 		dlg.exec_()
 		
 	def runGeoTOPSIS(self):	# richiamato al click sull'azione
 		from geoTOPSIS import geoTOPSISDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoTOPSISDialog(self.iface)
 		dlg.exec_()
 	
 	def runGeoFuzzy(self):	# richiamato al click sull'azione
 		from geoFuzzy import geoFuzzyDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoFuzzyDialog(self.iface)
 		dlg.exec_()
 		
 	def runGeoElectre(self):	# richiamato al click sull'azione
 		from geoElectre import geoElectreDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoElectreDialog(self.iface)
 		dlg.exec_()
 		
 		
 	def runGeoRSDB(self):	# richiamato al click sull'azione
 		from geoRSDB import geoRSDBDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoRSDBDialog(self.iface)
 		dlg.exec_()
 		
 	def runGeoXMCDA(self):	# richiamato al click sull'azione
 		from geoXMCDA import geoXMCDADialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
 		dlg = geoXMCDADialog(self.iface)
 		dlg.exec_()
 

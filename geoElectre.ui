@@ -28,7 +28,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>geo Electre</string>
+   <string>geo Concordance</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -502,8 +502,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>676</width>
-        <height>570</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">

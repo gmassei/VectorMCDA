@@ -1,8 +1,8 @@
 import os
 import operator
 
-def BuilHTMLGraph(ListValue,labels,ranks):
-	header=["label",ranks]
+def BuilHTMLGraph(ListValue,labels,model):
+	header=["label",model]
 	data=[]
 	for i in range(len(labels)):
 		row=[]

@@ -30,6 +30,7 @@ from qgis.gui import *
 import os
 import webbrowser
 import htmlGraph
+import csv
 
 try:
 	import numpy as np
@@ -101,6 +102,12 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		#self.LblLogo.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"icon.png")))
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
+			
+		setting=self.csv2setting()
+		try:
+			self.setting2table(setting)
+		except:
+			pass
 		
 
 
@@ -204,6 +211,38 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
 		return 0
 
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setWeightedSum.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		write.writerow(preference)
+		csvFile.close()
+		
+	def csv2setting(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		setting=[]
+		try:
+			with open(os.path.join(currentDIR,'setWeightedSum.csv')) as csvFile:
+				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
+				for row in csvReader:
+					setting.append(row)
+			return setting
+		except:
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
+
+	def setting2table(self,setting):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		for i in range(len(criteria)):
+			for l in range(len(setting[0])):
+				if criteria[i]==setting[0][l]:
+					self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
+					self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
+					
 	def calculateWeight(self,pairwise):
 		"Define vector of weight based on eigenvector and eigenvalues"
 		pairwise=np.array(pairwise)
@@ -298,6 +337,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			features=feat.attributes()
 			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(WSM,4))
 		self.activeLayer.commitChanges()
+		self.setting2csv()
 		self.EnvTEdit.append("done") 
 		return 0
 
@@ -426,7 +466,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels)
+		htmlGraph.BuilHTMLGraph(geoWSMValue,labels,"geoWSM")
 		return 0
 
 

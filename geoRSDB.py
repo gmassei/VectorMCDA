@@ -49,13 +49,7 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		self.setupUi(self)	# inizializzo la GUI come realizzata nel QtDesigner
 		self.iface = iface	# salvo il riferimento alla interfaccia di QGis
 		self.activeLayer = self.iface.activeLayer()
-
-		if self.activeLayer == None:
-			QMessageBox.warning(self.iface.mainWindow(), "geoRules",
-			("No active layer found\n" "Please make one or more vector layer "\
-			"active"), QMessageBox.Ok, QMessageBox.Ok)
-			return
-		
+	
 		QObject.connect(self.SettingButtonBox, SIGNAL("accepted()"),self.AddDiscretizedField)
 		QObject.connect(self.SettingButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		# imposto l'azione da eseguire al click sui pulsanti
@@ -84,6 +78,7 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 
 		#retrieve signal for modified cell
 		self.CritWeighTableWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+		
 
 	def GetFieldNames(self, layer):
 		field_map = layer.dataProvider().fields()
@@ -175,14 +170,13 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		return 0
 
 	def DiscretizeDecision(self,value,listClass,numberOfClasses):
-		listValue=[]
 		DiscValue=-1
-		for o,t in zip(range(numberOfClasses-1),range(1,numberOfClasses)) :
+		for o,t in zip(range(numberOfClasses-1),range(1,numberOfClasses+1)) :
 			if ((float(value)>=float(listClass[o])) and (float(value)<=float(listClass[t]))):
-				DiscValue=o
+				DiscValue=o+1
 		return DiscValue
 	
-
+		
 	def AddDiscretizedField(self):
 		"""add new field"""
 		numberOfClasses=5
@@ -206,39 +200,40 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		
 	def WriteISFfile(self):
 		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
-		out_file = open(currentDIR+"\\example.isf","w")
+		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
 		criteria=[self.CritWeighTableWidget.verticalHeaderItem(f).text() for f in range(self.CritWeighTableWidget.rowCount())]
 		preference=[str(self.CritWeighTableWidget.item(c,0).text()) for c in range(self.CritWeighTableWidget.rowCount())]
 		function=[str(self.CritWeighTableWidget.item(c,1).text()) for c in range(self.CritWeighTableWidget.rowCount())]
 		decision=list(set(self.ExtractAttributeValue(self.DeclistFieldsCBox.currentText())))
 		decision=[int(i) for i in decision]
-		provider=self.activeLayer.dataProvider()
 		out_file.write("**ATTRIBUTES\n") 
 		for c,f in zip(criteria,function):
-			if(str(c)==str(self.DeclistFieldsCBox.currentText())):
-				out_file.write("+ %s: %s\n"  % (c,decision))
+			if (str(c)!=str(self.DeclistFieldsCBox.currentText())):
+				if (f=='continuous'):
+					out_file.write("+ %s: (%s)\n"  % (c,f))
+				else:
+					values=list(set(self.ExtractAttributeValue(c)))
+					out_file.write("+ %s: (%s)\n"  % (c,values))
 			else:
-				out_file.write("+ %s: (%s)\n"  % (c,f))
-		
+				out_file.write("+ %s: %s\n"  % (c,decision))
 		out_file.write("decision: %s" % (self.DeclistFieldsCBox.currentText()))
 		out_file.write("\n\n**PREFERENCES\n")
 		for c,p in zip(criteria,preference):
 			out_file.write("%s: %s\n"  % (c,p))
 		out_file.write("\n**EXAMPLES\n")
-		#if provider.fieldNameIndex("EnvValue")==-1:
-		#	self.AddDecisionField(self.active_layer,"EnvValue")
-		flIdAHP = provider.fieldNameIndex("SustValue") #obtain classify field index from its name
-		features=provider.featureCount() #Number of features in the layer.
+		provider=self.activeLayer.dataProvider()
+		#features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its names
-
 		for feat in self.activeLayer.getFeatures():
 			attribute = [feat.attributes()[j] for j in fids]
 			for i in (attribute):
 				out_file.write(" %s " % (i))
+				self.ruleEdit.append(str(i))
 			out_file.write("\n")
 		out_file.write("\n**END")
 		out_file.close()
 		return 0
+
 
 	def SelectFeatures(self):
 		self.selection_layer = self.iface.activeLayer()
@@ -268,6 +263,7 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
 		self.WriteISFfile()
 		DOMLEM.main(pathSource)
+		self.setModal(False)
 		self.ShowRules()
 		return 0
 		

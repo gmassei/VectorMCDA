@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\geoElectre.ui'
 #
-# Created: Mon Aug 25 18:10:47 2014
+# Created: Sun Sep 21 21:17:17 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -252,7 +252,7 @@ class Ui_Dialog(object):
         Dialog.setTabOrder(self.LabelListFieldsCBox, self.AnlsBtnBox)
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_translate("Dialog", "geo Electre", None))
+        Dialog.setWindowTitle(_translate("Dialog", "geo Concordance", None))
         self.EnvLbl.setText(_translate("Dialog", "Layer     ", None))
         self.EnvFieldsLbl.setText(_translate("Dialog", "Fields", None))
         self.SetBtnHelp.setText(_translate("Dialog", "Help", None))
