@@ -499,12 +499,13 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoWSMValue=self.ExtractAttributeValue('geoTOPSIS')
-		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
+		geoTOPSISValue=self.ExtractAttributeValue('geoTOPSIS')
+		geoTOPSISValue=[[A] for (A) in geoTOPSISValue]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels,"geoTOPSIS")
+		legend=['geoTOPSIS']
+		htmlGraph.BuilHTMLGraph(geoTOPSISValue,labels,legend)
 		return 0
 
 

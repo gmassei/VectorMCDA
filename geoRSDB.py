@@ -2,7 +2,7 @@
 
 """
 /***************************************************************************
-Name			 	 : geoRules - DBRA
+Name			 	 : geoRSDB - DBRA
 Description          : extract rules from attrubute table using dominance
 						based rough set approach"
 Date                 : 20/08/2013

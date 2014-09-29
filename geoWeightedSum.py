@@ -456,11 +456,12 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 	
 	def BuildHTML(self):
 		geoWSMValue=self.ExtractAttributeValue('geoWSM')
-		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
+		geoWSMValue=[[A] for (A) in geoWSMValue]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoWSMValue,labels,"geoWSM")
+		legend=['geoWSM']
+		htmlGraph.BuilHTMLGraph(geoWSMValue,labels,legend)
 		return 0
 
 

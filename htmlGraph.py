@@ -1,13 +1,14 @@
 import os
 import operator
 
-def BuilHTMLGraph(ListValue,labels,model):
-	header=["label",model]
+def BuilHTMLGraph(ListValue,labels,legend):
+	header=["label"]+legend
 	data=[]
 	for i in range(len(labels)):
 		row=[]
 		row.append(labels[i])
-		row.append(ListValue[i])
+		for j in ListValue[i]:
+			row.append(j)
 		data.append(row)
 	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 	data = sorted(data, key=operator.itemgetter(-1),reverse=True)

@@ -2,7 +2,7 @@
 
 """
 /***************************************************************************
-Name            : geoTOPSIS
+Name            : geoFuzzy
 Description        : geographical MCDA 
 Date            : June 27, 2014
 copyright		: Gianluca Massei  (developper) 
@@ -605,12 +605,14 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoFuzzyValue=self.ExtractAttributeValue('geoFzyAND')
-		#SuitValue=[x+y+z for (x,y,z) in zip(EnvValue,EcoValue,SocValue)]
+		geoFuzzyAND=self.ExtractAttributeValue('geoFzyAND')
+		geoFuzzyOR=self.ExtractAttributeValue('geoFzyOR')
+		geoFuzzyValue=[[A,B] for (A,B) in zip(geoFuzzyAND,geoFuzzyOR)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels,"geoFzyAND")
+		legend=['geoFzyAND','geoFzyOR']
+		htmlGraph.BuilHTMLGraph(geoFuzzyValue,labels,legend)
 		return 0
 
 ###################################################################################################

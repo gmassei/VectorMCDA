@@ -527,10 +527,12 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	def BuildHTML(self):
 		geoConcValue=self.ExtractAttributeValue('geoConc')
 		geoDiscValue=self.ExtractAttributeValue('geoDisc')
+		geoConcordanceValue=[[A,B] for (A,B) in zip(geoConcValue,geoDiscValue)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		htmlGraph.BuilHTMLGraph(geoConcValue,labels,'Concordance')
+		legend=['geoConcordance','geoDiscordance']
+		htmlGraph.BuilHTMLGraph(geoConcordanceValue,labels,legend)
 		return 0
 
 

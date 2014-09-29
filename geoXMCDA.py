@@ -1,3 +1,26 @@
+# -*- coding: utf-8 -*-
+
+"""
+/***************************************************************************
+Name            : geoXMCDA
+Description        : geographical MCDA 
+Date            : June 27, 2014
+copyright		: Gianluca Massei  (developper) 
+email			: (g_massa@libero.it)
+
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
+
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import QtGui
