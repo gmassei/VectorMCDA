@@ -52,8 +52,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 
-		#QObject.connect(self.RetriveFileTBtn, SIGNAL( "clicked()" ), self.outFile)
-		#QObject.connect(self.SetBtnBox, SIGNAL("accepted()"), self.Standardization)
 		QObject.connect(self.SetBtnQuit, SIGNAL("rejected()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
@@ -66,7 +64,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
 		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
 
-		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		QObject.connect(self.AnlsBtnQuit, SIGNAL("rejected()"),self, SLOT("reject()"))
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)

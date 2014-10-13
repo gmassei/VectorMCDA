@@ -63,6 +63,9 @@ class vMCDA:
 		
 		self.actionElectre = QAction( "geoConcordance", self.iface.mainWindow() )
 		self.actionElectre.triggered.connect(self.runGeoElectre )
+		
+		self.actionPromethee = QAction( "geoPromethee", self.iface.mainWindow() )
+		self.actionPromethee.triggered.connect(self.runGeoPromethee )
 				
 		self.actionRSDB = QAction( "geoRSDB", self.iface.mainWindow() )
 		self.actionRSDB.triggered.connect(self.runGeoRSDB )
@@ -71,8 +74,8 @@ class vMCDA:
 		self.actionXMCDA.triggered.connect(self.runGeoXMCDA )
 		
 		# aggiunge il plugin alla toolbar
-		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionTOPSIS,\
-			self.actionFuzzy,self.actionElectre,self.actionRSDB,self.actionXMCDA])
+		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionTOPSIS,self.actionFuzzy,\
+			self.actionElectre,self.actionPromethee,self.actionRSDB,self.actionXMCDA])
 		self.menu = self.iface.pluginMenu()
 		self.menu.addMenu( self.geoMCDAmenu ) 
 		
@@ -83,6 +86,7 @@ class vMCDA:
 		self.iface.removePluginMenu( "&geoTOPSIS", self.actionTOPSIS )
 		self.iface.removePluginMenu( "&geoFuzzy", self.actionFuzzy )
 		self.iface.removePluginMenu( "&geoConcordance", self.actionElectre )
+		self.iface.removePluginMenu( "&geoPromethee", self.actionPromethee )
 		self.iface.removePluginMenu( "&geoRSDB", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoXMCDA", self.actionXMCDA )
 		 
@@ -129,6 +133,17 @@ class vMCDA:
 			webbrowser.open("http://maplab.alwaysdata.net")
 			return
 		dlg = geoElectreDialog(self.iface)
+		dlg.exec_()
+		
+	def runGeoPromethee(self):	# richiamato al click sull'azione
+		from geoPromethee import geoPrometheeDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
+		dlg = geoPrometheeDialog(self.iface)
 		dlg.exec_()
 		
 		

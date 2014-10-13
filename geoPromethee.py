@@ -36,13 +36,13 @@ import csv
 try:
 	import numpy as np
 except ImportError, e:
-	QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
-	QCoreApplication.translate('geoConcordance', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoPromethee', "Plugin error"), \
+	QCoreApplication.translate('geoPromethee', "Couldn't import Python module. [Message: %s]" % e))
 	
 
-from ui_geoElectre import Ui_Dialog
+from ui_geoPromethee import Ui_Dialog
 
-class geoElectreDialog(QDialog, Ui_Dialog):
+class geoPrometheeDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
 		'''costruttore'''
 		QDialog.__init__(self, iface.mainWindow())
@@ -67,7 +67,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)
 		pathSource=os.path.dirname(sourceIn)
-		outFile="geoConcordance.shp"
+		outFile="geoPromethee.shp"
 		sourceOut=os.path.join(pathSource,outFile)
 		#self.OutlEdt.setText(str(sourceOut))
 
@@ -273,7 +273,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		csvFile=open(os.path.join(currentDIR,'setConcordance.csv'),"wb")
+		csvFile=open(os.path.join(currentDIR,'setPromethee.csv'),"wb")
 		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
 		write.writerow(criteria)
 		write.writerow(weight)
@@ -284,7 +284,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
 		setting=[]
 		try:
-			with open(os.path.join(currentDIR,'setConcordance.csv')) as csvFile:
+			with open(os.path.join(currentDIR,'setPromethee.csv')) as csvFile:
 				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
 				for row in csvReader:
 					setting.append(row)
@@ -304,67 +304,64 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	def StandardizeMatrix(self,preference,weight,matrix,minField,maxField):
 		""" """
 		StdMatrix=[]
+		print matrix
 		for row in matrix:
 			List=[]
-			for r,minF, maxF, pref, wgt  in zip(row, minField,maxField,preference,weight):
+			for r,minF, maxF, pref  in zip(row, minField,maxField,preference):
 				if pref=='gain':
-					value=((r-minF)/(maxF-minF)) #cres: x-min / max - min
+					value=round(((r-minF)/(maxF-minF)),4) #gain: x-min / max - min
 				else:
-					value=((maxF-r)/(maxF-minF))  #dec: max-x / max-min
+					value=round(((maxF-r)/(maxF-minF)),4)  #cost: max-x / max-min
 				List.append(value)
 			StdMatrix.append(List)
 		return StdMatrix
-	
-	def ConcordanceMatrix(self, matrix,weight):
-		concordance=[]
+		
+
+	def PreferenceMatrix(self, matrix,criteria,weight):
+		preference=[]
+		for i in range(len(criteria)):
+			col=[row[i] for row in matrix]
+			for ci in col:
+				for cj in col:
+					if ci>cj:
+						value=ci-cj
+					else:
+						value=value
+					row.append(value)
+				preference.append(row)
+					
+
+	def PreferenceMatrix(self, matrix,criteria,weight):
+		preference=[]
+		print matrix
 		for row1 in matrix:
 			crow=[]
 			for row2 in matrix:
 				value=0
 				for r1,r2,w in zip(row1,row2,weight):
 					if r1>r2:
-						value=value+w
-				crow.append(value)
-			concordance.append(crow)
-		return concordance
-
-	def DiscordanceMatrix(self, matrix):
-		discordance=[]
-		for row1 in matrix:
-			drow=[]
-			value=0
-			for row2 in matrix:
-				for r1,r2 in zip(row1,row2):
-					if (r1-r2)>value:
-						value=(r1-r2)
+						value=value+((r1-r2)*w)
+						print "r1: %s - r2: %s [value:%s]" % (str(r1),str(r2),str(round(value,3)))
 					else:
 						value=value
-				drow.append(value)
-			discordance.append(drow)
-		return discordance
-		
-	
-	def ConcordanceIndex(self,concordance):
-		concIndx=[]
-		concordance=np.array(concordance, dtype = 'float32')
-		for i in range(len(concordance)):
-			row=concordance[i]
-			col=concordance[:,i]
-			value=sum(row)-sum(col)
-			concIndx.append(value)
-		return concIndx
-		
-	def DiscordanceIndex(self,discordance):
-		discIndx=[]
-		discordance=np.array(discordance, dtype = 'float32')
-		for i in range(len(discordance[0])):
-			row=discordance[i]
-			col=discordance[:,i]
-			value=sum(row)-sum(col)
-			discIndx.append(value)
-		return discIndx
-	
+						print "[value:%s]" % ((round(value,3)))
+				print "\n***\n"
+				crow.append(value)
+			preference.append(crow)
+		return preference
 
+	def PoisitiveFlow(self,preference):
+		positiveFlow=[sum(row) for row in preference]
+		return positiveFlow
+		
+				
+	def NegativeFlow(self,preference):
+		negativeFlow=[]
+		for i in range(len(preference[0]):
+			col=sum([row[i] for row in preference])
+			negativeFlow.append(col)
+		return negativeFlow
+	
 		
 	def ElaborateAttributeTable(self):
 		"""Standardization fields values in range [0-1]"""
@@ -372,12 +369,12 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
-		if provider.fieldNameIndex("geoConc")==-1:
-			self.AddDecisionField(self.activeLayer,"geoConc")
-		fldConcValue = provider.fieldNameIndex("geoConc") #obtain classify field index from its name
-		if provider.fieldNameIndex("geoDisc")==-1:
-			self.AddDecisionField(self.activeLayer,"geoDisc")
-		fldDiscValue = provider.fieldNameIndex("geoDisc") #obtain classify field index from its name
+		if provider.fieldNameIndex("geoFlux[+]")==-1:
+			self.AddDecisionField(self.activeLayer,"geoFlux[+]")
+		fldPositiveFlux = provider.fieldNameIndex("geoFlux[+]") #obtain classify field index from its name
+		if provider.fieldNameIndex("geoFlux[-]")==-1:
+			self.AddDecisionField(self.activeLayer,"geoFlux[-]")
+		fldNegativeFlux = provider.fieldNameIndex("geoFlux[-]") #obtain classify field index from its name
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
@@ -385,23 +382,23 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		matrix= self.Attributes2Matrix()
 		
 		matrix=self.StandardizeMatrix(preference,weight,matrix,minField,maxField)
-		#print '\n'+str(matrix)
-		concordanceMatrix=self.ConcordanceMatrix(matrix,weight)
-		discordanceMatrix=self.DiscordanceMatrix(matrix)
-		#print concordanceMatrix,discordanceMatrix
+		print '\n'+str(matrix)
+		preferenceMatrix=self.PreferenceMatrix(matrix,criteria,weight)
 		
-		concIndx=self.ConcordanceIndex(concordanceMatrix)
-		discIndx=self.DiscordanceIndex(discordanceMatrix)
-		#print concIndx,discIndx
+		print preferenceMatrix
+		positiveFlow=self.PreferenceFlow(preference) 
+		negativeFlow=self.NegativeFlow(preference)  
+		print positiveFlow
+		print negativeFlow
 		self.setting2csv()
 		
 		
 		#feat = QgsFeature()
 		self.activeLayer.startEditing()
-		for conc,disc,feat in zip(concIndx,discIndx,self.activeLayer.getFeatures()):
+		for positiveFlow,negativeFlow,feat in zip(posF,negF,self.activeLayer.getFeatures()):
 			features=feat.attributes()
-			self.activeLayer.changeAttributeValue(feat.id(),fldConcValue,round(conc,4))
-			self.activeLayer.changeAttributeValue(feat.id(),fldDiscValue,round(disc,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldPositiveFlux,round(posF,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldNegativeFlux,round(negF,4))
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0

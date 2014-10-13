@@ -28,7 +28,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>geo Weighted Sum</string>
+   <string>geo Promethee</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -138,7 +138,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <rect>
          <x>10</x>
          <y>480</y>
-         <width>561</width>
+         <width>530</width>
          <height>81</height>
         </rect>
        </property>
@@ -165,9 +165,9 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="SetBtnHelp">
        <property name="geometry">
         <rect>
-         <x>591</x>
+         <x>560</x>
          <y>510</y>
-         <width>71</width>
+         <width>102</width>
          <height>24</height>
         </rect>
        </property>
@@ -182,9 +182,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
          <width>110</width>
          <height>16777215</height>
         </size>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::TabFocus</enum>
        </property>
        <property name="text">
         <string>Help</string>
@@ -281,9 +278,9 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <widget class="QPushButton" name="EnvGetWeightBtn">
          <property name="geometry">
           <rect>
-           <x>573</x>
+           <x>540</x>
            <y>190</y>
-           <width>71</width>
+           <width>104</width>
            <height>24</height>
           </rect>
          </property>
@@ -437,9 +434,9 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="SetBtnAbout">
        <property name="geometry">
         <rect>
-         <x>591</x>
+         <x>560</x>
          <y>540</y>
-         <width>71</width>
+         <width>102</width>
          <height>24</height>
         </rect>
        </property>
@@ -459,32 +456,29 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>About</string>
        </property>
       </widget>
-      <widget class="QDialogButtonBox" name="SetBtnQuit">
+      <widget class="QPushButton" name="SetBtnQuit">
        <property name="geometry">
         <rect>
-         <x>590</x>
-         <y>473</y>
-         <width>71</width>
+         <x>560</x>
+         <y>480</y>
+         <width>102</width>
          <height>24</height>
         </rect>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="maximumSize">
         <size>
-         <width>101</width>
+         <width>110</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel</set>
+       <property name="text">
+        <string>Quit</string>
        </property>
       </widget>
       <zorder>EnvRemoveFieldBtn</zorder>
@@ -605,7 +599,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>Label field</string>
        </property>
       </widget>
-      <widget class="QDialogButtonBox" name="AnlsBtnQuit">
+      <widget class="QDialogButtonBox" name="AnlsBtnBox">
        <property name="geometry">
         <rect>
          <x>560</x>
@@ -646,7 +640,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
   <tabstop>EnvlistFieldsCBox</tabstop>
   <tabstop>RenderBtn</tabstop>
   <tabstop>LabelListFieldsCBox</tabstop>
-  <tabstop>AnlsBtnQuit</tabstop>
+  <tabstop>AnlsBtnBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

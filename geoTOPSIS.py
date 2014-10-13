@@ -34,8 +34,8 @@ import csv
 try:
 	import numpy as np
 except ImportError, e:
-	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
+	QCoreApplication.translate('geoTOPSIS', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 
@@ -53,22 +53,16 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.activeLayer = self.iface.activeLayer()
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
-		#QObject.connect(self.SetBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-
 		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.Elaborate)
-
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
 		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
-
 		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		#QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractRules)
-		#QObject.connect(self.SaveRulesBtn, SIGNAL( "clicked()" ), self.SaveRules)
-		
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)

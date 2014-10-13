@@ -13,7 +13,7 @@ qgisMinimumVersion=2.0
 #qgisMaximumVersion=2.99
 description=Performs geographic multi criteria decision making.
 category=Vector
-version=0.1
+version=0.0.1
 
 # end of mandatory metadata
 
@@ -23,14 +23,17 @@ version=0.1
 # changelog= new social tab and rules extraction tabs
 
 # tags are comma separated with spaces allowed
-tags=Sustainability, Geographic MCDA, Vector
+tags=Sustainability assesment, Geographic MCDA, Vector
+category=Vector
 
-homepage=http://maplab.alwaysdata.net/geoMCDA.html
-tracker=http://hub.qgis.org/projects/geoMCDA/
-repository=https://github.com/gmassei/geoMCDA
-icon=icon.png
+changelog=Ver. 0.1: First release.
+
+homepage=http://maplab.alwaysdata.net/geomcda.html
+tracker=http://hub.qgis.org/projects/vectormcda
+repository=https://github.com/gmassei/VectorMCDA
+icon=icons/Tree.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version
 deprecated=False
@@ -39,7 +42,7 @@ about= VectorMCDA is a QGIS plugin that  use several MCDA algorithms performing 
 
 
 # Author contact information
-author= Gianluca Massei, Antonio Boggia
+author= Gianluca Massei
 email=g_massa@libero.it
 
 

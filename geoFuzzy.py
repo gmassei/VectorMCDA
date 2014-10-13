@@ -51,7 +51,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.activeLayer = self.iface.activeLayer()
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
-		#QObject.connect(self.SetBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
 

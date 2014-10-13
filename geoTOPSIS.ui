@@ -425,7 +425,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>Add</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="SetBtnQuit">
+      <widget class="QToolButton" name="SetBtnQuit">
        <property name="geometry">
         <rect>
          <x>560</x>
@@ -496,8 +496,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>675</width>
+        <height>579</height>
        </rect>
       </property>
       <attribute name="label">
@@ -596,11 +596,23 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QDialogButtonBox" name="AnlsBtnBox">
        <property name="geometry">
         <rect>
-         <x>565</x>
+         <x>560</x>
          <y>504</y>
-         <width>86</width>
+         <width>110</width>
          <height>23</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="standardButtons">
         <set>QDialogButtonBox::Cancel</set>
