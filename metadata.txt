@@ -13,7 +13,7 @@ qgisMinimumVersion=2.0
 #qgisMaximumVersion=2.99
 description=Performs geographic multi criteria decision making.
 category=Vector
-version=0.0.1
+version=0.2
 
 # end of mandatory metadata
 
@@ -27,6 +27,7 @@ tags=Sustainability assesment, Geographic MCDA, Vector
 category=Vector
 
 changelog=Ver. 0.1: First release.
+Ver. 0.2: several bugs in geoPromethee are corrected
 
 homepage=http://maplab.alwaysdata.net/geomcda.html
 tracker=http://hub.qgis.org/projects/vectormcda

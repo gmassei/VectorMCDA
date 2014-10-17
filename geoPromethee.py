@@ -2,9 +2,8 @@
 
 """
 /***************************************************************************
-Name			: geoConcordance
-Description		: geographical MCDA with Electre model (ranking with concordance 
-					and discordance index)
+Name			: geoPromethee
+Description		: geographical MCDA with geoPromethee model 
 Date			: June 20, 2014
 copyright		: Gianluca Massei  (developper) 
 email			: (g_massa@libero.it)
@@ -304,7 +303,6 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 	def StandardizeMatrix(self,preference,weight,matrix,minField,maxField):
 		""" """
 		StdMatrix=[]
-		print matrix
 		for row in matrix:
 			List=[]
 			for r,minF, maxF, pref  in zip(row, minField,maxField,preference):
@@ -333,7 +331,6 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	def PreferenceMatrix(self, matrix,criteria,weight):
 		preference=[]
-		print matrix
 		for row1 in matrix:
 			crow=[]
 			for row2 in matrix:
@@ -341,11 +338,8 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 				for r1,r2,w in zip(row1,row2,weight):
 					if r1>r2:
 						value=value+((r1-r2)*w)
-						print "r1: %s - r2: %s [value:%s]" % (str(r1),str(r2),str(round(value,3)))
 					else:
 						value=value
-						print "[value:%s]" % ((round(value,3)))
-				print "\n***\n"
 				crow.append(value)
 			preference.append(crow)
 		return preference
@@ -357,7 +351,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 				
 	def NegativeFlow(self,preference):
 		negativeFlow=[]
-		for i in range(len(preference[0]):
+		for i in range(len(preference[0])):
 			col=sum([row[i] for row in preference])
 			negativeFlow.append(col)
 		return negativeFlow
@@ -382,20 +376,14 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		matrix= self.Attributes2Matrix()
 		
 		matrix=self.StandardizeMatrix(preference,weight,matrix,minField,maxField)
-		print '\n'+str(matrix)
 		preferenceMatrix=self.PreferenceMatrix(matrix,criteria,weight)
-		
-		print preferenceMatrix
-		positiveFlow=self.PreferenceFlow(preference) 
-		negativeFlow=self.NegativeFlow(preference)  
-		print positiveFlow
-		print negativeFlow
+		positiveFlow=self.PoisitiveFlow(preferenceMatrix) 
+		negativeFlow=self.NegativeFlow(preferenceMatrix)  
 		self.setting2csv()
-		
 		
 		#feat = QgsFeature()
 		self.activeLayer.startEditing()
-		for positiveFlow,negativeFlow,feat in zip(posF,negF,self.activeLayer.getFeatures()):
+		for posF,negF,feat in zip(positiveFlow,negativeFlow,self.activeLayer.getFeatures()):
 			features=feat.attributes()
 			self.activeLayer.changeAttributeValue(feat.id(),fldPositiveFlux,round(posF,4))
 			self.activeLayer.changeAttributeValue(feat.id(),fldNegativeFlux,round(negF,4))
@@ -439,7 +427,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	def RenderLayer(self):
 		""" Load thematic layers in canvas """
-		fields=['geoConc','geoDisc']
+		fields=['geoFlux[+]','geoFlux[-]']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
@@ -478,7 +466,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
-			QCoreApplication.translate('geoConcordance', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
+			QCoreApplication.translate('geoPromethee', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
@@ -489,7 +477,9 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 	def BuildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
 
-		geoConcordanceValue=self.ExtractAttributeValue('geoConc')
+		geoPositiveFlux=self.ExtractAttributeValue('geoFlux[+]')
+		geoNegativeFlux=self.ExtractAttributeValue('geoFlux[-]')
+		geoFluxNetValue=[(p-n) for p,n in zip(geoPositiveFlux,geoNegativeFlux)]
 		
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
@@ -497,11 +487,11 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		ax = fig.add_subplot(111)
 		ax.margins(0.05, None)
 		#xpos = np.arange(len(SuitValue))    # the x locations for the groups
-		xpos = range(len(geoWSMValue))    # the x locations for the groups
+		xpos = range(len(geoFluxNetValue))    # the x locations for the groups
 		width = 0.8     # the width of the bars: can also be len(x) sequence
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
+		p1 = plt.bar((xpos), geoFluxNetValue, width=width, color='g',align='center') # yerr=womenStd)
 		#p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
 		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
 		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
@@ -517,14 +507,14 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	
 	def BuildHTML(self):
-		geoConcValue=self.ExtractAttributeValue('geoConc')
-		geoDiscValue=self.ExtractAttributeValue('geoDisc')
-		geoConcordanceValue=[[A,B] for (A,B) in zip(geoConcValue,geoDiscValue)]
+		geoPositiveFlux=self.ExtractAttributeValue('geoFlux[+]')
+		geoNegativeFlux=self.ExtractAttributeValue('geoFlux[-]')
+		geoFluxNetValue=[[p-n] for (p,n) in zip(geoPositiveFlux,geoNegativeFlux)]
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		labels=[str(l) for l in labels]
-		legend=['geoConcordance','geoDiscordance']
-		htmlGraph.BuilHTMLGraph(geoConcordanceValue,labels,legend)
+		legend=['geoFluxNet']
+		htmlGraph.BuilHTMLGraph(geoFluxNetValue,labels,legend)
 		return 0
 
 
