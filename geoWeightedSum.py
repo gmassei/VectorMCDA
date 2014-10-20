@@ -34,6 +34,7 @@ import csv
 
 try:
 	import numpy as np
+	import matplotlib.pyplot as plt
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
 	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
@@ -410,7 +411,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		try:
 			import matplotlib.pyplot as plt
 			import numpy as np
-			self.BuildGraphPnt(currentDir)
+			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
@@ -445,7 +446,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		plt.ylabel('Scores')
 		plt.title('geoWSM')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoWSM'))
+		#plt.legend((p1[0]), ('geoWSM'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')

@@ -34,6 +34,7 @@ import htmlGraph
 import csv
 
 try:
+	import matplotlib.pyplot as plt
 	import numpy as np
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
@@ -477,7 +478,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		try:
 			import matplotlib.pyplot as plt
 			import numpy as np
-			self.BuildGraphPnt(currentDir)
+			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
@@ -491,28 +492,23 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	def BuildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
-
-		geoConcordanceValue=self.ExtractAttributeValue('geoConc')
-		
+		geoConcValue=self.ExtractAttributeValue('geoConc')
+		geoDiscValue=self.ExtractAttributeValue('geoDisc')
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
 		ax = fig.add_subplot(111)
 		ax.margins(0.05, None)
-		#xpos = np.arange(len(SuitValue))    # the x locations for the groups
-		xpos = range(len(geoWSMValue))    # the x locations for the groups
-		width = 0.8     # the width of the bars: can also be len(x) sequence
+		xpos = np.arange(len(geoConcValue))    # the x locations for the groups
+		width = 0.35    # the width of the bars: can also be len(x) sequence
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		#p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
-		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
-		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
-		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
+		p1 = plt.bar((xpos), geoConcValue, width, color='g',align='center') 
+		p2 = plt.bar((xpos+width), geoDiscValue, width, color='r', align='center') 
 		plt.ylabel('Scores')
 		plt.title('geoConcordance')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoConcordance'))
+		plt.legend((p1[0], p2[0]), ('geoConcordamce', 'geoDiscordance'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')

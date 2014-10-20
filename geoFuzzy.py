@@ -32,6 +32,7 @@ import shutil
 import csv
 
 try:
+	import matplotlib.pyplot as plt
 	import numpy as np
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
@@ -407,7 +408,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		second=self.binaryYvalue(second)
 		third=self.binaryYvalue(third)
 		fourth=self.binaryYvalue(fourth)
-		print firsth,second,third,fourth
+		#print firsth,second,third,fourth
 		return firsth,second,third,fourth
 	
 	def Regression(self,Xvalues,Yvalue):
@@ -567,7 +568,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		try:
 			import matplotlib.pyplot as plt
 			import numpy as np
-			self.BuildGraphPnt(currentDir)
+			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
@@ -582,27 +583,30 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 	def BuildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
 
-		geoFuzzyValue=self.ExtractAttributeValue('geoFuzzy')
+		geoFuzzyAND=self.ExtractAttributeValue('geoFzyAND')
+		geoFuzzyOR=self.ExtractAttributeValue('geoFzyOR')
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
 		ax = fig.add_subplot(111)
 		ax.margins(0.05, None)
-		#xpos = np.arange(len(SuitValue))    # the x locations for the groups
-		xpos = range(len(geoWSMValue))    # the x locations for the groups
-		width = 0.8     # the width of the bars: can also be len(x) sequence
+		xpos = np.arange(len(geoFuzzyOR))    # the x locations for the groups
+		width = 0.35     # the width of the bars: can also be len(x) sequence
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoFuzzyValue, width=width, color='g',align='center') # yerr=womenStd)
+		p2 = plt.bar(xpos, geoFuzzyOR, width, color='r')
+		p1 = plt.bar(xpos+width, geoFuzzyAND, width, color='g')
 		plt.ylabel('Scores')
 		plt.title('geoFuzzy')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoFuzzy'))
+		plt.legend((p1[0], p2[0]), ('Fuzzy intersection', 'Fuzzy union'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')
 		return 0
 
+		p1 = plt.bar((xpos), EnvValue, width=width, color='g',align='center') # yerr=womenStd)
+		p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
 	
 	def BuildHTML(self):
 		geoFuzzyAND=self.ExtractAttributeValue('geoFzyAND')

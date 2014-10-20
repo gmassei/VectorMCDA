@@ -32,6 +32,7 @@ import shutil
 import csv
 
 try:
+	import matplotlib.pyplot as plt
 	import numpy as np
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
@@ -450,7 +451,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		try:
 			import matplotlib.pyplot as plt
 			import numpy as np
-			self.BuildGraphPnt(currentDir)
+			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoUmbriaSUIT', "Plugin error"), \
@@ -485,7 +486,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		plt.ylabel('Scores')
 		plt.title('geoTOPSIS')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.legend((p1[0]), ('geoTOPSIS'))
+		#plt.legend((p1[0]), ('geoTOPSIS'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')
