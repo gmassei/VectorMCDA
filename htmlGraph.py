@@ -51,10 +51,13 @@ def BuilHTMLGraph(ListValue,labels,legend):
 	  <div id="logo" class="container"><h1>Graph of rating</h1>
 		<br></br>
 		<div id="bar_div" style="width: 1350px; height: 750px;"  border='0'></div>
-		<br><hr>
+		<br><hr></br>
 		<img class="aligncenter" src='histogram.png' style="width: 1250px; height: 750px;"  border='0'/>
-		<br><hr>
-		<img class="aligncenter" src='points.png' style="width: 1250px; height: 750px;"  border='0'/><hr>
+		<br><hr><hr><hr></br>
+		<a href ="http://maplab.alwaysdata.net">
+			<img class="aligncenter" src="icons/Tree.png" style="width: 150px; height: 100px;"  border='0'/> 
+		powered by VectorMCDA in QGIS</a>
+		<hr>
 	  </body>
 	</html>""")
 	HTMLfile.close()
