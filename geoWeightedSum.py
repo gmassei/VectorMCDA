@@ -37,7 +37,7 @@ try:
 	import matplotlib.pyplot as plt
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
+	QCoreApplication.translate('geoWeightedSum', "You can't get all the graphics output . [Message: %s]" % e))
 	
 
 from ui_geoWeightedSum import Ui_Dialog
@@ -49,34 +49,29 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.setupUi(self)
 		self.iface = iface
 		self.activeLayer = self.iface.activeLayer()
-		#self.base_Layer = self.iface.activeLayer()
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 
 		QObject.connect(self.SetBtnQuit, SIGNAL("rejected()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-
 		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
+		#QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
-
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
 		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
-
 		QObject.connect(self.AnlsBtnQuit, SIGNAL("rejected()"),self, SLOT("reject()"))
 		
 		sourceIn=str(self.iface.activeLayer().source())
-		#self.baseLbl.setText(sourceIn)
 		pathSource=os.path.dirname(sourceIn)
 		outFile="geoWeightedSum.shp"
 		sourceOut=os.path.join(pathSource,outFile)
-		#self.OutlEdt.setText(str(sourceOut))
 
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
+		
 
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
@@ -96,12 +91,16 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		#retrieve signal for modified cell
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+###############################ContextMenu########################################
+#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
+		headers = self.EnvParameterWidget.horizontalHeader()
+		headers.setContextMenuPolicy(Qt.CustomContextMenu)
+		headers.customContextMenuRequested.connect(self.removePopup)
 #################################################################################
-		#currentDir=unicode(os.path.abspath( os.path.dirname(__file__)))
-		#self.LblLogo.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"icon.png")))
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
-			
+
 		setting=self.csv2setting()
 		try:
 			self.setting2table(setting)
@@ -161,26 +160,28 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
 		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
 		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
-
 		return 0
 
 
-	def RemoveField(self):
-		"""Remove field in table in GUI"""
-		f=self.EnvlistFieldsCBox.currentText()
-		i=self.EnvTableWidget.currentColumn()
-		j=self.EnvParameterWidget.currentColumn()
-		if i == -1 and j== -1:
+	def removePopup(self, pos):
+		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
+		if i != -1:
+			menu = QMenu()
+			removeAction = menu.addAction("Remove field")
+			action = menu.exec_(self.mapToGlobal(pos))
+			if action == removeAction:
+				self.RemoveField(i)
+				self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
 			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		elif i != -1:
-			self.EnvTableWidget.removeColumn(i)
-			self.EnvTableWidget.removeRow(i)
-			self.EnvParameterWidget.removeColumn(i)
-		elif j != -1:
-			self.EnvTableWidget.removeColumn(j)
-			self.EnvTableWidget.removeRow(j)
-			self.EnvParameterWidget.removeColumn(j)
+		return 0
+
+	def RemoveField(self,i):
+		"""Remove field in table in GUI"""
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
 		return 0
 
 
@@ -320,7 +321,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
-		
 		fields = self.activeLayer.pendingFields()
 		features= self.activeLayer.getFeatures()
 		matrix=[]
@@ -331,13 +331,18 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		WeightedSumVaList=self.ComputeWeightedSumValue(preference,weight,matrix,minField,maxField)
 		
 		feat = QgsFeature()
+		self.EnvProgressBar.setRange(1,provider.featureCount())
+		progress=0
 		self.activeLayer.startEditing()
 		for WSM,feat in zip(WeightedSumVaList,self.activeLayer.getFeatures()):
+			progress=progress+1
 			features=feat.attributes()
 			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(WSM,4))
+			self.EnvProgressBar.setValue(progress)
 		self.activeLayer.commitChanges()
 		self.setting2csv()
-		self.EnvTEdit.append("done") 
+		self.EnvTEdit.append("done")
+		#self.EnvGetWeightBtn.setEnabled(False)
 		return 0
 
 
@@ -411,7 +416,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		try:
 			import matplotlib.pyplot as plt
 			import numpy as np
-			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
 			QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
@@ -427,7 +431,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		"""Build Istogram graph using pyplot"""
 
 		geoWSMValue=self.ExtractAttributeValue('geoWSM')
-		
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
@@ -439,14 +442,9 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		#p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
-		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
-		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
-		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
 		plt.ylabel('Scores')
 		plt.title('geoWSM')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		#plt.legend((p1[0]), ('geoWSM'))
 		plt.savefig(os.path.join(currentDir,"histogram.png"))
 		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
 		plt.close('all')

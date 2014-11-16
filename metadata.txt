@@ -28,6 +28,7 @@ category=Vector
 
 changelog=Ver. 0.1: First release.
 Ver. 0.2: several bugs in geoPromethee are corrected
+Ver. 0.4: improve and upgrade geoWeightedSum algorithm
 
 homepage=http://maplab.alwaysdata.net/geomcda.html
 tracker=http://hub.qgis.org/projects/vectormcda
@@ -39,7 +40,7 @@ experimental=True
 # deprecated flag (applies to the whole plugin, not just a single version
 deprecated=False
 
-about= VectorMCDA is a QGIS plugin that  use several MCDA algorithms performing a multicriteria analysis in a geographical environmental
+about= VectorMCDA is a QGIS plugin that uses different MCDA algorithms to perform a multicriteria analysis in a geographical environmental
 
 
 # Author contact information

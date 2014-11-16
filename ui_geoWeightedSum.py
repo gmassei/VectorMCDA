@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\geoWeightedSum.ui'
 #
-# Created: Thu Oct 02 23:29:11 2014
+# Created: Sun Nov 16 09:43:49 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,7 +57,7 @@ class Ui_Dialog(object):
         self.EnvironmentaleQTbox.setGeometry(QtCore.QRect(0, 0, 676, 570))
         self.EnvironmentaleQTbox.setObjectName(_fromUtf8("EnvironmentaleQTbox"))
         self.EnvlistFieldsCBox = QtGui.QComboBox(self.EnvironmentaleQTbox)
-        self.EnvlistFieldsCBox.setGeometry(QtCore.QRect(88, 62, 364, 22))
+        self.EnvlistFieldsCBox.setGeometry(QtCore.QRect(88, 62, 421, 22))
         self.EnvlistFieldsCBox.setMaximumSize(QtCore.QSize(16777215, 22))
         self.EnvlistFieldsCBox.setObjectName(_fromUtf8("EnvlistFieldsCBox"))
         self.EnvLbl = QtGui.QLabel(self.EnvironmentaleQTbox)
@@ -164,22 +164,8 @@ class Ui_Dialog(object):
         self.EnvTableWidget.setColumnCount(0)
         self.EnvTableWidget.setRowCount(0)
         self.EnvTabWidget.addTab(self.tab_6, _fromUtf8(""))
-        self.line_3 = QtGui.QFrame(self.EnvironmentaleQTbox)
-        self.line_3.setGeometry(QtCore.QRect(560, 58, 20, 32))
-        self.line_3.setFrameShape(QtGui.QFrame.VLine)
-        self.line_3.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line_3.setObjectName(_fromUtf8("line_3"))
-        self.line_6 = QtGui.QFrame(self.EnvironmentaleQTbox)
-        self.line_6.setGeometry(QtCore.QRect(554, 58, 20, 32))
-        self.line_6.setFrameShape(QtGui.QFrame.VLine)
-        self.line_6.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line_6.setObjectName(_fromUtf8("line_6"))
-        self.EnvRemoveFieldBtn = QtGui.QPushButton(self.EnvironmentaleQTbox)
-        self.EnvRemoveFieldBtn.setGeometry(QtCore.QRect(590, 62, 72, 24))
-        self.EnvRemoveFieldBtn.setMaximumSize(QtCore.QSize(16777215, 24))
-        self.EnvRemoveFieldBtn.setObjectName(_fromUtf8("EnvRemoveFieldBtn"))
         self.EnvAddFieldBtn = QtGui.QPushButton(self.EnvironmentaleQTbox)
-        self.EnvAddFieldBtn.setGeometry(QtCore.QRect(465, 62, 72, 24))
+        self.EnvAddFieldBtn.setGeometry(QtCore.QRect(541, 62, 121, 24))
         self.EnvAddFieldBtn.setMaximumSize(QtCore.QSize(16777215, 24))
         self.EnvAddFieldBtn.setObjectName(_fromUtf8("EnvAddFieldBtn"))
         self.SetBtnAbout = QtGui.QPushButton(self.EnvironmentaleQTbox)
@@ -245,8 +231,7 @@ class Ui_Dialog(object):
         self.toolBox.setCurrentIndex(0)
         self.EnvTabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
-        Dialog.setTabOrder(self.EnvAddFieldBtn, self.EnvRemoveFieldBtn)
-        Dialog.setTabOrder(self.EnvRemoveFieldBtn, self.EnvTEdit)
+        Dialog.setTabOrder(self.EnvAddFieldBtn, self.EnvTEdit)
         Dialog.setTabOrder(self.EnvTEdit, self.GraphBtn)
         Dialog.setTabOrder(self.GraphBtn, self.SetBtnHelp)
         Dialog.setTabOrder(self.SetBtnHelp, self.EnvlistFieldsCBox)
@@ -263,8 +248,8 @@ class Ui_Dialog(object):
         self.EnvTabWidget.setTabText(self.EnvTabWidget.indexOf(self.tab_5), _translate("Dialog", "Standard", None))
         self.EnvCalculateBtn.setText(_translate("Dialog", "Calculate weight", None))
         self.EnvTabWidget.setTabText(self.EnvTabWidget.indexOf(self.tab_6), _translate("Dialog", "Advanced", None))
-        self.EnvRemoveFieldBtn.setText(_translate("Dialog", "Remove", None))
-        self.EnvAddFieldBtn.setText(_translate("Dialog", "Add", None))
+        self.EnvTabWidget.setTabToolTip(self.EnvTabWidget.indexOf(self.tab_6), _translate("Dialog", "<html><head/><body><p>colun vs row</p><p><br/></p></body></html>", None))
+        self.EnvAddFieldBtn.setText(_translate("Dialog", "Add field", None))
         self.SetBtnAbout.setText(_translate("Dialog", "About", None))
         self.toolBox.setItemText(self.toolBox.indexOf(self.EnvironmentaleQTbox), _translate("Dialog", "Criteria", None))
         self.GraphBtn.setText(_translate("Dialog", "Graph", None))
