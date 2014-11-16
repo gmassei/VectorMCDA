@@ -467,7 +467,6 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		"""Build Istogram graph using pyplot"""
 
 		geoWSMValue=self.ExtractAttributeValue('geoTOPSIS')
-		
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
@@ -479,10 +478,6 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		label=self.LabelListFieldsCBox.currentText()
 		labels=self.ExtractAttributeValue(label)
 		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		#p2 = plt.bar((xpos), EcoValue, width=width, color='r', bottom=EnvValue, align='center') #, yerr=menStd)
-		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
-		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
-		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
 		plt.ylabel('Scores')
 		plt.title('geoTOPSIS')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
@@ -518,5 +513,4 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		""")
 
 	def open_help(self):
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
-		webbrowser.open(os.path.join(currentDir,"maplab.alwaysdata.net"))
+		webbrowser.open("http://maplab.alwaysdata.net/geomcda.html")

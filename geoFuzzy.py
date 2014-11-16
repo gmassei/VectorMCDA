@@ -631,5 +631,4 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		""")
 
 	def open_help(self):
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
-		webbrowser.open(os.path.join(currentDir,"maplab.alwaysdata.net"))
+		webbrowser.open("http://maplab.alwaysdata.net/geomcda.html")

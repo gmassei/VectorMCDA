@@ -492,9 +492,6 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		labels=self.ExtractAttributeValue(label)
 		p1 = plt.bar((xpos), geoFluxNetValue, width, color='g',align='center') # yerr=womenStd)
 		p2 = plt.bar((xpos+width), geoNegativeFlux, width, color='r', align='center') #, yerr=menStd)
-		#bot=[e+c for e,c in zip(EnvValue,EcoValue)]
-		#p3 = plt.bar((xpos), SocValue, width=width, color='c', bottom=bot, align='center') #, yerr=menStd)
-		#n, bins, patches = plt.hist( [EnvValue,EcoValue,SocValue], histtype='bar', stacked=True)
 		plt.ylabel('Scores')
 		plt.title('geoPromethee')
 		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
@@ -531,6 +528,5 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		""")
 
 	def open_help(self):
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
-		webbrowser.open(os.path.join(currentDir,"maplab.alwaysdata.net"))
+		webbrowser.open("http://maplab.alwaysdata.net/geomcda.html")
 
