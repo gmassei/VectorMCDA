@@ -83,14 +83,14 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        </rect>
       </property>
       <attribute name="label">
-       <string>Environmental criteria</string>
+       <string>Criteria</string>
       </attribute>
       <widget class="QComboBox" name="EnvlistFieldsCBox">
        <property name="geometry">
         <rect>
          <x>88</x>
          <y>62</y>
-         <width>364</width>
+         <width>421</width>
          <height>22</height>
         </rect>
        </property>
@@ -361,57 +361,12 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         </widget>
        </widget>
       </widget>
-      <widget class="Line" name="line_3">
-       <property name="geometry">
-        <rect>
-         <x>560</x>
-         <y>58</y>
-         <width>20</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-      <widget class="Line" name="line_6">
-       <property name="geometry">
-        <rect>
-         <x>554</x>
-         <y>58</y>
-         <width>20</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="EnvRemoveFieldBtn">
-       <property name="geometry">
-        <rect>
-         <x>590</x>
-         <y>62</y>
-         <width>72</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Remove</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="EnvAddFieldBtn">
        <property name="geometry">
         <rect>
-         <x>465</x>
+         <x>540</x>
          <y>62</y>
-         <width>72</width>
+         <width>121</width>
          <height>24</height>
         </rect>
        </property>
@@ -422,7 +377,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         </size>
        </property>
        <property name="text">
-        <string>Add</string>
+        <string>Add field</string>
        </property>
       </widget>
       <widget class="QToolButton" name="SetBtnQuit">
@@ -475,7 +430,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>About</string>
        </property>
       </widget>
-      <zorder>EnvRemoveFieldBtn</zorder>
       <zorder>EnvAddFieldBtn</zorder>
       <zorder>EnvlistFieldsCBox</zorder>
       <zorder>EnvLbl</zorder>
@@ -486,8 +440,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <zorder>line_2</zorder>
       <zorder>line_4</zorder>
       <zorder>EnvTabWidget</zorder>
-      <zorder>line_3</zorder>
-      <zorder>line_6</zorder>
       <zorder>SetBtnQuit</zorder>
       <zorder>SetBtnAbout</zorder>
      </widget>
@@ -496,8 +448,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>675</width>
-        <height>579</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -678,7 +630,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
  <layoutdefault spacing="6" margin="9"/>
  <tabstops>
   <tabstop>EnvAddFieldBtn</tabstop>
-  <tabstop>EnvRemoveFieldBtn</tabstop>
   <tabstop>EnvTEdit</tabstop>
   <tabstop>GraphBtn</tabstop>
   <tabstop>SetBtnHelp</tabstop>

@@ -74,7 +74,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
 
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list

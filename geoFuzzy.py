@@ -22,6 +22,7 @@ email			: (g_massa@libero.it)
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import QtGui
+import PyQt4.Qwt5 as Qwt
 
 from qgis.core import *
 from qgis.gui import *
@@ -38,7 +39,6 @@ except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
 	QCoreApplication.translate('geoFuzzy', "Couldn't import Python module. [Message: %s]" % e))
 	
-
 import htmlGraph
 
 from ui_geoFuzzy import Ui_Dialog
@@ -50,32 +50,49 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.setupUi(self)
 		self.iface = iface
 		self.activeLayer = self.iface.activeLayer()
+		self.Xgraph=self.Ygraph=[]
+		self.fzyValuer={} #hold the valuer for fuzzify matrix
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-
 		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.Elaborate)
-
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
 		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
-
 		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		#QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractRules)
-		#QObject.connect(self.SaveRulesBtn, SIGNAL( "clicked()" ), self.SaveRules)
-		
+		QObject.connect(self.FzyFieldBtn, SIGNAL("clicked()"), self.getFzyGraph)
+		QObject.connect(self.FzfyListFieldsCBox, SIGNAL("currentIndexChanged(int)"), self.setqwtPlot)
+		self.qwtPlot.setAutoReplot()
+		self.qwtPlot.setAxisScale(0,0,1,0.1)
+		self.picker = Qwt.QwtPlotPicker(Qwt.QwtPlot.xBottom,
+								   Qwt.QwtPlot.yLeft,
+								   #Qwt.QwtPicker.PointSelection,
+								   Qwt.QwtPicker.PolygonSelection,
+								   #Qwt.QwtPlotPicker.CrossRubberBand,
+								   Qwt.QwtPlotPicker.PolygonRubberBand,
+								   Qwt.QwtPicker.AlwaysOn,
+								   self.qwtPlot.canvas())
+		self.picker.setRubberBandPen(QPen(Qt.red))
+		#self.picker.connect(self.picker,SIGNAL('selected(const QwtDoublePoint&)'), self.pickPoints)
+		self.picker.connect(self.picker,SIGNAL('selected(const QwtPolygon&)'), self.pickPoints)
+		# curves
+		self.curve = Qwt.QwtPlotCurve('Fuzzify')
+		self.curve.setRenderHint(Qwt.QwtPlotItem.RenderAntialiased)
+		self.curve.setPen(QPen(Qt.blue))
+		self.curve.setYAxis(self.qwtPlot.yLeft)
+		self.curve.attach(self.qwtPlot)
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
 		outputFile="geoFuzzy.shp"
 		sourceOut=os.path.join(pathSource,outputFile)
-		#self.OutlEdt.setText(str(sourceOut))
+
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.FzfyListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
 		self.LabelListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
@@ -83,8 +100,8 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
-		EnvSetLabel=["Hedges","First", "Second", "Third","Fourth"]
-
+		
+		EnvSetLabel=["Hedges","Min", "Max", "Set"]
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvParameterWidget.setRowCount(len(EnvSetLabel))
@@ -93,19 +110,18 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.updateTable()
-		try:
-			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
-		except:
-			pass
+###############################ContextMenu########################################
+#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
+		headers = self.EnvParameterWidget.horizontalHeader()
+		headers.setContextMenuPolicy(Qt.CustomContextMenu)
+		headers.customContextMenuRequested.connect(self.removePopup)
+#################################################################################
 		setting=self.csv2setting()
 		try:
 			self.setting2table(setting)
 		except:
 			pass
-#################################################################################
-		header = self.EnvParameterWidget.horizontalHeader()
-		header.sectionClicked.connect(self.ReverseValues)
-#################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
 
@@ -130,13 +146,10 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 	def coloTable(self):
 		rows=self.EnvParameterWidget.rowCount()
 		cols=self.EnvParameterWidget.columnCount()
-		for r in range(rows):
-			if r==1:
-				for c in range(cols):
-					self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,165,0))
-			elif r>1:
-				for c in range(cols):
-					self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,0,0))
+		for c in range(cols):
+			self.EnvParameterWidget.item(1, c).setBackgroundColor(QtGui.QColor(255,165,0))
+			self.EnvParameterWidget.item(2, c).setBackgroundColor(QtGui.QColor(255,0,0))
+			self.EnvParameterWidget.item(3, c).setBackgroundColor(QtGui.QColor(216,216,216))
 		return 0
 		
 	def updateTable(self):
@@ -148,7 +161,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(fields)
 		self.EnvTableWidget.setRowCount(len(fields))
 		self.EnvTableWidget.setVerticalHeaderLabels(fields)
-		EnvSetLabel=["Hedges","First", "Second", "Third","Fourth"]
+		EnvSetLabel=["Hedges","Min", "Max", "Set"]
 		self.EnvParameterWidget.setColumnCount(len(fields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(fields)
 		self.EnvParameterWidget.setRowCount(len(EnvSetLabel))
@@ -158,6 +171,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.updateGUIFuzzy()
 		self.coloTable()
 		return 0
+
 
 
 	def updateFuzzyFctn(self,TableWidget,WeighTableWidget,provider):
@@ -171,12 +185,10 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			WeighTableWidget.setItem(0,r,QTableWidgetItem(str(1.0)))
 			WeighTableWidget.setItem(1,r,QTableWidgetItem(str(minField[r])))#
 			WeighTableWidget.setItem(2,r,QTableWidgetItem(str(maxField[r])))#
-			WeighTableWidget.setItem(3,r,QTableWidgetItem(str(maxField[r])))
-			WeighTableWidget.setItem(4,r,QTableWidgetItem(str(maxField[r])))
+			WeighTableWidget.setItem(3,r,QTableWidgetItem(str("Crisp")))
 	
 	def updateGUIFuzzy(self):
-		provider=self.activeLayer.dataProvider() #provider=self.active_layer.dataProvider() 
-		##Environmental
+		provider=self.activeLayer.dataProvider() 
 		self.updateFuzzyFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
 		return 0
 
@@ -194,30 +206,32 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			
 	def AddField(self):
 		"""Add field to table in GUI"""
-		listFields=self.EnvlistFieldsCBox.currentText()
-		self.addFieldFctn(listFields,self.EnvTableWidget,self.EnvParameterWidget)
+		field=self.EnvlistFieldsCBox.currentText()
+		self.addFieldFctn(field,self.EnvTableWidget,self.EnvParameterWidget)
 		return 0
 
-	def removeFieldFctn(self,TableWidget,WeighTableWidget):
-		"""base function for RemoveField()"""
-		i=TableWidget.currentColumn()
-		j=WeighTableWidget.currentColumn()
-		if i == -1 and j== -1:
-			QMessageBox.warning(self.iface.mainWindow(), "geoFuzzy",
+	def removePopup(self, pos):
+		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
+		if i != -1:
+			menu = QMenu()
+			removeAction = menu.addAction("Remove field")
+			action = menu.exec_(self.mapToGlobal(pos))
+			if action == removeAction:
+				self.RemoveField(i)
+				self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
+			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		elif i != -1:
-			TableWidget.removeColumn(i)
-			TableWidget.removeRow(i)
-			WeighTableWidget.removeColumn(i)
-		elif j != -1:
-			TableWidget.removeColumn(j)
-			TableWidget.removeRow(j)
-			WeighTableWidget.removeColumn(j)
+		return 0
 
-	def RemoveField(self):
+	def RemoveField(self,i):
 		"""Remove field in table in GUI"""
-		self.EnvTableWidget.currentColumn()
-		self.removeFieldFctn(self.EnvTableWidget,self.EnvParameterWidget)
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
+		self.FzfyListFieldsCBox.clear()
+		self.FzfyListFieldsCBox.addItems([self.EnvTableWidget.verticalHeaderItem(f).text() \
+			for f in range(self.EnvTableWidget.columnCount())])
 		return 0
 
 
@@ -234,37 +248,82 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
+	
+	def pickPoints(self,aQPointF):
+		#print 'aSlot gets:', aQPointF[0]
+		Y=[self.qwtPlot.invTransform(0,p.y()) for p in aQPointF]
+		X=[self.qwtPlot.invTransform(2,p.x()) for p in aQPointF]
+		self.pickedTable.setColumnCount(2)
+		self.pickedTable.setHorizontalHeaderLabels(['X','Y'])
+		rows=range(len(X))
+		self.pickedTable.setRowCount(len(X))
+		for x,y,r in zip(X,Y,rows):
+			#self.pickedTable.setColumnWidth(r,  10);
+			self.pickedTable.setItem(r,0,QTableWidgetItem(str(round(x,2))))
+			self.pickedTable.setItem(r,1,QTableWidgetItem(str(round(y,2))))
 
-	def ChangeValue(self):
-		"""Event for change values"""
-		cell=self.EnvParameterWidget.currentItem()
-		r=cell.row()
-		c=cell.column()
-		if r>0:
-			if (self.EnvParameterWidget.item(r, c).backgroundColor().getRgb())== \
-				(QtGui.QColor(255,165,0).getRgb()):
-				self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,0,0))
-			else:
-				self.EnvParameterWidget.item(r, c).setBackgroundColor(QtGui.QColor(255,165,0))
+
+		
+	def plotGraph(self,valuer,field):
+		X=self.ExtractAttributeValue(field)
+		X=np.sort(X)
+		Y=[valuer(x) for x in X]
+		self.curve.setData(X,Y)
+		
+	def setqwtPlot(self):
+		"""connected with FzfyListFieldsCBox"""
+		field=self.FzfyListFieldsCBox.currentText()
+		if field in self.fzyValuer:
+			self.plotGraph(self.fzyValuer[field],field)
+		field=self.FzfyListFieldsCBox.currentText()
+		listValue=self.ExtractAttributeValue(field)
+		limits=[min(listValue),max(listValue)]
+		stringa="%s - %s" % (limits[0],limits[1])
+		self.rangeLineEdit.setText(stringa)
+		self.qwtPlot.setAxisScale(2,limits[0],limits[1])
+		self.qwtPlot.setAxisTitle(2,str(field))
+		self.qwtPlot.updateAxes()
+
+
+	def checkTableField(self):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() \
+			for f in range(self.EnvTableWidget.columnCount())]
+		for r in range(len(criteria)):
+			if str(criteria[r]) in self.fzyValuer:
+				self.EnvParameterWidget.setItem(3,r,QTableWidgetItem(str("Fuzzy")))
+				
+	def RegressionGraph(self):
+		polyFittValue=self.spinBoxFitting.value()
+		rows=range(self.pickedTable.rowCount())
+		print rows
+		self.Xgraph=[float(self.pickedTable.item(r, 0).text()) for r in rows]
+		self.Ygraph=[float(self.pickedTable.item(r, 1).text()) for r in rows]
+		try:  
+			import numpy as np
+			#from scipy import  interpolate
+			Xvalues=np.array(self.Xgraph)
+			Yvalues=np.array(self.Ygraph)
+			fit=np.polyfit(Xvalues, Yvalues, polyFittValue)
+			valuer = np.poly1d(fit)
+			return valuer
+		except ImportError, e:
+			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
+			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'numpy' from scipy. [Message: %s]" % e))  
 	
-	def ReverseValues(self):
-		cell=self.EnvParameterWidget.currentItem()
-		c=cell.column()
-		first=self.EnvParameterWidget.item(1,cell.column()).text()
-		second=self.EnvParameterWidget.item(2,cell.column()).text()
-		third=self.EnvParameterWidget.item(3,cell.column()).text()
-		fourth=self.EnvParameterWidget.item(4,cell.column()).text()
-		print first,second,third,fourth
-		self.EnvParameterWidget.setItem(1,cell.column(),QTableWidgetItem(fourth))
-		self.EnvParameterWidget.setItem(2,cell.column(),QTableWidgetItem(third))
-		self.EnvParameterWidget.setItem(3,cell.column(),QTableWidgetItem(second))
-		self.EnvParameterWidget.setItem(4,cell.column(),QTableWidgetItem(first))
-		self.coloTable()
-	
+		
+	def getFzyGraph(self):
+		"""connected with getFzyGraph"""
+		field=self.FzfyListFieldsCBox.currentText()
+		valuer=self.RegressionGraph()
+		self.plotGraph(valuer,field)
+		self.fzyValuer[field]=valuer
+		print self.fzyValuer
+		self.checkTableField()
+
 	
 	def Elaborate(self):
-		matrix=self.Attributes2Matrix()
-		FzyMatrix=self.FuzzifiedMatrix(matrix)
+		matrix,criteria=self.Attributes2Matrix()
+		FzyMatrix=self.FuzzifiedMatrix(matrix,criteria)
 		FzyMatrix=self.LinguisticModification(FzyMatrix)
 		fzyIntersection=self.IntersectionMatrix(FzyMatrix)
 		fzyUnion=self.UnionMatrix(FzyMatrix)
@@ -374,92 +433,28 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
 			matrix.append(row)
 		matrix=np.array(matrix, dtype = 'float32')
-		return matrix
+		return matrix, criteria
 		
-	def RetriveXvalues(self):
-		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		firsth=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		second=[float(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		third=[float(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		fourth=[float(self.EnvParameterWidget.item(4, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		return firsth,second,third,fourth
-		
-	def binaryYvalue(self,values):
-		yValue=[]
-		for co in values:
-			if co == QtGui.QColor(255,165,0).getRgb():
-				yValue.append(0)
-			else:
-				yValue.append(1)
-		return yValue
 	
-	def RetriveYvalues(self):
-		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() \
-			for f in range(self.EnvParameterWidget.columnCount())]
-		firsth=[self.EnvParameterWidget.item(1, c).backgroundColor().getRgb() \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		second=[self.EnvParameterWidget.item(2, c).backgroundColor().getRgb() \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		third=[self.EnvParameterWidget.item(3, c).backgroundColor().getRgb() \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		fourth=[self.EnvParameterWidget.item(4, c).backgroundColor().getRgb() \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		firsth=self.binaryYvalue(firsth)
-		second=self.binaryYvalue(second)
-		third=self.binaryYvalue(third)
-		fourth=self.binaryYvalue(fourth)
-		#print firsth,second,third,fourth
-		return firsth,second,third,fourth
-	
-	def Regression(self,Xvalues,Yvalue):
-		"""y = slope*x+intercept 
-		scipy.stats.linregress(x,y)"""
-		try:  
-			import numpy as np
-			Xvalues=np.array(Xvalues)
-			Yvalues=np.array(Yvalue)
-			regFunct=np.polyfit(Xvalues, Yvalues, 3)
-			valuer = np.poly1d(regFunct)
-			print Xvalues
-			print Yvalues
-			return valuer
-		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
-			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'stast' from scipy. [Message: %s]" % e))  
-	
-	
-	def FuzzifiedMatrix(self,matrix):
-		""" """
+	def FuzzifiedMatrix(self,matrix,criteria):
 		FzyMatrix=[]
-		xfirsth,xsecond,xthird,xfourth=self.RetriveXvalues()
-		yfirsth,ysecond,ythird,yfourth=self.RetriveYvalues()
-		for i in range(len(xfirsth)):
-			Xvalue=[xfirsth[i],xsecond[i],xthird[i],xfourth[i]]
-			Yvalue=[yfirsth[i],ysecond[i],ythird[i],yfourth[i]]
+		for i in range(len(criteria)):
+			valuer=self.fzyValuer[str(criteria[i])]
 			col=matrix[:,i]
-			valuer=self.Regression(Xvalue,Yvalue)
 			fzycol=[round(valuer(c),4) for c in col]
 			FzyMatrix.append(fzycol)
 		FzyMatrix=np.array(FzyMatrix, dtype = 'float32')
 		#print [float(c) for c in FzyMatrix.transpose()[0]]
 		return FzyMatrix.transpose()
 			
-	
 	def LinguisticModification(self,matrix):
 		"""+++"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		weight=[round(w/sum(weight),4) for w in weight ]
-		matrixStd=[]
-		for c,w in zip(range(len(criteria)),weight):
-			self.EnvParameterWidget.setItem(0,c,QTableWidgetItem(str(w))) 
+		matrixStd=[] 
 		self.EnvGetWeightBtn.setEnabled(False)
-		provider=self.activeLayer.dataProvider()
-		feat = QgsFeature()
-		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
+		#fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		for row in matrix:
-			#print [float(f) for f in row]
-			#print str(weight)
 			rowMod=[(float(f)**w) for f,w in zip(row,weight)]
 			matrixStd.append(rowMod)
 		return matrixStd

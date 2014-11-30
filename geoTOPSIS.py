@@ -57,8 +57,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
+		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)	
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.Elaborate)
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
@@ -72,7 +71,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
 		self.EnvTableWidget.setColumnCount(len(Envfields))
@@ -95,6 +94,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
 		except:
 			pass
+###############################ContextMenu########################################
+#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
+		headers = self.EnvParameterWidget.horizontalHeader()
+		headers.setContextMenuPolicy(Qt.CustomContextMenu)
+		headers.customContextMenuRequested.connect(self.removePopup)
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
@@ -184,26 +189,25 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.addFieldFctn(listFields,self.EnvTableWidget,self.EnvParameterWidget)
 		return 0
 
-	def removeFieldFctn(self,TableWidget,WeighTableWidget):
-		"""base function for RemoveField()"""
-		i=TableWidget.currentColumn()
-		j=WeighTableWidget.currentColumn()
-		if i == -1 and j== -1:
-			QMessageBox.warning(self.iface.mainWindow(), "geoTOPSYS",
+	def removePopup(self, pos):
+		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
+		if i != -1:
+			menu = QMenu()
+			removeAction = menu.addAction("Remove field")
+			action = menu.exec_(self.mapToGlobal(pos))
+			if action == removeAction:
+				self.RemoveField(i)
+				self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
+			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		elif i != -1:
-			TableWidget.removeColumn(i)
-			TableWidget.removeRow(i)
-			WeighTableWidget.removeColumn(i)
-		elif j != -1:
-			TableWidget.removeColumn(j)
-			TableWidget.removeRow(j)
-			WeighTableWidget.removeColumn(j)
+		return 0
 
-	def RemoveField(self):
+	def RemoveField(self,i):
 		"""Remove field in table in GUI"""
-		self.EnvTableWidget.currentColumn()
-		self.removeFieldFctn(self.EnvTableWidget,self.EnvParameterWidget)
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
 		return 0
 
 
@@ -346,7 +350,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		
 			
 	def RelativeCloseness(self, matrix):
-		""" Calculate Environmental and Socio-Economicos distance from ideal point"""
+		"""  distance from ideal point"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		idealPoint=[float(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
@@ -356,6 +360,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		worstPoint=[float(self.EnvParameterWidget.item(4, c).text())/sumSquareColumnList[c]*weight[c] \
 			for c in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
+
 		if provider.fieldNameIndex("geoTOPSYS")==-1:
 			self.AddDecisionField(self.activeLayer,"geoTOPSYS")
 		fldValue = provider.fieldNameIndex("geoTOPSYS") #obtain classify field index from its name
@@ -454,7 +459,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
 		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoUmbriaSUIT', "Plugin error"), \
+			QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
 			QCoreApplication.translate('geoTOPSIS', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
