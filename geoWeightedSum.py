@@ -347,10 +347,13 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 
 
 
-
 	def Symbolize(self,field):
 		"""Prepare legends """
-		classes=['very low', 'low','medium','high','very high']
+		numberOfClasses=self.spinBoxClasNum.value()
+		if(numberOfClasses==5):
+			classes=['very low', 'low','medium','high','very high']
+		else:
+			classes=range(1,numberOfClasses+1)
 		fieldName = field
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()

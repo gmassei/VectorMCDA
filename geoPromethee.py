@@ -57,7 +57,6 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
 		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
@@ -73,7 +72,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
 
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
@@ -93,9 +92,13 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		#retrieve signal for modified cell
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+###############################ContextMenu########################################
+#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
+		headers = self.EnvParameterWidget.horizontalHeader()
+		headers.setContextMenuPolicy(Qt.CustomContextMenu)
+		headers.customContextMenuRequested.connect(self.removePopup)
 #################################################################################
-		#currentDir=unicode(os.path.abspath( os.path.dirname(__file__)))
-		#self.LblLogo.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"icon.png")))
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
 		setting=self.csv2setting()
@@ -156,26 +159,29 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
 		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
 		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
-
+		return 0
+		
+		
+	def removePopup(self, pos):
+		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
+		if i != -1:
+			menu = QMenu()
+			removeAction = menu.addAction("Remove field")
+			action = menu.exec_(self.mapToGlobal(pos))
+			if action == removeAction:
+				self.RemoveField(i)
+				self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
+			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
+			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		return 0
 
 
-	def RemoveField(self):
+	def RemoveField(self,i):
 		"""Remove field in table in GUI"""
-		f=self.EnvlistFieldsCBox.currentText()
-		i=self.EnvTableWidget.currentColumn()
-		j=self.EnvParameterWidget.currentColumn()
-		if i == -1 and j== -1:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
-			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		elif i != -1:
-			self.EnvTableWidget.removeColumn(i)
-			self.EnvTableWidget.removeRow(i)
-			self.EnvParameterWidget.removeColumn(i)
-		elif j != -1:
-			self.EnvTableWidget.removeColumn(j)
-			self.EnvTableWidget.removeRow(j)
-			self.EnvParameterWidget.removeColumn(j)
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
 		return 0
 
 
@@ -188,7 +194,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
 			return 0
 		except ValueError:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
+			QMessageBox.warning(self.iface.mainWindow(), "geoPromethee",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
@@ -397,7 +403,11 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	def Symbolize(self,field):
 		"""Prepare legends """
-		classes=['very low', 'low','medium','high','very high']
+		numberOfClasses=self.spinBoxClasNum.value()
+		if(numberOfClasses==5):
+			classes=['very low', 'low','medium','high','very high']
+		else:
+			classes=range(1,numberOfClasses+1)
 		fieldName = field
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()

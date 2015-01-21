@@ -78,16 +78,13 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
-		EnvSetLabel=["Label","Weigths","Preference","Ideal point", "Worst point "]
+		EnvSetLabel=["Weigths","Preference","Ideal point", "Worst point "]
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
-		self.EnvParameterWidget.setRowCount(5)
+		self.EnvParameterWidget.setRowCount(4)
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-			#self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("1.0"))
-			#self.EnvParameterWidget.setItem(2,r,QTableWidgetItem("gain"))
-		#retrieve signal for modified cell
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.updateTable()
 		try:
@@ -95,14 +92,18 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		except:
 			pass
 ###############################ContextMenu########################################
-#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
 		headers.customContextMenuRequested.connect(self.removePopup)
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
+			
+		setting=self.csv2setting()
+		try:
+			self.setting2table(setting)
+		except:
+			pass
 
 	def GetFieldNames(self, layer):
 		"""retrive field names from active map/layer"""
@@ -131,15 +132,14 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(fields)
 		self.EnvTableWidget.setRowCount(len(fields))
 		self.EnvTableWidget.setVerticalHeaderLabels(fields)
-		EnvSetLabel=["Label","Weigths","Preference","Ideal point", "Worst point "]
+		EnvSetLabel=["Weigths","Preference","Ideal point", "Worst point "]
 		self.EnvParameterWidget.setColumnCount(len(fields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(fields)
-		self.EnvParameterWidget.setRowCount(5)
+		self.EnvParameterWidget.setRowCount(4)
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(fields)):
-			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("*"))
-			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("1.0"))
-			self.EnvParameterWidget.setItem(2,r,QTableWidgetItem("gain"))
+			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
+			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		self.updateGUIIdealPoint()
 		return 0
 
@@ -147,20 +147,20 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def updateGUIIdealPointFctn(self,TableWidget,WeighTableWidget,provider):
 		"""base function for updateGUIIdealPoint()"""
 		criteria=[TableWidget.verticalHeaderItem(f).text() for f in range(TableWidget.columnCount())]
-		preference=[str(WeighTableWidget.item(2, c).text()) for c in range(WeighTableWidget.columnCount())]
+		preference=[str(WeighTableWidget.item(1, c).text()) for c in range(WeighTableWidget.columnCount())]
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
 		for r in range(len(preference)):
 			if preference[r]=='gain':
-				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(maxField[r])))#ideal point
-				WeighTableWidget.setItem(4,r,QTableWidgetItem(str(minField[r])))#worst point
+				WeighTableWidget.setItem(2,r,QTableWidgetItem(str(maxField[r])))#ideal point
+				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(minField[r])))#worst point
 			elif preference[r]=='cost':
-				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(minField[r])))
-				WeighTableWidget.setItem(4,r,QTableWidgetItem(str(maxField[r])))
+				WeighTableWidget.setItem(2,r,QTableWidgetItem(str(minField[r])))
+				WeighTableWidget.setItem(3,r,QTableWidgetItem(str(maxField[r])))
 			else:
+				WeighTableWidget.setItem(2,r,QTableWidgetItem("0"))
 				WeighTableWidget.setItem(3,r,QTableWidgetItem("0"))
-				WeighTableWidget.setItem(4,r,QTableWidgetItem("0"))
 	
 	def updateGUIIdealPoint(self):
 		provider=self.activeLayer.dataProvider() #provider=self.active_layer.dataProvider() 
@@ -177,10 +177,10 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		##############
 		WeighTableWidget.insertColumn(WeighTableWidget.columnCount())
 		WeighTableWidget.setHorizontalHeaderItem((WeighTableWidget.columnCount()-1),QTableWidgetItem(listFields))
-		WeighTableWidget.setItem(1,(WeighTableWidget.columnCount()-1),QTableWidgetItem("1.0"))
-		WeighTableWidget.setItem(2,(WeighTableWidget.columnCount()-1),QTableWidgetItem("gain"))
+		WeighTableWidget.setItem(0,(WeighTableWidget.columnCount()-1),QTableWidgetItem("1.0"))
+		WeighTableWidget.setItem(1,(WeighTableWidget.columnCount()-1),QTableWidgetItem("gain"))
+		WeighTableWidget.setItem(2,(WeighTableWidget.columnCount()-1),QTableWidgetItem("0.0"))
 		WeighTableWidget.setItem(3,(WeighTableWidget.columnCount()-1),QTableWidgetItem("0.0"))
-		WeighTableWidget.setItem(4,(WeighTableWidget.columnCount()-1),QTableWidgetItem("0.0"))
 		return 0
 			
 	def AddField(self):
@@ -199,7 +199,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.RemoveField(i)
 				self.EnvParameterWidget.setCurrentCell(-1,-1)
 		else:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
+			QMessageBox.warning(self.iface.mainWindow(), "geoTOPSIS",
 			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		return 0
 
@@ -230,9 +230,9 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		cell=self.EnvParameterWidget.currentItem()
 		r=cell.row()
 		c=cell.column()
-		first=self.EnvParameterWidget.item(3, c).text()
-		second=self.EnvParameterWidget.item(4, c).text()
-		if cell.row()==2:
+		first=self.EnvParameterWidget.item(2, c).text()
+		second=self.EnvParameterWidget.item(3, c).text()
+		if cell.row()==1:
 			val=cell.text()
 			if val=="cost":
 				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("gain"))
@@ -240,9 +240,47 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem("cost"))
 			else:
 				self.EnvParameterWidget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
-			self.EnvParameterWidget.setItem(3,c, QTableWidgetItem(second))
-			self.EnvParameterWidget.setItem(4,c, QTableWidgetItem(first))
+			self.EnvParameterWidget.setItem(2,c, QTableWidgetItem(second))
+			self.EnvParameterWidget.setItem(3,c, QTableWidgetItem(first))
+
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		idealPoint=[str(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		worstPoint=[str(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setTOPSIS.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		write.writerow(preference)
+		write.writerow(idealPoint)
+		write.writerow(worstPoint)
+		csvFile.close()
 		
+	def csv2setting(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		setting=[]
+		try:
+			with open(os.path.join(currentDIR,'setTOPSIS.csv')) as csvFile:
+				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
+				for row in csvReader:
+					setting.append(row)
+			return setting
+		except:
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
+
+	def setting2table(self,setting):
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		for i in range(len(criteria)):
+			for l in range(len(setting[0])):
+				if criteria[i]==setting[0][l]:
+					self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(setting[1][l])))
+					self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(setting[2][l])))
+					self.EnvParameterWidget.setItem(2,i,QTableWidgetItem(str(setting[3][l])))
+					self.EnvParameterWidget.setItem(3,i,QTableWidgetItem(str(setting[4][l])))
+
 			
 	def Elaborate(self):
 		matrix=self.StandardizationIdealPoint()
@@ -324,10 +362,10 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def StandardizationIdealPoint(self):
 		"""Perform STEP 1 and STEP 2 of TOPSIS algorithm"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		weight=[ round(w/sum(weight),4) for w in weight ]
 		for c,w in zip(range(len(criteria)),weight):
-			self.EnvParameterWidget.setItem(1,c,QTableWidgetItem(str(w))) 
+			self.EnvParameterWidget.setItem(0,c,QTableWidgetItem(str(w))) 
 		self.EnvGetWeightBtn.setEnabled(False)
 		provider=self.activeLayer.dataProvider()
 		feat = QgsFeature()
@@ -352,12 +390,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def RelativeCloseness(self, matrix):
 		"""  distance from ideal point"""
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		idealPoint=[float(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		idealPoint=[float(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		sumSquareColumnList=[self.ExtractFieldSumSquare(field) for field in criteria]
-		idealPoint=[float(self.EnvParameterWidget.item(3, c).text())/sumSquareColumnList[c]*weight[c] \
+		idealPoint=[float(self.EnvParameterWidget.item(2, c).text())/sumSquareColumnList[c]*weight[c] \
 			for c in range(self.EnvParameterWidget.columnCount())]
-		worstPoint=[float(self.EnvParameterWidget.item(4, c).text())/sumSquareColumnList[c]*weight[c] \
+		worstPoint=[float(self.EnvParameterWidget.item(3, c).text())/sumSquareColumnList[c]*weight[c] \
 			for c in range(self.EnvParameterWidget.columnCount())]
 		provider=self.activeLayer.dataProvider()
 
@@ -368,7 +406,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		#self.EnvTEdit.append(str(idealPoint)+"#"+str(worstPoint))
 		features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-
+		self.setting2csv()
 		##################################################################
 		self.activeLayer.startEditing()
 		self.EnvProgressBar.setRange(1,features)
@@ -393,9 +431,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 	def Symbolize(self,field):
 		"""Prepare legends """
-		classes=['very low', 'low','medium','high','very high']
+		numberOfClasses=self.spinBoxClasNum.value()
+		if(numberOfClasses==5):
+			classes=['very low', 'low','medium','high','very high']
+		else:
+			classes=range(1,numberOfClasses+1)
 		fieldName = field
-		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()
 		fieldIndex = layer.fieldNameIndex(fieldName)
 		provider = layer.dataProvider()

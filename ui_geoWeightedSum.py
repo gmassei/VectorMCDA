@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\geoWeightedSum.ui'
 #
-# Created: Sun Nov 16 09:43:49 2014
+# Created: Thu Dec 18 23:14:27 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -222,13 +222,23 @@ class Ui_Dialog(object):
         self.AnlsBtnQuit.setStandardButtons(QtGui.QDialogButtonBox.Cancel)
         self.AnlsBtnQuit.setObjectName(_fromUtf8("AnlsBtnQuit"))
         self.label_4 = QtGui.QLabel(self.AnalysisQTBox)
-        self.label_4.setGeometry(QtCore.QRect(30, 19, 348, 16))
+        self.label_4.setGeometry(QtCore.QRect(30, 19, 141, 21))
         self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.RenderBtn_2 = QtGui.QPushButton(self.AnalysisQTBox)
+        self.RenderBtn_2.setGeometry(QtCore.QRect(820, 470, 90, 24))
+        self.RenderBtn_2.setObjectName(_fromUtf8("RenderBtn_2"))
+        self.label_7 = QtGui.QLabel(self.AnalysisQTBox)
+        self.label_7.setGeometry(QtCore.QRect(250, 20, 111, 20))
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.spinBoxClasNum = QtGui.QSpinBox(self.AnalysisQTBox)
+        self.spinBoxClasNum.setGeometry(QtCore.QRect(380, 20, 42, 22))
+        self.spinBoxClasNum.setProperty("value", 5)
+        self.spinBoxClasNum.setObjectName(_fromUtf8("spinBoxClasNum"))
         self.toolBox.addItem(self.AnalysisQTBox, _fromUtf8(""))
         self.gridLayout.addWidget(self.toolBox, 0, 0, 1, 1)
 
         self.retranslateUi(Dialog)
-        self.toolBox.setCurrentIndex(0)
+        self.toolBox.setCurrentIndex(1)
         self.EnvTabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
         Dialog.setTabOrder(self.EnvAddFieldBtn, self.EnvTEdit)
@@ -256,5 +266,7 @@ class Ui_Dialog(object):
         self.RenderBtn.setText(_translate("Dialog", "Maps", None))
         self.label_3.setText(_translate("Dialog", "Label field", None))
         self.label_4.setText(_translate("Dialog", "Load thematic maps", None))
+        self.RenderBtn_2.setText(_translate("Dialog", "Load maps", None))
+        self.label_7.setText(_translate("Dialog", "Classes in maps", None))
         self.toolBox.setItemText(self.toolBox.indexOf(self.AnalysisQTBox), _translate("Dialog", "Analysis", None))
 
