@@ -162,6 +162,7 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 	
 	def LoadAttributes(self,criteria):
 		matrix=[self.ExtractAttributeValue(c) for c in criteria]
+		matrix=[list(row) for row in zip(*matrix)]
 		return matrix
 		
 	  
@@ -177,6 +178,7 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 	 
 	def matrix2xml(self,matrix,criteria,preference,weight,IDlist):
 		#try:
+		print matrix
 		root=ET.Element('objects')
 		root.set('version', '1.0')
 		comment=ET.Comment('xml data for Decision Deck interoperability [http://www.decision-deck.org/xmcda/]')

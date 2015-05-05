@@ -53,6 +53,31 @@
 <h1>Welcome to VectorMCDA&#8217;s documentation!<a class="headerlink" href="#welcome-to-vectormcda-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="description-of-vectormcda">
 <h2>Description of VectorMCDA<a class="headerlink" href="#description-of-vectormcda" title="Permalink to this headline">¶</a></h2>
+<p><strong>VectorMCDA</strong> implements some multicriteria decision aid (<strong>MCDA</strong>) algorithms using vector data in QGS GFOSS software.
+VectorMCDA assumes that each geographical object, described with a records in the attribute table, is a single
+alternative (<strong>geo-alternative</strong>) and the algorithms  implemented in the plugin analyzes the attributes, elaborates
+these ones like criteria and return the output in one or more columns,  added in the attribute table.
+The output are shows as geographic maps in QGIS canvas and in a graphical html page.
+The algorithms available in the current VectorMCDA version are the follow:</p>
+<p><strong>geoWeightedSum</strong>: [1] implements the classic <strong>weighted sum algorithm</strong> and return a maps shows the preference granted
+to the various geo-alternatives. The user may provide  directly the weight values, or he can calculate  them with  AHP [2] approach
+implemented in the module.</p>
+<p><strong>geoTOPSIS</strong>: implements the <strong>ideal point algorithms</strong> base on TOPSYS model [3] and returns a maps shows the ranking  alternative
+in a colour and numerical scale and in a graph in html page. Even in this case, the user may provide directly the weight values, or
+he can calculate them with  AHP [2] approach implemented in the module</p>
+<p><strong>geoFuzzy</strong>: implements the <strong>fuzzy MCDA model</strong> proposed by <strong>Yager</strong> [4] and returns the fuzzy intersection and fuzzy union MCDA index.
+The <strong>linguistic modifier</strong> may be provided in the same way of weights, seen in the previous algorithms.</p>
+<p><strong>geoConcordance</strong>: calculates the concordance and discordance index for each geo-alternative, as a base for assessment with <strong>Electre</strong> [5] models family.
+The module returns two maps, one for concordance index and one for discordance index. The weighing step is the same seen in the previous algorithms.</p>
+<p><strong>geoPromethee</strong>: implements the <strong>Promethee</strong> [6] method in a geographic way. The weighing step is the same seen in the previous algorithms,
+the outputs are the negative flux, the positive flux, the net flux, stored in the attribute table, the relative maps and graphs in html separate page.</p>
+<p><strong>geoRSDB</strong>: the module implements the <strong>DOMLEM</strong> algorithm for <strong>rough set dominance based theory (RSDB)**[7]. The output is in a set of
+**decisional rules</strong> extracted from a pre-definited ranking stored in the attribute table. The module doesn&#8217;t make a classification of
+geo-alternatives, but  pick up the rules from attribute table, with a column with ranking value. The current implementation of the module
+is &#8220;discovery  knowledge oriented&#8221;, instead a proper MCDA algorithm. In the next implementation, the rules extracted will be used for
+perform a real MCDA classification.</p>
+<p><strong>geoXMCDA</strong>: is the first implementation of xMCDA standard (<a class="reference external" href="http://www.decision-deck.org/xmcda/">http://www.decision-deck.org/xmcda/</a>)  for grant the MCDA data interoperability. The module isn&#8217;t
+yet  mature and it isn&#8217;t usable in production environment, anyway it is under active develop and test.</p>
 <div class="section" id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <p>The plugin works under QGIS 2.0 environment, but the first time we use it we need to follow the installation procedure:</p>
@@ -64,11 +89,8 @@
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/LoadPlugin.jpg"><img alt="_images/LoadPlugin.jpg" src="_images/LoadPlugin.jpg" style="height: 300px;" /></a>
 <p class="caption">Figure 1: Plugin manager in QGIS</p>
-<div class="legend">
-<blockquote>
-<div>VectorMCDA implements several MCDA algorithms and the user can access from the menu shows in figure 1.</div></blockquote>
 </div>
-</div>
+<p>VectorMCDA implements several MCDA algorithms and the user can access from the menu shows in figure 1.</p>
 <p>The user can download example data from the site <a class="reference external" href="http://maplab.alwaysdata.net/geomcda.html">http://maplab.alwaysdata.net/geomcda.html</a>.</p>
 </div>
 <div class="section" id="running-geoweightedsum">
@@ -165,13 +187,24 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 <li><strong>graphic:</strong>  the user has to select the field used for labeling the <strong>research units</strong> from the combo-box <strong>Label field</strong>. For example, if our assessment concerns the Italian regions, we have to select the field that holds the name of  the regions. The same for Provinces, municipality or other administrative or phisical units. Pressing the <strong>Graph</strong> button, geoUmbriaSUIT will load an html page in a web browser with four graphs. The first shows a stack – histogram whose the overall height is proportional to the sustainability value, as the sum (linear combination) of the three indexes (environmental, economic and social values) calculated using TOPSIS algorithm. The second graph is a <strong>bubble-graph</strong>: the  position, dimension and color of bubbles provide information about sustainability and its three dimensions. In particular, the x-axis is ordered with the environmental index, the y-axis is ordered with the economic index, while the color (from red to green) is ordered with the social index; the dimension of the bubble is proportional to the sustainability value. The first two graphs use Google chart API&#8217;s and require an active internet connection. The third and the fourth graphs are quite similar to the the first two, but they are <strong>static</strong> and they do not require an internet active connection.</li>
 <li><strong>alphanumeric:</strong> geoUmbriaSUIT implements the Dominance Based Rough Set theory [5] for discovering and explaining the data outputs. In the page <strong>Rules</strong> there is a button named <strong>Extract rules</strong>, for the extraction of decisional rules on the basis of a classification given from TOPSIS algorithm. If a rule has a syntax like  <strong>IF  A&gt;= X THEN AT LEAST i-th</strong>,  we can read it as: ** if criterion A has a value greater than or equal to x, then the class of membership will be at least the i-th <strong>. On the other hand, if the extracted rule has the  syntax like  **IF  A&gt;= X THEN AT MOST i-th</strong>, it can be read as: <strong>If the criterion A has a value greater than or equal to x, then the class of membership will be at most the i-th **. If the user selects a single rule, the **research units</strong> covered  from that rule will be selected. In other words, selecting a single rule from the text box, we can see the <strong>examples</strong> which support that rule.</li>
 </ol>
+</div>
+</div>
+<div class="section" id="bibliography">
+<h2>Bibliography<a class="headerlink" href="#bibliography" title="Permalink to this headline">¶</a></h2>
+<p>[1] Triantaphyllou, E. (2000). Multi-Criteria Decision Making: A Comparative Study. Dordrecht, The Netherlands: Kluwer Academic Publishers (now Springer). p.&nbsp;320. ISBN&nbsp;0-7923-6607-7.</p>
+<p>[2] Thomas L. Saaty, Decision Making for Leaders – The Analytic Hierarchy Process for Decisions in a Complex World, RWS Publishing, Pittsburgh, 1990.</p>
+<p>[3] Hwang, C.L.; Yoon, K. (1981). Multiple Attribute Decision Making: Methods and Applications. New York: Springer-Verlag.</p>
+<p>[4] Yager, R.R., 1978, Fuzzy decision making including unequal objectives, Fuzzy Sets and
+Systems, 1: 87–95.</p>
+<p>[5] Roy B., (1991), “The outranking approach and the foundation of ELECTRE methods”, Theory an Decision, vol. 31, 49-73.</p>
+<p>[6] J.P. Brans and P. Vincke (1985). &#8220;A preference ranking organisation method: The PROMETHEE method for MCDM&#8221;. Management Science.</p>
+<p>[7] Greco, S., Matarazzo, B., Słowiński, R.: Rough sets theory for multi-criteria decision analysis. European Journal of Operational Research, 129, 1 (2001) 1–47</p>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
 <li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
 <li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
 </ul>
 <p>.</p>
-</div>
 </div>
 </div>
 
@@ -196,6 +229,7 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 <li><a class="reference internal" href="#outputs">Outputs</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#bibliography">Bibliography</a></li>
 </ul>
 </li>
 </ul>
