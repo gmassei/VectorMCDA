@@ -177,13 +177,13 @@ Running geoXMCDA
 Outputs
 +++++++
 
-The page **Analysis** [figure 4] allows the user to get the outputs provided from the plugin. We can have three  types of output:
+The page **Analysis** [figure 4] allows the user to get the outputs provided from the plugin. Even if there are specific approaches for each implemented algorithm ,
+we can have at least two output:
+ 
+1. **cartographic:** pressing the **Load maps** button, you can load the output thematic maps based on the canvas showing the ranking of geo-alternatives in  choropleth map.
 
-1. **cartographic:** pressing the **Load maps** button, geoUmbriaSUIT loads four  thematic maps, showing the environment (EnvIdeal), economic (EcoIdeal), social (SocIdeal) and the comprehensive sustainability performance of each **research unit**, based on the related indexes. The user can change the class numbers changing the value in **Classes map** control,  but the label will be only numeric, from the lowest to the highest value.
+2. **graphic:**  the user has to select the field used for labelling the geo-alternatives from the combo-box **Label field**. Pressing the **Graph** button,  VectorMCDA will load an html page in a web browser with a histogram  proportional with the performance of each geo-alternatives.
 
-2. **graphic:**  the user has to select the field used for labeling the **research units** from the combo-box **Label field**. For example, if our assessment concerns the Italian regions, we have to select the field that holds the name of  the regions. The same for Provinces, municipality or other administrative or phisical units. Pressing the **Graph** button, geoUmbriaSUIT will load an html page in a web browser with four graphs. The first shows a stack – histogram whose the overall height is proportional to the sustainability value, as the sum (linear combination) of the three indexes (environmental, economic and social values) calculated using TOPSIS algorithm. The second graph is a **bubble-graph**: the  position, dimension and color of bubbles provide information about sustainability and its three dimensions. In particular, the x-axis is ordered with the environmental index, the y-axis is ordered with the economic index, while the color (from red to green) is ordered with the social index; the dimension of the bubble is proportional to the sustainability value. The first two graphs use Google chart API's and require an active internet connection. The third and the fourth graphs are quite similar to the the first two, but they are **static** and they do not require an internet active connection.
-
-3. **alphanumeric:** geoUmbriaSUIT implements the Dominance Based Rough Set theory [5] for discovering and explaining the data outputs. In the page **Rules** there is a button named **Extract rules**, for the extraction of decisional rules on the basis of a classification given from TOPSIS algorithm. If a rule has a syntax like  **IF  A>= X THEN AT LEAST i-th**,  we can read it as: ** if criterion A has a value greater than or equal to x, then the class of membership will be at least the i-th **. On the other hand, if the extracted rule has the  syntax like  **IF  A>= X THEN AT MOST i-th**, it can be read as: **If the criterion A has a value greater than or equal to x, then the class of membership will be at most the i-th **. If the user selects a single rule, the **research units** covered  from that rule will be selected. In other words, selecting a single rule from the text box, we can see the **examples** which support that rule.
 
 
 Bibliography

@@ -168,24 +168,24 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 <div class="section" id="running-georules">
 <h3>Running geoRULES<a class="headerlink" href="#running-georules" title="Permalink to this headline">¶</a></h3>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="./_images/geoRULES.jpg"><img alt="./_images/geoRULES.jpg" src="./_images/geoRULES.jpg" style="height: 500px;" /></a>
+<a class="reference internal image-reference" href="_images/geoRULES.jpg"><img alt="_images/geoRULES.jpg" src="_images/geoRULES.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 8:</strong> geoRULES algorithm in VectorMCDA plugin.</p>
 </div>
 </div>
 <div class="section" id="running-geoxmcda">
 <h3>Running geoXMCDA<a class="headerlink" href="#running-geoxmcda" title="Permalink to this headline">¶</a></h3>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="./_images/geoXMCDA.jpg"><img alt="./_images/geoXMCDA.jpg" src="./_images/geoXMCDA.jpg" style="height: 500px;" /></a>
+<a class="reference internal image-reference" href="_images/geoXMCDA.jpg"><img alt="_images/geoXMCDA.jpg" src="_images/geoXMCDA.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 9:</strong> geoXMCDA algorithm in VectorMCDA plugin.</p>
 </div>
 </div>
 <div class="section" id="outputs">
 <h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
-<p>The page <strong>Analysis</strong> [figure 4] allows the user to get the outputs provided from the plugin. We can have three  types of output:</p>
+<p>The page <strong>Analysis</strong> [figure 4] allows the user to get the outputs provided from the plugin. Even if there are specific approaches for each implemented algorithm ,
+we can have at least two output:</p>
 <ol class="arabic simple">
-<li><strong>cartographic:</strong> pressing the <strong>Load maps</strong> button, geoUmbriaSUIT loads four  thematic maps, showing the environment (EnvIdeal), economic (EcoIdeal), social (SocIdeal) and the comprehensive sustainability performance of each <strong>research unit</strong>, based on the related indexes. The user can change the class numbers changing the value in <strong>Classes map</strong> control,  but the label will be only numeric, from the lowest to the highest value.</li>
-<li><strong>graphic:</strong>  the user has to select the field used for labeling the <strong>research units</strong> from the combo-box <strong>Label field</strong>. For example, if our assessment concerns the Italian regions, we have to select the field that holds the name of  the regions. The same for Provinces, municipality or other administrative or phisical units. Pressing the <strong>Graph</strong> button, geoUmbriaSUIT will load an html page in a web browser with four graphs. The first shows a stack – histogram whose the overall height is proportional to the sustainability value, as the sum (linear combination) of the three indexes (environmental, economic and social values) calculated using TOPSIS algorithm. The second graph is a <strong>bubble-graph</strong>: the  position, dimension and color of bubbles provide information about sustainability and its three dimensions. In particular, the x-axis is ordered with the environmental index, the y-axis is ordered with the economic index, while the color (from red to green) is ordered with the social index; the dimension of the bubble is proportional to the sustainability value. The first two graphs use Google chart API&#8217;s and require an active internet connection. The third and the fourth graphs are quite similar to the the first two, but they are <strong>static</strong> and they do not require an internet active connection.</li>
-<li><strong>alphanumeric:</strong> geoUmbriaSUIT implements the Dominance Based Rough Set theory [5] for discovering and explaining the data outputs. In the page <strong>Rules</strong> there is a button named <strong>Extract rules</strong>, for the extraction of decisional rules on the basis of a classification given from TOPSIS algorithm. If a rule has a syntax like  <strong>IF  A&gt;= X THEN AT LEAST i-th</strong>,  we can read it as: ** if criterion A has a value greater than or equal to x, then the class of membership will be at least the i-th <strong>. On the other hand, if the extracted rule has the  syntax like  **IF  A&gt;= X THEN AT MOST i-th</strong>, it can be read as: <strong>If the criterion A has a value greater than or equal to x, then the class of membership will be at most the i-th **. If the user selects a single rule, the **research units</strong> covered  from that rule will be selected. In other words, selecting a single rule from the text box, we can see the <strong>examples</strong> which support that rule.</li>
+<li><strong>cartographic:</strong> pressing the <strong>Load maps</strong> button, you can load the output thematic maps based on the canvas showing the ranking of geo-alternatives in  choropleth map.</li>
+<li><strong>graphic:</strong>  the user has to select the field used for labelling the geo-alternatives from the combo-box <strong>Label field</strong>. Pressing the <strong>Graph</strong> button,  VectorMCDA will load an html page in a web browser with a histogram  proportional with the performance of each geo-alternatives.</li>
 </ol>
 </div>
 </div>
