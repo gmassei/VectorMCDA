@@ -52,7 +52,7 @@ The plugin works under QGIS 2.0 environment. The first time the user need to fol
 
      Figure 1: Plugin manager in QGIS
 
-VectorMCDA implements several MCDA algorithms, avaible for the users at menu shown in figure 1.
+VectorMCDA implements several MCDA algorithms, available for the users at menu shown in figure 1.
 
 The user can download example data from the site http://maplab.alwaysdata.net/geomcda.html.
 
