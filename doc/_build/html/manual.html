@@ -53,75 +53,58 @@
 <h1>Welcome to VectorMCDA&#8217;s documentation!<a class="headerlink" href="#welcome-to-vectormcda-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="description-of-vectormcda">
 <h2>Description of VectorMCDA<a class="headerlink" href="#description-of-vectormcda" title="Permalink to this headline">¶</a></h2>
-<p><strong>VectorMCDA</strong> implements some multicriteria decision aid (<strong>MCDA</strong>) algorithms using vector data in QGS GFOSS software.
-VectorMCDA assumes that each geographical object, described with a records in the attribute table, is a single
-alternative (<strong>geo-alternative</strong>) and the algorithms  implemented in the plugin analyzes the attributes, elaborates
-these ones like criteria and return the output in one or more columns,  added in the attribute table.
-The output are shows as geographic maps in QGIS canvas and in a graphical html page.
+<p><strong>VectorMCDA</strong> implements some multicriteria decision aid (<strong>MCDA</strong>) algorithms using vector data in QGIS GFOSS software.
+VectorMCDA assumes that each geographical object, described with a record in the attribute table, is a single
+alternative (<strong>geo-alternative</strong>). The algorithms  implemented in the plugin analyze all the attributes and elaborate
+them as criteria; then return an output creating one or more columns,  added in the attribute table.
+Such an output are shown as geographic maps in QGIS canvas and in a graphical html page.
 The algorithms available in the current VectorMCDA version are the follow:</p>
-<p><strong>geoWeightedSum</strong>: [1] implements the classic <strong>weighted sum algorithm</strong> and return a maps shows the preference granted
-to the various geo-alternatives. The user may provide  directly the weight values, or he can calculate  them with  AHP [2] approach
-implemented in the module.</p>
-<p><strong>geoTOPSIS</strong>: implements the <strong>ideal point algorithms</strong> base on TOPSYS model [3] and returns a maps shows the ranking  alternative
-in a colour and numerical scale and in a graph in html page. Even in this case, the user may provide directly the weight values, or
-he can calculate them with  AHP [2] approach implemented in the module</p>
-<p><strong>geoFuzzy</strong>: implements the <strong>fuzzy MCDA model</strong> proposed by <strong>Yager</strong> [4] and returns the fuzzy intersection and fuzzy union MCDA index.
+<p><strong>geoWeightedSum</strong>: [1] implements the classic <strong>weighted sum algorithm</strong> and returns a maps shown the preference granted
+to the various geo-alternatives. The user may provide  directly the weight values, or she can calculate them with  AHP [2] approach implemented in the module.</p>
+<p><strong>geoTOPSIS</strong>: implements the <strong>ideal point algorithms</strong> based on TOPSIS model [3] and returns a map shown the ranking  alternatives in a colour and numerical scale and also in a graph in a html page. Even in this case, the user may provide  the weight values directly, or she can calculate them with  AHP [2] procedure implemented in the module.</p>
+<p><strong>geoFuzzy</strong>: implements the <strong>fuzzy MCDA model</strong> proposed by <strong>Yager</strong> [4]. It returns the fuzzy intersection and fuzzy union MCDA index.
 The <strong>linguistic modifier</strong> may be provided in the same way of weights, seen in the previous algorithms.</p>
-<p><strong>geoConcordance</strong>: calculates the concordance and discordance index for each geo-alternative, as a base for assessment with <strong>Electre</strong> [5] models family.
-The module returns two maps, one for concordance index and one for discordance index. The weighing step is the same seen in the previous algorithms.</p>
-<p><strong>geoPromethee</strong>: implements the <strong>Promethee</strong> [6] method in a geographic way. The weighing step is the same seen in the previous algorithms,
-the outputs are the negative flux, the positive flux, the net flux, stored in the attribute table, the relative maps and graphs in html separate page.</p>
-<p><strong>geoRSDB</strong>: the module implements the <strong>DOMLEM</strong> algorithm for <strong>rough set dominance based theory (RSDB)**[7]. The output is in a set of
-**decisional rules</strong> extracted from a pre-definited ranking stored in the attribute table. The module doesn&#8217;t make a classification of
-geo-alternatives, but  pick up the rules from attribute table, with a column with ranking value. The current implementation of the module
-is &#8220;discovery  knowledge oriented&#8221;, instead a proper MCDA algorithm. In the next implementation, the rules extracted will be used for
-perform a real MCDA classification.</p>
-<p><strong>geoXMCDA</strong>: is the first implementation of xMCDA standard (<a class="reference external" href="http://www.decision-deck.org/xmcda/">http://www.decision-deck.org/xmcda/</a>)  for grant the MCDA data interoperability. The module isn&#8217;t
-yet  mature and it isn&#8217;t usable in production environment, anyway it is under active develop and test.</p>
+<p><strong>geoConcordance</strong>: calculates the concordance and discordance index for each geo-alternative, as a base for assessing with <strong>Electre</strong> [5] models family.
+The module returns two maps, one for concordance index and one for discordance index. The weighing phase is the same seen in the previous algorithms.</p>
+<p><strong>geoPromethee</strong>: implements the <strong>Promethee</strong> [6] method in a geographic way. The outputs are the negative and the positive flux, while the net one can be calculated using a gis function. All the outputs are produced in maps and graphs in html separate page. The values are stored in the attribute table. The weighing step is the same seen in the previous algorithms.</p>
+<p><strong>geoRSDB</strong>: the module implements the <strong>DOMLEM</strong> algorithm for <strong>Dominance- based Rough Set Approach(DRSA)**[7]. The output is in a set of **decisional rules</strong> extracted from a pre-definited ranking, stored in the attributes table. The module doesn&#8217;t make a classification of geo-alternatives, but  pick up the rules from the attributes table, which includes a column with ranking value. Therefore, the current implementation of the module is &#8220;discovery  knowledge oriented&#8221;, instead a proper MCDA algorithm. In future development, the rules extracted will be used for
+performing a real MCDA classification.</p>
+<p><strong>geoXMCDA</strong>: is the first implementation of xMCDA standard (<a class="reference external" href="http://www.decision-deck.org/xmcda/">http://www.decision-deck.org/xmcda/</a>) for granting the MCDA data interoperability. The module is not yet mature and it is not usable for proper application; anyway it is under active development and testing.</p>
 <div class="section" id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
-<p>The plugin works under QGIS 2.0 environment, but the first time we use it we need to follow the installation procedure:</p>
+<p>The plugin works under QGIS 2.0 environment. The first time the user need to follow the installation procedure:</p>
 <ol class="arabic simple">
 <li>from the menu <strong>Plugins</strong> choose  <strong>Manage and Install plugin</strong>,  the <strong>Plugin manager</strong> window will open;</li>
-<li>if VectoMCDA is already installed, we will find it under the <strong>installed</strong> plugins in <strong>Plugin manager</strong>. Otherwise, the plugin will be listed under <strong>Get more</strong> and we can install it by clicking on <strong>Install plugin</strong>;</li>
-<li>after the end of installation procedure, VectoMCDA will be accessible from the menu <strong>Plugins</strong>;</li>
+<li>if VectorMCDA is already installed, you will find it under the <strong>installed</strong> plugins in <strong>Plugin manager</strong>. Otherwise, the plugin will be listed under <strong>Get more</strong> and you can install it by clicking on <strong>Install plugin</strong>. Check to pick the option &#8220;include sperimental plugins&#8221; before.</li>
+<li>after the end of installation procedure, VectorMCDA will be accessible from the menu <strong>Plugins</strong>;</li>
 </ol>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/LoadPlugin.jpg"><img alt="_images/LoadPlugin.jpg" src="_images/LoadPlugin.jpg" style="height: 300px;" /></a>
 <p class="caption">Figure 1: Plugin manager in QGIS</p>
 </div>
-<p>VectorMCDA implements several MCDA algorithms and the user can access from the menu shows in figure 1.</p>
+<p>VectorMCDA implements several MCDA algorithms, avaible for the users at menu shown in figure 1.</p>
 <p>The user can download example data from the site <a class="reference external" href="http://maplab.alwaysdata.net/geomcda.html">http://maplab.alwaysdata.net/geomcda.html</a>.</p>
 </div>
 <div class="section" id="running-geoweightedsum">
 <h3>Running geoWeightedSum<a class="headerlink" href="#running-geoweightedsum" title="Permalink to this headline">¶</a></h3>
-<p>The user has to load a vector geographic data in qgis and select it clicking with the mouse over the name.
-The attribute table of that file has to contain the indicators we intend to use in the assessment and a label for
-identify the geo-alternatives.
+<p>The user has to load a vector geographic data in QGIS and select it by clicking with the mouse over the name.
+The attributes table of the vector file has to contain the indicators the user intends to use in the assessment and a label for identifing the geo-alternatives.
 From the menu <strong>Plugins/VectorMCDA</strong> we can select <strong>geoWeightedSum</strong> and the window shown in figure 2 will open.</p>
-<p>In the <strong>Criteria</strong> page the label <strong>Layer</strong> shows the active layer&#8217;s name, while the combo-box <strong>field</strong> hold the
-list of numerical fields in the attribute table. The <strong>Add field</strong> button insert the selected field in the combo-box as a
-new column in the <strong>table</strong>, as a new criteria used in MCDA analysis.
-The columns in the table in the card <strong>Standard</strong> holds all the numerical fields from the attribute table of the selected layer,
-used for the MCDA analysis, meaning as criteria. The first row of the table contain the weight for each criteria (column),
-the second row shows the preference function  as cost/gain value.
-The user has to decide which criteria he want to use for the analysis, the ones he doesn&#8217;t want to use, have to be selected
-on the table (clicking with the mouse on the header)  and removed with the menu activated with the right button of the mouse.
-We can add a field in the analysis using the <strong>Add field</strong> button on the card.
-The input of the weight in the first row can be done simply digit the values for each criteria shows on the header of the table;
-otherwise, and alternatively, is available the AHP approach with pairwise comparation matrix, in the <strong>Advance</strong> card. In the last case, the user
-has to digit the preference of column criteria  respect the rows criteria, in a range [1/9....9/1]. The weight are calculated with the
+<p>In the <strong>Criteria</strong> page the label <strong>Layer</strong> shows the active layer&#8217;s name, while the combo-box <strong>field</strong> holds the list of numerical fields in the attributes table. The <strong>Add field</strong> button inserts the selected field in the combo-box as a new column in the <strong>table</strong>, as a new criterion used in MCDA analysis.
+The columns in the table included in the card <strong>Standard</strong> holds all the numerical fields from the attributes table of the selected layer, used for the MCDA analysis, meaning as criteria. The first row of the table contains the weight for each criterion (column), while the second row shows the preference function as cost or gain.
+The user has to decide which criterion she wants to use for the analysis. The ones she does not want to use, have to be selected on the table (clicking with the mouse on the header)  and removed through the menu activated with the right button of the mouse.
+User can add a field in the analysis using the <strong>Add field</strong> button on the card.
+To input the weight in the first row user can do it directly for each criterion shown on the header of the table;
+otherwise it is available the AHP procedure with a pairwise comparation matrix, in the <strong>Advance</strong> card. In the last case, the user has to type the preferences of column criteria  respect to the rows criteria, in a range [1/9....9/1]. The weight are calculated with the
 <strong>Calculate weight</strong> button and the values are inserted in the weighted row in the table of <strong>Standard</strong> card.
-In the next step the user has to define the preference function for each criteria; if a criterion is preferable if it&#8217;s value increase,
-the value to be selected is <strong>gain</strong>, otherwise the value has to be <strong>cost</strong>.</p>
+In the following step the user has to define the preference function for each criterion; if a criterion is preferable in case of an increasing value, the value of the preference to be selected is <strong>gain</strong>, otherwise the value has to be <strong>cost</strong>.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/geoWeightedSum.jpg"><img alt="_images/geoWeightedSum.jpg" src="_images/geoWeightedSum.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 2.a:</strong> geoWeightedSum algorithm in VectorMCDA plugin. Criteria Tab.</p>
 </div>
-<p>Pressing the button <strong>Apply</strong> the user performs the analysis, on the table will add a new field named <strong>geoWSM</strong> that holds the values
-of each alternative (each row in the table of attribute, and each relative geographic object)</p>
-<p>With the <strong>Analysis</strong>  we can shows the graphical and geographical outputs. The <strong>Maps</strong> button load the map in QGIS, with the colour
-graduated  with <strong>geoWSM</strong> field.  The <strong>Graph</strong> button open an html page with bar-graph labeled with <strong>Label filed</strong> in the combo-box</p>
+<p>Pressing the button <strong>Apply</strong> the user performs the analysis, on the table will add a new field named <strong>geoWSM</strong> that holds the values of each alternative (each row in the table of attribute, and each relative geographic object).</p>
+<p>With the <strong>Analysis</strong> the user can see the graphical and geographical outputs. The <strong>Maps</strong> button load the map in QGIS, with the colour
+graduated  with <strong>geoWSM</strong> field.  The <strong>Graph</strong> button open a html page with bar-graph labeled with <strong>Label filed</strong> in the combo-box</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/geoWeightedSum_2.jpg"><img alt="_images/geoWeightedSum_2.jpg" src="_images/geoWeightedSum_2.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 2.b:</strong> geoWeightedSum algorithm in VectorMCDA plugin. Analysis Tab.</p>
@@ -129,11 +112,10 @@ graduated  with <strong>geoWSM</strong> field.  The <strong>Graph</strong> butto
 </div>
 <div class="section" id="running-geotopsis">
 <h3>Running geoTOPSIS<a class="headerlink" href="#running-geotopsis" title="Permalink to this headline">¶</a></h3>
-<p>The geoTOPSIS module can be lunched from <strong>Plugins/VectorMCDA/geoTOPSIS</strong>. It shows the windows for perform geoTOPSIS MCDA analysis.
-The general input are the same seen in the geoWeightedSum. The table in the <strong>Standard</strong> page has the same field and meaning of the previous module,
-except for last two rows: ideal point and worst point.
-The <strong>Ideal point</strong> is the target and optimum value, the default value is the best in the attribute table for each single criterion, but the user can
-change it with different value. The <strong>worst point</strong> is the opposite of the ideal point and the default value is the worse in the attribute table.
+<p>The geoTOPSIS module can be lunched from <strong>Plugins/VectorMCDA/geoTOPSIS</strong>, which open the window for perform geoTOPSIS MCDA analysis.
+The general inputs are the same seen in the geoWeightedSum. The table in the <strong>Standard</strong> page has the same field and meaning of the previous module,
+except for the last two rows: ideal point and worst point.
+The <strong>Ideal point</strong> is the target and optimum value to be reached. The default value is the best in the attribute table for each single criterion, but the user may change it with a different value. The <strong>worst point</strong> is the opposite of the ideal point and the default value is the worse in the attributes table.
 The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described in geoWeightedSum and have the same meaning and behavior.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/geoTOPSIS.jpg"><img alt="_images/geoTOPSIS.jpg" src="_images/geoTOPSIS.jpg" style="height: 500px;" /></a>
@@ -146,10 +128,14 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 <a class="reference internal image-reference" href="_images/geoFuzzy.jpg"><img alt="_images/geoFuzzy.jpg" src="_images/geoFuzzy.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 4:</strong> geoFuzzy algorithm in VectorMCDA plugin. Criteria tab.</p>
 </div>
+<p>Comparing to the previous plugins, geoFuzzy differes or the present on the card &#8220;Standard&#8221; the label &#8220;Hedges&#8221; on the first row. Such a label identifies the linguistic modifier of the Yager model, implemented in the plugin.</p>
+<p>The other four fields(“first”, “second”, “third”,”fourth”) are typical of the gaussian fuzzy function and are can have a value among 0 (coloured in orange) and 1 (coloured in red). The default value is calculated a growing, linear function, which min is equal to the minimum value in the table for each criterion and max is equal to the maximum one.
+The user can change these attributes working on min and max, or modifying the value 0/1.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/geoFuzzy_2.jpg"><img alt="_images/geoFuzzy_2.jpg" src="_images/geoFuzzy_2.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 5:</strong> geoFuzzy algorithm in VectorMCDA plugin. Fuzzify tab.</p>
 </div>
+<p>Using the button &#8220;load maps&#8221; on the card &#8220;Analysis&#8221; two qgis maps are displayed, showing the union and intersection index.</p>
 </div>
 <div class="section" id="running-geoconcordance">
 <h3>Running geoConcordance<a class="headerlink" href="#running-geoconcordance" title="Permalink to this headline">¶</a></h3>
@@ -167,6 +153,16 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 </div>
 <div class="section" id="running-georules">
 <h3>Running geoRULES<a class="headerlink" href="#running-georules" title="Permalink to this headline">¶</a></h3>
+<p>This plugin does not produce a ranking of alternatives, but it is an instrument of analysis and comprehension of the choice done, thanks to the Dominance- based Rough Set Approach (DRSA).
+To access to geoRULES open the menu: Plugins/VectoMCDA/geoRSDB. The output is a text contains the &#8220;decision rules&#8221;. To generate such decision rules the button
+“Extract rules” (in the bottom part of the card) has to be pushed. The single rules have the following syntax: “
+IF     A&gt;= (or &lt;=)  X   THEN   AT   LEAST   i-esima
+which mean: “
+if the criterion A is equal or bigger (or lower) than x, then it is at least (at most) in the i-esima class”.
+Clicking on each single rule all the units which support such rule will be underlined in yellow. At the same time, on the QGIS map all the area which
+l&#8217;area geografica ove una determinata regola risulta vera e provata.The plugin is very useful
+to understand, for instance, which criteria is more important for obtaining a certain ranking or if the Decision Maker gives a weight too big to a single criterion.
+In case of decision rules with a continuos numeric domain, it is very useful to discrete it. The process is not mandatory and it could be done using the setting card.</p>
 <div class="figure align-center">
 <a class="reference internal image-reference" href="_images/geoRULES.jpg"><img alt="_images/geoRULES.jpg" src="_images/geoRULES.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 8:</strong> geoRULES algorithm in VectorMCDA plugin.</p>
@@ -178,27 +174,30 @@ The <strong>Load maps</strong> and <strong>Graph</strong> buttons are described 
 <a class="reference internal image-reference" href="_images/geoXMCDA.jpg"><img alt="_images/geoXMCDA.jpg" src="_images/geoXMCDA.jpg" style="height: 500px;" /></a>
 <p class="caption"><strong>Figure 9:</strong> geoXMCDA algorithm in VectorMCDA plugin.</p>
 </div>
+<p>As already write, this plugin is still ongoing and more development is required to finish it. The main objective for having this plugin is to simplify the interchange of vectorial data, according to the approach proposed by the Decision   Deck   project   (<a class="reference external" href="http://www.decision">http://www.decision</a>-
+deck.org/project/index.html)</p>
 </div>
 <div class="section" id="outputs">
 <h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
-<p>The page <strong>Analysis</strong> [figure 4] allows the user to get the outputs provided from the plugin. Even if there are specific approaches for each implemented algorithm ,
-we can have at least two output:</p>
+<p>The page <strong>Analysis</strong> [figure 4] allows the user to get the outputs provided from the plugin. Although there are specific approach for each algorithms implemented,
+you can have two outputs:</p>
 <ol class="arabic simple">
-<li><strong>cartographic:</strong> pressing the <strong>Load maps</strong> button, you can load the output thematic maps based on the canvas showing the ranking of geo-alternatives in  choropleth map.</li>
-<li><strong>graphic:</strong>  the user has to select the field used for labelling the geo-alternatives from the combo-box <strong>Label field</strong>. Pressing the <strong>Graph</strong> button,  VectorMCDA will load an html page in a web browser with a histogram  proportional with the performance of each geo-alternatives.</li>
+<li><strong>cartographic:</strong> pressing the <strong>Load maps</strong> button, the user can load the output thematic map based on the canvas showing the ranking of geo-alternatives in  choropleth map.</li>
 </ol>
+<p>2. <strong>graphic:</strong>  the user has to select the field used for labelling the geo-alternatives from the combo-box <strong>Label field</strong>. Pressing the <strong>Graph</strong> button,
+VectorMCDA will load an html page in a web browser with a histogram  proportional with the performance of each geo-alternatives.</p>
 </div>
 </div>
 <div class="section" id="bibliography">
 <h2>Bibliography<a class="headerlink" href="#bibliography" title="Permalink to this headline">¶</a></h2>
-<p>[1] Triantaphyllou, E. (2000). Multi-Criteria Decision Making: A Comparative Study. Dordrecht, The Netherlands: Kluwer Academic Publishers (now Springer). p.&nbsp;320. ISBN&nbsp;0-7923-6607-7.</p>
-<p>[2] Thomas L. Saaty, Decision Making for Leaders – The Analytic Hierarchy Process for Decisions in a Complex World, RWS Publishing, Pittsburgh, 1990.</p>
+<p>[1] Triantaphyllou, E. (2000). Multi-Criteria Decision Making: A Comparative Study. Dordrecht, The Netherlands: Kluwer Academic Publishers (now Springer). p.Â&nbsp;320. ISBNÂ&nbsp;0-7923-6607-7.</p>
+<p>[2] Thomas L. Saaty, Decision Making for Leaders â€“ The Analytic Hierarchy Process for Decisions in a Complex World, RWS Publishing, Pittsburgh, 1990.</p>
 <p>[3] Hwang, C.L.; Yoon, K. (1981). Multiple Attribute Decision Making: Methods and Applications. New York: Springer-Verlag.</p>
 <p>[4] Yager, R.R., 1978, Fuzzy decision making including unequal objectives, Fuzzy Sets and
-Systems, 1: 87–95.</p>
-<p>[5] Roy B., (1991), “The outranking approach and the foundation of ELECTRE methods”, Theory an Decision, vol. 31, 49-73.</p>
+Systems, 1: 87â€“95.</p>
+<p>[5] Roy B., (1991), â€œThe outranking approach and the foundation of ELECTRE methodsâ€, Theory an Decision, vol. 31, 49-73.</p>
 <p>[6] J.P. Brans and P. Vincke (1985). &#8220;A preference ranking organisation method: The PROMETHEE method for MCDM&#8221;. Management Science.</p>
-<p>[7] Greco, S., Matarazzo, B., Słowiński, R.: Rough sets theory for multi-criteria decision analysis. European Journal of Operational Research, 129, 1 (2001) 1–47</p>
+<p>[7] Greco, S., Matarazzo, B., SÅ‚owiÅ„ski, R.: Rough sets theory for multi-criteria decision analysis. European Journal of Operational Research, 129, 1 (2001) 1â€“47</p>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
 <li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
