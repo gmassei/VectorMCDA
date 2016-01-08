@@ -13,6 +13,7 @@ COPYRIGHT:	c) 2012 Gianluca Massei and Antonio Boggia. This program is
 
 import sys,os
 import collections
+import pickle
 from time import time, ctime
 
 
@@ -378,7 +379,6 @@ def print_rules(RULES,infosystem):
 	j=1
 	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 	outfile=open(os.path.join(currentDIR,"rules.rls"),"w")
-	
 	#outfile.write("\n##  AT LEAST {>= Class} - Type 1 rules and  AT MOST {<= Class} - Type 3 rules\n")
 	#outfile.write('\t[RULES:]\n')
 	for E in RULES:
@@ -395,6 +395,14 @@ def print_rules(RULES,infosystem):
 	outfile.close()
 	return 0
 		
+def saveToPickle(RULES):
+	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+	rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'wb')
+	pickle.dump(RULES,rulesPKL) #save RULES dict in a file for use it in geoRULES module
+	rulesPKL.close()
+	return 0
+	
+	
 def main(currentDIR):
 	"""main function for stand alone program"""
 	try:
@@ -434,6 +442,7 @@ def main(currentDIR):
 			RULES=format_rules(rules,RULES,header)
 		refactoring_label(RULES,currentDIR)
 		print_rules(RULES,infosystem)
+		saveToPickle(RULES)
 		end=time()
 		print "Time -> %.4f s" % (end-start)
 		return 0

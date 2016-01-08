@@ -531,22 +531,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
-      <widget class="QComboBox" name="LabelListFieldsCBox">
-       <property name="geometry">
-        <rect>
-         <x>114</x>
-         <y>76</y>
-         <width>419</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>22</height>
-        </size>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
@@ -638,7 +622,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
   <tabstop>SetBtnHelp</tabstop>
   <tabstop>EnvlistFieldsCBox</tabstop>
   <tabstop>RenderBtn</tabstop>
-  <tabstop>LabelListFieldsCBox</tabstop>
   <tabstop>AnlsBtnQuit</tabstop>
  </tabstops>
  <resources/>

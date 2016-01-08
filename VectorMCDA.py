@@ -70,6 +70,9 @@ class vMCDA:
 		self.actionRSDB = QAction( "geoRSDB", self.iface.mainWindow() )
 		self.actionRSDB.triggered.connect(self.runGeoRSDB )
 		
+		self.actionRSDB = QAction( "geoRULES", self.iface.mainWindow() )
+		self.actionRSDB.triggered.connect(self.runGeoRULES )
+		
 		self.actionXMCDA = QAction( "geoXMCDA", self.iface.mainWindow() )
 		self.actionXMCDA.triggered.connect(self.runGeoXMCDA )
 		
@@ -88,6 +91,7 @@ class vMCDA:
 		self.iface.removePluginMenu( "&geoConcordance", self.actionElectre )
 		self.iface.removePluginMenu( "&geoPromethee", self.actionPromethee )
 		self.iface.removePluginMenu( "&geoRSDB", self.actionRSDB )
+		self.iface.removePluginMenu( "&geoRULES", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoXMCDA", self.actionXMCDA )
 		 
 
@@ -156,6 +160,17 @@ class vMCDA:
 			webbrowser.open("http://maplab.alwaysdata.net")
 			return
 		dlg = geoRSDBDialog(self.iface)
+		dlg.exec_()
+		
+	def runGeoRULES(self):	# richiamato al click sull'azione
+		from geoRULES import geoRULESDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			QMessageBox.warning(self.iface.mainWindow(), "VectorMCDA",
+			("No active layer found\n" "Please make one or more vector layer " "active"), QMessageBox.Ok, QMessageBox.Ok)
+			webbrowser.open("http://maplab.alwaysdata.net")
+			return
+		dlg = geoRULESDialog(self.iface)
 		dlg.exec_()
 		
 	def runGeoXMCDA(self):	# richiamato al click sull'azione

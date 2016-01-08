@@ -37,6 +37,7 @@ Ver. 0.9.1: code unchanged, cleaned up plugin structure
 homepage=http://maplab.alwaysdata.net/geomcda.html
 tracker=http://hub.qgis.org/projects/vectormcda
 repository=https://github.com/gmassei/VectorMCDA
+category=Vector
 icon=icons/Tree.png
 # experimental flag
 experimental=True

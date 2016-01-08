@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>513</width>
+    <height>570</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>geoRules</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QToolBox" name="toolBox">
+     <property name="styleSheet">
+      <string notr="true">
+font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="settingQTbox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>495</width>
+        <height>432</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Setting</string>
+      </attribute>
+      <widget class="QDialogButtonBox" name="SettingButtonBox">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>390</y>
+         <width>156</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="DiscretizeGbox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>230</y>
+         <width>471</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Discretize</string>
+       </property>
+       <widget class="QSpinBox" name="spinClasseNum">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>41</y>
+          <width>36</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>15</number>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="ClassNumbLbl">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>41</y>
+          <width>51</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Classes</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="NewFieldNameDiscLbl">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>40</y>
+          <width>151</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Classification field name</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="cobBoxFieldNameDisc">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>40</y>
+          <width>171</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QLabel" name="EnvLbl_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>71</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Active layer     </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="CritMapNameLbl_2">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>20</y>
+         <width>361</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>MS Shell Dlg 2</family>
+         <pointsize>10</pointsize>
+         <weight>9</weight>
+         <italic>true</italic>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>471</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Features to use</string>
+       </property>
+       <widget class="QCheckBox" name="checkSelected">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>60</y>
+          <width>331</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Use  selected features only</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="CriteriaQTbox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>495</width>
+        <height>432</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Criteria</string>
+      </attribute>
+      <widget class="QComboBox" name="CritListFieldsCBox">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>30</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="EnvLbl">
+       <property name="geometry">
+        <rect>
+         <x>2</x>
+         <y>0</y>
+         <width>71</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Active layer     </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="CritFieldsLbl">
+       <property name="geometry">
+        <rect>
+         <x>2</x>
+         <y>32</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Active field</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="CritMapNameLbl">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>0</y>
+         <width>361</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>MS Shell Dlg 2</family>
+         <pointsize>10</pointsize>
+         <weight>9</weight>
+         <italic>true</italic>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="CritTEdit">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>380</y>
+         <width>451</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>2</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="DeclistFieldsCBox">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>341</y>
+         <width>351</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="DecFieldsLbl">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Decision field</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="CritExtractBtn">
+       <property name="geometry">
+        <rect>
+         <x>394</x>
+         <y>80</y>
+         <width>71</width>
+         <height>201</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string> Extract</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="CritHelpBtn">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>300</y>
+         <width>75</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="CritAddFieldBtn">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>30</y>
+         <width>71</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+      <widget class="QTableWidget" name="critTableWiget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>70</y>
+         <width>361</width>
+         <height>251</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>MS Shell Dlg 2</family>
+         <pointsize>10</pointsize>
+         <weight>9</weight>
+         <italic>true</italic>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="RoulesQTBox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>495</width>
+        <height>432</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Rules</string>
+      </attribute>
+      <widget class="QDialogButtonBox" name="RulesBtnBox">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>400</y>
+         <width>156</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="RulesListWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>11</y>
+         <width>471</width>
+         <height>281</height>
+        </rect>
+       </property>
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="ruleEdit">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>310</y>
+         <width>471</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>2</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="classifyQTbox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>495</width>
+        <height>432</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Classify</string>
+      </attribute>
+      <widget class="QListWidget" name="ClassifyRulesWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>471</width>
+         <height>301</height>
+        </rect>
+       </property>
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QDialogButtonBox" name="reclassButtonBox">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>360</y>
+         <width>156</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>CritListFieldsCBox</tabstop>
+  <tabstop>CritAddFieldBtn</tabstop>
+  <tabstop>CritExtractBtn</tabstop>
+  <tabstop>CritHelpBtn</tabstop>
+  <tabstop>CritTEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

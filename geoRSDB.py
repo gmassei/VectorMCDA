@@ -153,7 +153,6 @@ class geoRSDBDialog(QDialog, Ui_Dialog):
 		if fields[fid].typeName()=='Real' or fields[fid].typeName()=='Integer':
 			for feat in self.activeLayer.getFeatures():
 				attribute=feat.attributes()[fid]
-				print attribute
 				listValue.append(float(attribute))
 		else:
 			for feat in self.activeLayer.getFeatures():
