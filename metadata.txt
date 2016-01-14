@@ -12,8 +12,7 @@ name=VectorMCDA
 qgisMinimumVersion=2.0
 #qgisMaximumVersion=2.99
 description=Performs geographic multi criteria decision making.
-category=Vector
-version=0.9.1
+version=1.0.0
 
 # end of mandatory metadata
 
@@ -33,6 +32,7 @@ Ver. 0.6: improve and upgrade geoFuzzy algorithm, tested geoWeightedSum, geoTOPS
 Ver. 0.8: improve and upgrade geoConcordance and geoPromethee
 Ver. 0.9: improved documentation and corrected minor bugs
 Ver. 0.9.1: code unchanged, cleaned up plugin structure
+Ver. 1.0.0: complete implementation of algorithm DOMLEM  in geoRULES code, with  extraction of rules and their  application in classification 
 
 homepage=http://maplab.alwaysdata.net/geomcda.html
 tracker=http://hub.qgis.org/projects/vectormcda

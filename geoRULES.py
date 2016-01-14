@@ -54,7 +54,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		# imposto l'azione da eseguire al click sui pulsanti
 		QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractRules)
-		QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+	#	QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		QObject.connect(self.reclassButtonBox, SIGNAL("accepted()"),self.parsingRules)
 		QObject.connect(self.reclassButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 
@@ -105,7 +105,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				field_min.append(provider.minimumValue( layer.fieldNameIndex(str(field.name())) ))
 				field_max.append(provider.maximumValue( layer.fieldNameIndex(str(field.name())) ))
 		f=zip(field_list,field_type,field_min,field_max)
-		self.CritTEdit.setText(str(f))
+		#self.CritTEdit.setText(str(f))
 		return field_list # sorted( field_list, cmp=locale.strcoll )
 
 
@@ -267,7 +267,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			attribute = [feat.attributes()[j] for j in fids]
 			for i in (attribute):
 				out_file.write(" %s " % (i))
-				self.ruleEdit.append(str(i))
+				#self.ruleEdit.append(str(i))
 			out_file.write("\n")
 		out_file.write("\n**END")
 		out_file.close()
@@ -283,7 +283,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		itemSelect=map(int,itemSelect.split(','))
 		itemSelect=[(cod-1) for cod in itemSelect]
 		self.selectionLayer.setSelectedFeatures(itemSelect)
-		self.ruleEdit.setText(str(itemSelect))
+		#self.ruleEdit.setText(str(itemSelect))
 		return 0
 
 
@@ -317,8 +317,9 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			if len(R)>1:
 				for F in R[:1]:
 					exp=exp + " AND %s %s %s" % (F['label'],F['sign'],F['condition'])
-			value="%s%s" % (E[0]['sign'],R[0]['class'])
-			self.reclass(exp,)
+			value=R[0]['class']
+			print value
+			self.reclass(exp,E['rule_type'],value)
 		rulesPKL.close()
 		
 	def whereExpression(self,layer, exp):
@@ -334,29 +335,35 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				yield feature
 
 		
-	def reclass(self, exp, value='-9999'):
+	def reclass(self, exp, rule, value='-9999',):
 		layer = self.iface.activeLayer()
 		provider=layer.dataProvider()
-		if provider.fieldNameIndex("Reclass")==-1:
-			res=layer.dataProvider().addAttributes( [QgsField("Reclass", QVariant.String) ] )
-		fid = layer.fieldNameIndex('Reclass')
+		if provider.fieldNameIndex("AT_LEAST")==-1:
+			res=layer.dataProvider().addAttributes( [QgsField("AT_LEAST", QVariant.String) ] )
+		fidAL = layer.fieldNameIndex('AT_LEAST')
+		if provider.fieldNameIndex("AT_MOST")==-1:
+			res=layer.dataProvider().addAttributes( [QgsField("AT_MOST", QVariant.String) ] )
+		fidAM = layer.fieldNameIndex('AT_MOST')
+		
 		idf=[f.id() for f in  self.whereExpression(layer, exp)]
 		layer.setSelectedFeatures(idf)
 		if(layer):
 			selectedId = layer.selectedFeaturesIds()
 			layer.startEditing()
 			for i in selectedId:
-				layer.changeAttributeValue(int(i), fid, value) # 1 being the second column
+				if rule=="three": #AT MOST
+					layer.changeAttributeValue(int(i), fidAM, value) # 1 being the second column
+				elif rule =="one": #AT LEAST
+					layer.changeAttributeValue(int(i), fidAL, value) # 1 being the second column
 			layer.commitChanges()
 		else:
 			QMessageBox.critical(self.iface.mainWindow(), "Error", "Please select a layer")
-		self.renderLayer()
 		return 0
 
 
 	def Symbolize(self,field):
 		"""Prepare legends """
-		numberOfClasses=self.spinBoxClasNum.value()
+		numberOfClasses=5 #self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
@@ -391,7 +398,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 
 	def renderLayer(self):
 		""" Load thematic layers in canvas """
-		fields=['Reclass']
+		fields=['AT_LEAST','AT_MOST']
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
