@@ -55,7 +55,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractRules)
 	#	QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		QObject.connect(self.reclassButtonBox, SIGNAL("accepted()"),self.parsingRules)
+		QObject.connect(self.applyRulesBtn, SIGNAL("clicked()"),self.parsingRules)
 		QObject.connect(self.reclassButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 
 		msg="Use  selected features only (%s)" % (len(self.activeLayer.selectedFeatures()))
@@ -67,6 +67,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.CritListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
 		fields=self.GetFieldNames(self.activeLayer) #field list
 		self.DeclistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		
+		self.typeRuleCmBox.addItems(['AT_LEAST','AT_MOST'])
 
 		CritSetLabel=["Preference","Function"]
 		self.critTableWiget.setColumnCount(2)
@@ -162,7 +164,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			self.critTableWiget.setItem(cell.row(),cell.column(),QTableWidgetItem(str(val)))
 	
 	
-	def ExtractAttributeValue(self,field):
+	def extractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
 		fields=self.activeLayer.pendingFields()
 		fid = self.activeLayer.fieldNameIndex(field)
@@ -214,7 +216,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		if provider.fieldNameIndex("Classified")==-1:
 			self.AddDecisionField(self.activeLayer,"Classified")
 		fidClass = provider.fieldNameIndex("Classified") #obtain classify field index from its name
-		listValues=self.ExtractAttributeValue(self.cobBoxFieldNameDisc.currentText())
+		listValues=self.extractAttributeValue(self.cobBoxFieldNameDisc.currentText())
 		classes=5 #int(self.spinClasseNum.value()) #TODO: it can use different classes, but in DOMLEM there are only 5 label_classes
 		classLimits=self.equalInterval(listValues, classes)
 		self.activeLayer.startEditing()
@@ -238,7 +240,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		criteria=[self.critTableWiget.verticalHeaderItem(f).text() for f in range(self.critTableWiget.rowCount())]
 		preference=[str(self.critTableWiget.item(c,0).text()) for c in range(self.critTableWiget.rowCount())]
 		function=[str(self.critTableWiget.item(c,1).text()) for c in range(self.critTableWiget.rowCount())]
-		decision=list(set(self.ExtractAttributeValue(self.DeclistFieldsCBox.currentText())))
+		decision=list(set(self.extractAttributeValue(self.DeclistFieldsCBox.currentText())))
 		decision=[int(i) for i in decision]
 		out_file.write("**ATTRIBUTES\n") 
 		for c,f in zip(criteria,function):
@@ -246,7 +248,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				if (f=='continuous'):
 					out_file.write("+ %s: (%s)\n"  % (c,f))
 				else:
-					values=list(set(self.ExtractAttributeValue(c)))
+					values=list(set(self.extractAttributeValue(c)))
 					out_file.write("+ %s: (%s)\n"  % (c,values))
 			else:
 				out_file.write("+ %s: %s\n"  % (c,decision))
@@ -321,6 +323,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			print value
 			self.reclass(exp,E['rule_type'],value)
 		rulesPKL.close()
+		self.symbolize()
 		
 	def whereExpression(self,layer, exp):
 		exp = QgsExpression(exp)
@@ -339,10 +342,10 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		layer = self.iface.activeLayer()
 		provider=layer.dataProvider()
 		if provider.fieldNameIndex("AT_LEAST")==-1:
-			res=layer.dataProvider().addAttributes( [QgsField("AT_LEAST", QVariant.String) ] )
+			res=layer.dataProvider().addAttributes( [QgsField("AT_LEAST", QVariant.Int) ] )
 		fidAL = layer.fieldNameIndex('AT_LEAST')
 		if provider.fieldNameIndex("AT_MOST")==-1:
-			res=layer.dataProvider().addAttributes( [QgsField("AT_MOST", QVariant.String) ] )
+			res=layer.dataProvider().addAttributes( [QgsField("AT_MOST", QVariant.Int) ] )
 		fidAM = layer.fieldNameIndex('AT_MOST')
 		
 		idf=[f.id() for f in  self.whereExpression(layer, exp)]
@@ -361,40 +364,35 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return 0
 
 
-	def Symbolize(self,field):
-		"""Prepare legends """
+	def symbolize(self):
+		layer=self.activeLayer
+		decision=list(set(self.extractAttributeValue(self.DeclistFieldsCBox.currentText())))
+		decision=[int(i) for i in decision]
 		numberOfClasses=5 #self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
-		else:
-			classes=range(1,numberOfClasses+1)
-		fieldName = field
-		numberOfClasses=len(classes)
-		layer = self.iface.activeLayer()
-		fieldIndex = layer.fieldNameIndex(fieldName)
-		provider = layer.dataProvider()
-		minimum = provider.minimumValue( fieldIndex )
-		maximum = provider.maximumValue( fieldIndex )
-		RangeList = []
-		Opacity = 1
-		for c,i in zip(classes,range(len(classes))):
-		# Crea il simbolo ed il range...
-			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
-			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
-			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
-			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
-			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
-			Symbol.setColor(Colour)
-			Symbol.setAlpha(Opacity)
-			Range = QgsRendererRangeV2(Min,Max,Symbol,Label)
-			RangeList.append(Range)
-		Renderer = QgsGraduatedSymbolRendererV2('', RangeList)
-		Renderer.setMode(QgsGraduatedSymbolRendererV2.EqualInterval)
-		Renderer.setClassAttribute(fieldName)
-		add=QgsVectorLayer(layer.source(),field,'ogr')
-		add.setRendererV2(Renderer)
-		QgsMapLayerRegistry.instance().addMapLayer(add)
+					
+		classes = {
+			1: ('#f59053', 'very low [1]'),
+			2: ('#fede99', 'low [2]'),
+			3: ('#ddefcf', 'medium [3]'),
+			4: ('#91c6de', 'high [4]'),
+			5: ('#2c7bb6', 'very high [5]'),
+			'': ('#d7caca', 'n.c.'),
+		}
 
+		# create a category for each item in classes
+		categories = []
+		for classes_name, (color, label) in classes.items():
+			symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+			symbol.setColor(QColor(color))
+			category = QgsRendererCategoryV2(classes_name, symbol, label)
+			categories.append(category)
+
+		# create the renderer and assign it to a layer
+		expression = self.typeRuleCmBox.currentText() # field name
+		renderer = QgsCategorizedSymbolRendererV2(expression, categories)
+		layer.setRendererV2(renderer)
 
 	def renderLayer(self):
 		""" Load thematic layers in canvas """

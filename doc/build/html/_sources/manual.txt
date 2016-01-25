@@ -6,10 +6,8 @@
 Welcome to VectorMCDA's documentation!
 ======================================
 
-**(Edited by Gianluca Massei and Lucia Rocchi)**
-
 	
-Description of VectorMCDA
+Description of VectorMCDA 
 ----------------------------
 
 **VectorMCDA** implements some multicriteria decision aid (**MCDA**) algorithms using vector data in QGIS GFOSS software. 
@@ -207,8 +205,8 @@ The Net flux can be easily calculated using the QGIS functions.
 Running geoRULES
 +++++++++++++++++++++
 
-This plugin does not produce a ranking of alternatives, but it is an instrument of analysis and comprehension of 
-a choice already done, thanks to the Dominance- based Rough Set Approach (DRSA).
+This plugin is both an instrument of analysis and comprehension of a choice already done, and is a tool for 
+produce a ranking of alternatives, thanks to the Dominance-Based Rough Set Approach (DRSA)
 
 .. figure:: ./_images/geoRULES.jpg
      :height: 500
@@ -223,11 +221,13 @@ syntax: “
 **IF     A>= (or <=)  X   THEN   AT   LEAST   i-esima** 
 which mean: “if the criterion A is equal or bigger (or lower) than x, then it is at least (at most) in the i-esima class”. By clicking on each single rule, 
 all the units which support such a rule will be highlighted in yellow. At the same time, on the QGIS map will be shown all the geographical areas which support 
-such a rules. The plugin is very useful 
-to understand, for instance, which criteria is the most important for obtaining a certain ranking or if the Decision Maker gives a weight too big to a 
-single criterion. Moreover, the plugin contributes to improve the knowledge about the decision process, because the decision rules analysis may be 
-use to communicate the results in a stronger way. 
-In case of decision rules with a continuous numeric domain, “geoRULES” is very useful to discrete it. The process could be done using the **”Setting”** card, 
+such a rules. The plugin is very useful to understand, for instance, which criteria is the most important for obtaining a certain ranking or if the Decision 
+Maker gives a weight too big to a single criterion. Moreover, the plugin contributes to improve the knowledge about the decision process, because the decision 
+rules analysis may be use to communicate the results in a stronger way. 
+The user can apply the rules extracted to the overall map, for a conplete reclassification of geographic alternatives, even if the rules are extracted with a subset of examples (maps object). 
+In this case, the checkbox "use selected features only"  in the **”Setting”** card has to be selected. With the button **"Applay rules to maps"**, geoRULES shows the maps with **AT LEAST** or 
+**AT MOST** rules, ranked in five different classes (very low, low, medium, higt, very higt).
+In case of decision rules with a continuous numeric domain, “geoRULES” is very useful to discrete it. Even this process could be done using the **”Setting”** card, 
 which adds a new field named **”Classified”**. This stage it is not mandatory for the analysis. 
 
 Running geoXMCDA

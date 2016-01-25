@@ -26,7 +26,7 @@
     <link rel="top" title="VectoMCDA 0 documentation" href="index.html" />
    
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
   <body role="document">  
@@ -38,7 +38,6 @@
             
   <div class="section" id="welcome-to-vectormcda-s-documentation">
 <h1>Welcome to VectorMCDA&#8217;s documentation!<a class="headerlink" href="#welcome-to-vectormcda-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p><strong>(Edited by Gianluca Massei and Lucia Rocchi)</strong></p>
 <div class="section" id="description-of-vectormcda">
 <h2>Description of VectorMCDA<a class="headerlink" href="#description-of-vectormcda" title="Permalink to this headline">¶</a></h2>
 <p><strong>VectorMCDA</strong> implements some multicriteria decision aid (<strong>MCDA</strong>) algorithms using vector data in QGIS GFOSS software.
@@ -191,8 +190,8 @@ The Net flux can be easily calculated using the QGIS functions.</p>
 </div>
 <div class="section" id="running-georules">
 <h3>Running geoRULES<a class="headerlink" href="#running-georules" title="Permalink to this headline">¶</a></h3>
-<p>This plugin does not produce a ranking of alternatives, but it is an instrument of analysis and comprehension of
-a choice already done, thanks to the Dominance- based Rough Set Approach (DRSA).</p>
+<p>This plugin is both an instrument of analysis and comprehension of a choice already done, and is a tool for
+produce a ranking of alternatives, thanks to the Dominance-Based Rough Set Approach (DRSA)</p>
 <div class="figure align-center" id="id14">
 <a class="reference internal image-reference" href="_images/geoRULES.jpg"><img alt="_images/geoRULES.jpg" src="_images/geoRULES.jpg" style="height: 500px;" /></a>
 <p class="caption"><span class="caption-text"><strong>Figure 8:</strong> geoRULES algorithm in VectorMCDA plugin.</span></p>
@@ -204,11 +203,13 @@ syntax: “
 <strong>IF     A&gt;= (or &lt;=)  X   THEN   AT   LEAST   i-esima</strong>
 which mean: “if the criterion A is equal or bigger (or lower) than x, then it is at least (at most) in the i-esima class”. By clicking on each single rule,
 all the units which support such a rule will be highlighted in yellow. At the same time, on the QGIS map will be shown all the geographical areas which support
-such a rules. The plugin is very useful
-to understand, for instance, which criteria is the most important for obtaining a certain ranking or if the Decision Maker gives a weight too big to a
-single criterion. Moreover, the plugin contributes to improve the knowledge about the decision process, because the decision rules analysis may be
-use to communicate the results in a stronger way.
-In case of decision rules with a continuous numeric domain, “geoRULES” is very useful to discrete it. The process could be done using the <strong>”Setting”</strong> card,
+such a rules. The plugin is very useful to understand, for instance, which criteria is the most important for obtaining a certain ranking or if the Decision
+Maker gives a weight too big to a single criterion. Moreover, the plugin contributes to improve the knowledge about the decision process, because the decision
+rules analysis may be use to communicate the results in a stronger way.
+The user can apply the rules extracted to the overall map, for a conplete reclassification of geographic alternatives, even if the rules are extracted with a subset of examples (maps object).
+In this case, the checkbox &#8220;use selected features only&#8221;  in the <strong>”Setting”</strong> card has to be selected. With the button <strong>&#8220;Applay rules to maps&#8221;</strong>, geoRULES shows the maps with <strong>AT LEAST</strong> or
+<strong>AT MOST</strong> rules, ranked in five different classes (very low, low, medium, higt, very higt).
+In case of decision rules with a continuous numeric domain, “geoRULES” is very useful to discrete it. Even this process could be done using the <strong>”Setting”</strong> card,
 which adds a new field named <strong>”Classified”</strong>. This stage it is not mandatory for the analysis.</p>
 </div>
 <div class="section" id="running-geoxmcda">
@@ -310,8 +311,8 @@ VectorMCDA will load an html page in a web browser with a histogram  proportiona
       &copy;2015, gianluca massei.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
       <a href="_sources/manual.txt"
