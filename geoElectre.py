@@ -57,7 +57,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
+#		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
@@ -94,11 +94,9 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
 		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
 ###############################ContextMenu########################################
-#		self.EnvTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-#		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
-		headers.customContextMenuRequested.connect(self.removePopup)
+		headers.customContextMenuRequested.connect(self.popMenu)
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
@@ -148,42 +146,61 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		return 0
 
 
-	def AddField(self):
-		"""Add field to table in GUI"""
-		f=self.EnvlistFieldsCBox.currentText()
-		self.EnvTableWidget.insertColumn(self.EnvTableWidget.columnCount())
-		self.EnvTableWidget.insertRow(self.EnvTableWidget.rowCount())
-		self.EnvTableWidget.setHorizontalHeaderItem((self.EnvTableWidget.columnCount()-1),QTableWidgetItem(f))
-		self.EnvTableWidget.setVerticalHeaderItem((self.EnvTableWidget.rowCount()-1),QTableWidgetItem(f))
-		##############
-		self.EnvParameterWidget.insertColumn(self.EnvParameterWidget.columnCount())
-		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
-		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
-		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
+	def popMenu(self):
+		fields=range(10)
+		menu = QMenu()
+		removeAction = menu.addAction("Remove selected fields")
+		reloadAllFields=menu.addAction("Add deleted fields")
+		action = menu.exec_(self.mapToGlobal(QPoint(100,100)))
+		if action == removeAction:
+			self.removePopup()
+		elif action==reloadAllFields:
+			self.addPopup()
+			
 
-		return 0
-
-
-	def removePopup(self, pos):
-		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
-		if i != -1:
-			menu = QMenu()
-			removeAction = menu.addAction("Remove field")
-			action = menu.exec_(self.mapToGlobal(pos))
-			if action == removeAction:
-				self.RemoveField(i)
-				self.EnvParameterWidget.setCurrentCell(-1,-1)
+	def removePopup(self):
+		selected = sorted(self.EnvParameterWidget.selectionModel().selectedColumns(),reverse=True)
+		if len(selected) > 0:
+			for s in selected:
+				self.removeField(s.column())
+			self.EnvParameterWidget.setCurrentCell(-1,-1)
 		else:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
-			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
+			QMessageBox.warning(self.iface.mainWindow(), "geoConcordance",
+			("column must to be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		return 0
 
-	def RemoveField(self,i):
+
+	def removeField(self,i):
 		"""Remove field in table in GUI"""
 		self.EnvTableWidget.removeColumn(i)
 		self.EnvTableWidget.removeRow(i)
 		self.EnvParameterWidget.removeColumn(i)
 		return 0
+
+
+	def addPopup(self):
+		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
+
+
+	def addField(self,f=''):
+		"""Add field to table in GUI"""
+		if f=='':
+			f=self.EnvlistFieldsCBox.currentText()
+		self.EnvTableWidget.insertColumn(self.EnvTableWidget.columnCount())
+		self.EnvTableWidget.insertRow(self.EnvTableWidget.rowCount())
+		self.EnvTableWidget.setHorizontalHeaderItem((self.EnvTableWidget.columnCount()-1),QTableWidgetItem(f))
+		self.EnvTableWidget.setVerticalHeaderItem((self.EnvTableWidget.rowCount()-1),QTableWidgetItem(f))
+
+		self.EnvParameterWidget.insertColumn(self.EnvParameterWidget.columnCount())
+		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
+		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
+		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
+		return 0
+
 
 
 	def CompleteMatrix(self):

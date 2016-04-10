@@ -57,7 +57,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
+		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.Elaborate)
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
@@ -115,7 +115,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 #		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
-		headers.customContextMenuRequested.connect(self.removePopup)
+		headers.customContextMenuRequested.connect(self.popMenu)
 #################################################################################
 		setting=self.csv2setting()
 		try:
@@ -192,6 +192,50 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.updateFuzzyFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
 		return 0
 
+
+	def popMenu(self,pos):
+		fields=range(10)
+		menu = QMenu()
+		removeAction = menu.addAction("Remove selected fields")
+		reloadAllFields=menu.addAction("Add deleted fields")
+		action = menu.exec_(self.mapToGlobal(QPoint(pos)))
+		if action == removeAction:
+			self.removePopup()
+		elif action==reloadAllFields:
+			self.addPopup()
+			
+	def removePopup(self):
+		selected = sorted(self.EnvParameterWidget.selectionModel().selectedColumns(),reverse=True)
+		if len(selected) > 0:
+			for s in selected:
+				self.removeField(s.column())
+			self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
+			QMessageBox.warning(self.iface.mainWindow(), "geoFuzzy",
+			("column must to be selected"), QMessageBox.Ok, QMessageBox.Ok)
+		return 0
+		
+		
+		
+	def addPopup(self):
+		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
+			
+			
+	def removeField(self,i):
+		"""Remove field in table in GUI"""
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
+		self.FzfyListFieldsCBox.clear()
+		self.FzfyListFieldsCBox.addItems([self.EnvTableWidget.verticalHeaderItem(f).text() \
+			for f in range(self.EnvTableWidget.columnCount())])
+		return 0
+		
+			
 	def addFieldFctn(self,listFields,TableWidget,WeighTableWidget):
 		"""base function for AddField()"""
 		TableWidget.insertColumn(TableWidget.columnCount())
@@ -204,35 +248,15 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		self.updateGUIFuzzy()
 		return 0
 			
-	def AddField(self):
+			
+	def addField(self,field=''):
 		"""Add field to table in GUI"""
-		field=self.EnvlistFieldsCBox.currentText()
+		if field=='':
+			field=self.EnvlistFieldsCBox.currentText()
 		self.addFieldFctn(field,self.EnvTableWidget,self.EnvParameterWidget)
 		return 0
 
-	def removePopup(self, pos):
-		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
-		if i != -1:
-			menu = QMenu()
-			removeAction = menu.addAction("Remove field")
-			action = menu.exec_(self.mapToGlobal(pos))
-			if action == removeAction:
-				self.RemoveField(i)
-				self.EnvParameterWidget.setCurrentCell(-1,-1)
-		else:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
-			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		return 0
 
-	def RemoveField(self,i):
-		"""Remove field in table in GUI"""
-		self.EnvTableWidget.removeColumn(i)
-		self.EnvTableWidget.removeRow(i)
-		self.EnvParameterWidget.removeColumn(i)
-		self.FzfyListFieldsCBox.clear()
-		self.FzfyListFieldsCBox.addItems([self.EnvTableWidget.verticalHeaderItem(f).text() \
-			for f in range(self.EnvTableWidget.columnCount())])
-		return 0
 
 
 	def CompleteMatrix(self):
@@ -277,7 +301,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			self.plotGraph(self.fzyValuer[field],field)
 		field=self.FzfyListFieldsCBox.currentText()
 		listValue=self.ExtractAttributeValue(field)
-		limits=[min(listValue),max(listValue)]
+		limits=[float(min(listValue)),float(max(listValue))]
 		stringa="%s - %s" % (limits[0],limits[1])
 		self.rangeLineEdit.setText(stringa)
 		self.qwtPlot.setAxisScale(2,limits[0],limits[1])

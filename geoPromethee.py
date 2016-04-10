@@ -56,7 +56,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
-		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
+		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
 		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
 		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
@@ -97,7 +97,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 #		self.EnvTableWidget.customContextMenuRequested.connect(self.removePopup)
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
-		headers.customContextMenuRequested.connect(self.removePopup)
+		headers.customContextMenuRequested.connect(self.popMenu)
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
@@ -146,10 +146,51 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		return 0
 
+		
+	def popMenu(self,pos):
+		fields=range(10)
+		menu = QMenu()
+		removeAction = menu.addAction("Remove selected fields")
+		reloadAllFields=menu.addAction("Add deleted fields")
+		action = menu.exec_(self.mapToGlobal(QPoint(pos)))
+		if action == removeAction:
+			self.removePopup()
+		elif action==reloadAllFields:
+			self.addPopup()
+			
 
-	def AddField(self):
+	def removePopup(self):
+		selected = sorted(self.EnvParameterWidget.selectionModel().selectedColumns(),reverse=True)
+		if len(selected) > 0:
+			for s in selected:
+				self.removeField(s.column())
+			self.EnvParameterWidget.setCurrentCell(-1,-1)
+		else:
+			QMessageBox.warning(self.iface.mainWindow(), "geoPromethee",
+			("column must to be selected"), QMessageBox.Ok, QMessageBox.Ok)
+		return 0
+
+
+	def removeField(self,i):
+		"""Remove field in table in GUI"""
+		self.EnvTableWidget.removeColumn(i)
+		self.EnvTableWidget.removeRow(i)
+		self.EnvParameterWidget.removeColumn(i)
+		return 0
+
+
+	def addPopup(self):
+		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
+
+
+	def addField(self,f=''):
 		"""Add field to table in GUI"""
-		f=self.EnvlistFieldsCBox.currentText()
+		if f=='':
+			f=self.EnvlistFieldsCBox.currentText()
 		self.EnvTableWidget.insertColumn(self.EnvTableWidget.columnCount())
 		self.EnvTableWidget.insertRow(self.EnvTableWidget.rowCount())
 		self.EnvTableWidget.setHorizontalHeaderItem((self.EnvTableWidget.columnCount()-1),QTableWidgetItem(f))
@@ -162,22 +203,8 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		return 0
 		
 		
-	def removePopup(self, pos):
-		i= self.EnvParameterWidget.selectionModel().currentIndex().column()
-		if i != -1:
-			menu = QMenu()
-			removeAction = menu.addAction("Remove field")
-			action = menu.exec_(self.mapToGlobal(pos))
-			if action == removeAction:
-				self.RemoveField(i)
-				self.EnvParameterWidget.setCurrentCell(-1,-1)
-		else:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
-			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
-		return 0
 
-
-	def RemoveField(self,i):
+	def removeField(self,i):
 		"""Remove field in table in GUI"""
 		self.EnvTableWidget.removeColumn(i)
 		self.EnvTableWidget.removeRow(i)

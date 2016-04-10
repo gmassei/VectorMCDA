@@ -52,8 +52,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		QObject.connect(self.SettingButtonBox, SIGNAL("accepted()"),self.fieldToClasses)
 		QObject.connect(self.SettingButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		# imposto l'azione da eseguire al click sui pulsanti
-		QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractRules)
+	#	QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.addField)
+		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.extractRules)
 	#	QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		QObject.connect(self.applyRulesBtn, SIGNAL("clicked()"),self.parsingRules)
 		QObject.connect(self.reclassButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
@@ -64,9 +64,9 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.CritMapNameLbl.setText(self.activeLayer.name())
 		self.CritMapNameLbl_2.setText(self.activeLayer.name())
 
-		self.CritListFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		fields=self.GetFieldNames(self.activeLayer) #field list
-		self.DeclistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
+		self.CritListFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
+		fields=self.getFieldNames(self.activeLayer) #field list
+		self.DeclistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
 		
 		self.typeRuleCmBox.addItems(['AT_LEAST','AT_MOST'])
 
@@ -75,25 +75,25 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.critTableWiget.setHorizontalHeaderLabels(CritSetLabel)
 		self.critTableWiget.setRowCount(len(fields))
 		self.critTableWiget.setVerticalHeaderLabels(fields)
-		self.cobBoxFieldNameDisc.addItems(self.GetFieldNames(self.activeLayer))
+		self.cobBoxFieldNameDisc.addItems(self.getFieldNames(self.activeLayer))
 		
 		for r in range(len(fields)):
 			self.critTableWiget.setItem(r,0,QTableWidgetItem("gain"))
 			self.critTableWiget.setItem(r,1,QTableWidgetItem("continuous"))
 
 		#retrieve signal for modified cell
-		self.critTableWiget.cellClicked[(int,int)].connect(self.ChangeValue)
+		self.critTableWiget.cellClicked[(int,int)].connect(self.changeValue)
 		
 		###############################ContextMenu########################################
 		headers = self.critTableWiget.verticalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
-		headers.customContextMenuRequested.connect(self.removePopup)
+		headers.customContextMenuRequested.connect(self.popMenu)
 		#################################################################################
 		self.CritListFieldsCBox.setContextMenuPolicy(Qt.CustomContextMenu)
 		self.CritListFieldsCBox.customContextMenuRequested.connect(self.addPopup)
 		
 
-	def GetFieldNames(self, layer):
+	def getFieldNames(self, layer):
 		field_map = layer.dataProvider().fields()
 		field_list = []
 		field_type=[]
@@ -111,45 +111,57 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return field_list # sorted( field_list, cmp=locale.strcoll )
 
 
-	def addPopup(self, pos):
+	def popMenu(self,pos):
+		fields=range(10)
 		menu = QMenu()
-		addAction = menu.addAction("Add field")
-		action = menu.exec_(self.mapToGlobal(pos))
-		if action == addAction:
-			self.AddField()
-		return 0
+		removeAction = menu.addAction("Remove selected fields")
+		reloadAllFields=menu.addAction("Add deleted fields")
+		action = menu.exec_(self.mapToGlobal(QPoint(pos)))
+		if action == removeAction:
+			self.removePopup()
+		elif action==reloadAllFields:
+			self.addPopup()
 		
 		
-	def AddField(self):
-		f=self.CritListFieldsCBox.currentText()
+	def addPopup(self):
+		Envfields=self.getFieldNames(self.activeLayer) #field list
+		criteria=[self.critTableWiget.verticalHeaderItem(f).text() for f in range(self.critTableWiget.rowCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
+		
+	def addField(self,f=''):
+		"""Add field to table in GUI"""
+		if f=='':
+			f=self.CritListFieldsCBox.currentText()
 		self.critTableWiget.insertRow(self.critTableWiget.rowCount())
 		self.critTableWiget.setVerticalHeaderItem((self.critTableWiget.rowCount()-1),QTableWidgetItem(f))
+		self.critTableWiget.setItem((self.critTableWiget.rowCount()-1),0,QTableWidgetItem("gain"))
+		self.critTableWiget.setItem((self.critTableWiget.rowCount()-1),1,QTableWidgetItem("continuous"))
 		return 0
 		
-	
 		
-	def removePopup(self, pos):
-		i= self.critTableWiget.selectionModel().currentIndex().row()
-		if i != -1:
-			menu = QMenu()
-			removeAction = menu.addAction("Remove field")
-			action = menu.exec_(self.mapToGlobal(pos))
-			if action == removeAction:
-				self.RemoveField(i)
-				self.critTableWiget.setCurrentCell(-1,-1)
+		
+	def removePopup(self):
+		selected = sorted(self.critTableWiget.selectionModel().selectedRows(),reverse=True)
+		if len(selected) > 0:
+			for s in selected:
+				self.removeField(s.row())
+			self.critTableWiget.setCurrentCell(-1,-1)
 		else:
 			QMessageBox.warning(self.iface.mainWindow(), "geoRULES",
-			("column or row must be selected"), QMessageBox.Ok, QMessageBox.Ok)
+			("column must to be selected"), QMessageBox.Ok, QMessageBox.Ok)
 		return 0
+		
 
 
-	def RemoveField(self,i):
+	def removeField(self,i):
 		"""Remove field in table in GUI"""
 		self.critTableWiget.removeRow(i)
 		return 0
 
 
-	def ChangeValue(self):
+	def changeValue(self):
 		cell=self.critTableWiget.currentItem()
 		val=cell.text()
 		if val=="cost":
@@ -182,7 +194,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return listValue
 		
 		
-	def AddDecisionField(self,layer,Label):
+	def addDecisionField(self,layer,Label):
 		"""Add field on attribute table"""
 		caps = layer.dataProvider().capabilities()
 		if caps & QgsVectorDataProvider.AddAttributes:
@@ -214,7 +226,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 	def fieldToClasses(self):
 		provider=self.activeLayer.dataProvider()
 		if provider.fieldNameIndex("Classified")==-1:
-			self.AddDecisionField(self.activeLayer,"Classified")
+			self.addDecisionField(self.activeLayer,"Classified")
 		fidClass = provider.fieldNameIndex("Classified") #obtain classify field index from its name
 		listValues=self.extractAttributeValue(self.cobBoxFieldNameDisc.currentText())
 		classes=5 #int(self.spinClasseNum.value()) #TODO: it can use different classes, but in DOMLEM there are only 5 label_classes
@@ -234,7 +246,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return list(set(decision))
 		
 		
-	def WriteISFfile(self):
+	def writeISFfile(self):
 		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
 		criteria=[self.critTableWiget.verticalHeaderItem(f).text() for f in range(self.critTableWiget.rowCount())]
@@ -260,6 +272,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		provider=self.activeLayer.dataProvider()
 		#features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its names
+		fiDec=fids.index(provider.fieldNameIndex(self.DeclistFieldsCBox.currentText())) #retrieve item position
+		fids+=[fids.pop(fiDec)] #move the decision field at the end
 		if self.checkSelected.isChecked():
 			features=self.activeLayer.selectedFeatures()
 		else:
@@ -276,7 +290,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return 0
 
 
-	def SelectFeatures(self):
+	def selectFeatures(self):
 		self.selectionLayer = self.iface.activeLayer()
 		itemSelect=self.RulesListWidget.currentItem().text()
 		itemSelect=str(itemSelect.split("\t")[1])
@@ -289,23 +303,26 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return 0
 
 
-	def ShowRules(self):
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
-		rules=open(currentDIR+"\\rules.rls")
-		R=rules.readlines()
-		self.RulesListWidget.clear()
-		for E in R:
-			self.RulesListWidget.addItem(E)
-		self.RulesListWidget.itemClicked.connect(self.SelectFeatures)
+	def showRules(self):
+		try:
+			currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+			rules=open(currentDIR+"\\rules.rls")
+			R=rules.readlines()
+			self.RulesListWidget.clear()
+			for E in R:
+				self.RulesListWidget.addItem(E)
+			self.RulesListWidget.itemClicked.connect(self.selectFeatures)
+		except:
+			QMessageBox.critical(self.iface.mainWindow(), "Error", "No rules extracted")
 		return 0
 
 		
-	def ExtractRules(self):
+	def extractRules(self):
 		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
-		self.WriteISFfile()
+		self.writeISFfile()
 		DOMLEM.main(pathSource)
 		self.setModal(False)
-		self.ShowRules()
+		self.showRules()
 		
 
 	def parsingRules(self):
@@ -320,7 +337,6 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				for F in R[:1]:
 					exp=exp + " AND %s %s %s" % (F['label'],F['sign'],F['condition'])
 			value=R[0]['class']
-			print value
 			self.reclass(exp,E['rule_type'],value)
 		rulesPKL.close()
 		self.symbolize()
