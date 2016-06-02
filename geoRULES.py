@@ -246,31 +246,43 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return list(set(decision))
 		
 		
-	def writeISFfile(self):
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
-		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
+	def retrieveCriteria(self):
+		decision=str(self.DeclistFieldsCBox.currentText())
 		criteria=[self.critTableWiget.verticalHeaderItem(f).text() for f in range(self.critTableWiget.rowCount())]
 		preference=[str(self.critTableWiget.item(c,0).text()) for c in range(self.critTableWiget.rowCount())]
 		function=[str(self.critTableWiget.item(c,1).text()) for c in range(self.critTableWiget.rowCount())]
-		decision=list(set(self.extractAttributeValue(self.DeclistFieldsCBox.currentText())))
-		decision=[int(i) for i in decision]
+		pos=criteria.index(decision)
+		criteria+=[criteria.pop(pos)]
+		preference+=[preference.pop(pos)]
+		function+=[function.pop(pos)]
+		return criteria,preference,function
+		
+		
+	def writeISFfile(self):
+		""""extract data from attribute table and write idf file for extract rules"""
+		self.retrieveCriteria()
+		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
+		decision=str(self.DeclistFieldsCBox.currentText())
+		criteria,preference,function=self.retrieveCriteria()
+		decisionList=list(set(self.extractAttributeValue(self.DeclistFieldsCBox.currentText())))
+		decisionList=[int(i) for i in decisionList]
 		out_file.write("**ATTRIBUTES\n") 
 		for c,f in zip(criteria,function):
-			if (str(c)!=str(self.DeclistFieldsCBox.currentText())):
+			if (str(c)!=decision):
 				if (f=='continuous'):
 					out_file.write("+ %s: (%s)\n"  % (c,f))
 				else:
 					values=list(set(self.extractAttributeValue(c)))
-					out_file.write("+ %s: (%s)\n"  % (c,values))
+					out_file.write("+ %s: %s\n"  % (c,str(map(int,values))))
 			else:
-				out_file.write("+ %s: %s\n"  % (c,decision))
+				out_file.write("+ %s: %s\n"  % (c,decisionList))
 		out_file.write("decision: %s" % (self.DeclistFieldsCBox.currentText()))
 		out_file.write("\n\n**PREFERENCES\n")
 		for c,p in zip(criteria,preference):
 			out_file.write("%s: %s\n"  % (c,p))
 		out_file.write("\n**EXAMPLES\n")
 		provider=self.activeLayer.dataProvider()
-		#features=provider.featureCount() #Number of features in the layer.
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its names
 		fiDec=fids.index(provider.fieldNameIndex(self.DeclistFieldsCBox.currentText())) #retrieve item position
 		fids+=[fids.pop(fiDec)] #move the decision field at the end
@@ -290,20 +302,18 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return 0
 
 
-	def selectFeatures(self):
-		self.selectionLayer = self.iface.activeLayer()
-		itemSelect=self.RulesListWidget.currentItem().text()
-		itemSelect=str(itemSelect.split("\t")[1])
-		itemSelect=itemSelect.replace('[','')
-		itemSelect=itemSelect.replace(']','')
-		itemSelect=map(int,itemSelect.split(','))
-		itemSelect=[(cod-1) for cod in itemSelect]
-		self.selectionLayer.setSelectedFeatures(itemSelect)
-		#self.ruleEdit.setText(str(itemSelect))
+	def extractRules(self):
+		"""run DOMLEM algorithms"""
+		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
+		self.writeISFfile()
+		DOMLEM.main(pathSource)
+		self.setModal(False)
+		self.showRules()
 		return 0
 
 
 	def showRules(self):
+		"""show rules in geoRules """
 		try:
 			currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 			rules=open(currentDIR+"\\rules.rls")
@@ -316,30 +326,32 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			QMessageBox.critical(self.iface.mainWindow(), "Error", "No rules extracted")
 		return 0
 
-		
-	def extractRules(self):
-		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
-		self.writeISFfile()
-		DOMLEM.main(pathSource)
-		self.setModal(False)
-		self.showRules()
-		
+	def queryByRule(self,R):
+		"""perform query based on extracted rules"""
+		E=R[0]
+		exp="%s %s %s" % (E['label'],E['sign'],E['condition'])
+		if len(R)>1:
+			for F in R[1:]:
+				exp=exp + " AND %s %s %s" % (F['label'],F['sign'],F['condition'])
+		return exp
 
-	def parsingRules(self):
+
+	def selectFeatures(self):
+		"""select feature in attribute table based on rules"""
 		layer=self.iface.activeLayer()
 		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
 		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
 		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
-		for R in RULES:
-			E=R[0]
-			exp="%s %s %s" % (E['label'],E['sign'],E['condition'])
-			if len(R)>1:
-				for F in R[:1]:
-					exp=exp + " AND %s %s %s" % (F['label'],F['sign'],F['condition'])
-			value=R[0]['class']
-			self.reclass(exp,E['rule_type'],value)
+		selectedRule=self.RulesListWidget.currentItem().text()
+		selectedRule=int(selectedRule.split(":")[0])
+		R=RULES[selectedRule-1]
+		exp=self.queryByRule(R)
+		idf=[f.id() for f in  self.whereExpression(layer, exp)]
+		layer.setSelectedFeatures(idf)
 		rulesPKL.close()
-		self.symbolize()
+		return 0
+
+		
 		
 	def whereExpression(self,layer, exp):
 		exp = QgsExpression(exp)
@@ -353,6 +365,20 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 			if bool(value):
 				yield feature
 
+
+	def parsingRules(self):
+		layer=self.iface.activeLayer()
+		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
+		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
+		for R in RULES:
+			exp=self.queryByRule(R)
+			value=R[0]['class']
+			self.reclass(exp,R[0]['rule_type'],value)
+		rulesPKL.close()
+		self.symbolize()
+		
+		
 		
 	def reclass(self, exp, rule, value='-9999',):
 		layer = self.iface.activeLayer()

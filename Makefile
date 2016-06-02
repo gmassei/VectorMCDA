@@ -1,6 +1,6 @@
 PLUGINNAME = VectorMCDA
 
-PY_FILES = VectorMCDA.py geoAHPSort.py  geoWeightedSum.py geoTOPSIS.py geoFuzzy.py geoPromethee.py geoElectre.py geoRSDB.py geoXMCDA.py htmlGraph.py geoXMCDA.py fuzzify.py DOMLEM.py geoRULES.py __init__.py
+PY_FILES = VectorMCDA.py geoWeightedSum.py geoTOPSIS.py geoFuzzy.py geoPromethee.py geoElectre.py geoRSDB.py geoXMCDA.py htmlGraph.py geoXMCDA.py fuzzify.py DOMLEM.py geoRULES.py __init__.py
 
 EXTRAS = metadata.txt icons/ images/ Doc/
 

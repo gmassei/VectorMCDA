@@ -12,7 +12,7 @@ name=VectorMCDA
 qgisMinimumVersion=2.0
 #qgisMaximumVersion=2.99
 description=Performs geographic multi-criteria decision making.
-version=1.0.2
+version=1.0.6
 
 # end of mandatory metadata
 
@@ -25,16 +25,18 @@ version=1.0.2
 tags=Sustainability assessment, Geographic MCDA, Vector
 category=vector
 
-changelog= Ver. 1.0.2: improved add and delete field in criterion's table
-	Ver. 1.0.1: bug in geoRULES solved (incorect decision field)
-	Ver. 1.0.0: complete implementation of algorithm DOMLEM  in geoRULES code, with  extraction of rules and their  application in classification 
-	Ver. 0.9.1: code unchanged, cleaned up plugin structure
-	Ver. 0.9: improved documentation and corrected minor bugs
-	Ver. 0.8: improve and upgrade geoConcordance and geoPromethee
-	Ver. 0.6: improve and upgrade geoFuzzy algorithm, tested geoWeightedSum, geoTOPSIS and geoFUZZY output
-	Ver. 0.4: improve and upgrade geoWeightedSum algorithm
-	Ver. 0.2: several bugs in geoPromethee are corrected
-	Ver. 0.1: First release
+changelog=1.0.6 bug in geoRULES solved (mistake in coding parsingRules fnct )
+	1.0.4 bug in geoRULES solved (incorrect rules shown)
+	1.0.2 improved add and delete field in criterion's table
+	1.0.1 bug in geoRULES solved (incorect decision field)
+	1.0.0 complete implementation of algorithm DOMLEM  in geoRULES code, with  extraction of rules and their  application in classification 
+	0.9.1 code unchanged, cleaned up plugin structure
+	0.9 improved documentation and corrected minor bugs
+	0.8 improve and upgrade geoConcordance and geoPromethee
+	0.6 improve and upgrade geoFuzzy algorithm, tested geoWeightedSum, geoTOPSIS and geoFUZZY output
+	0.4 improve and upgrade geoWeightedSum algorithm
+	0.2 several bugs in geoPromethee are corrected
+	0.1 first release
 
 
 homepage=http://maplab.alwaysdata.net/geomcda.html
