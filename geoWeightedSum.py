@@ -4,7 +4,7 @@
 /***************************************************************************
 Name			: geoWeightedSum
 Description		: geographical MCDA with Weighted Sum Model (WSM)
-Date			: June 20, 2014
+Date			: 6/11/2016
 copyright		: Gianluca Massei  (developper) 
 email			: (g_massa@libero.it)
 
@@ -34,7 +34,6 @@ import csv
 
 try:
 	import numpy as np
-	import matplotlib.pyplot as plt
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
 	QCoreApplication.translate('geoWeightedSum', "You can't get all the graphics output . [Message: %s]" % e))
@@ -54,6 +53,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 
 		QObject.connect(self.SetBtnQuit, SIGNAL("rejected()"),self, SLOT("reject()"))
 		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
+		QObject.connect(self.AnsytBtnAbout, SIGNAL("clicked()"), self.about)
 		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		#QObject.connect(self.EnvRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
@@ -145,19 +145,25 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		return 0
 
-	def mousePressEvent(self, QMouseEvent):
-		return QMouseEvent.pos()
 
-	def popMenu(self):
-		fields=range(10)
+	def popMenu(self,pos):
+		#fields=range(10)
 		menu = QMenu()
 		removeAction = menu.addAction("Remove selected fields")
 		reloadAllFields=menu.addAction("Add deleted fields")
-		action = menu.exec_(self.mapToGlobal(QPoint(100,100)))
+		action = menu.exec_(self.mapToGlobal(QPoint(pos)))
 		if action == removeAction:
 			self.removePopup()
 		elif action==reloadAllFields:
-			self.reloadTable()
+			self.addPopup()
+			
+
+	def addPopup(self):
+		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
 			
 
 	def removePopup(self):
@@ -187,20 +193,26 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		for f in difference:
 			self.addField(f)
 
-
-	def addField(self):
-		"""Add deleted fields to table in GUI"""
-		self.EnvTableWidget.insertColumn(self.EnvTableWidget.columnCount())
-		self.EnvTableWidget.insertRow(self.EnvTableWidget.rowCount())
-		self.EnvTableWidget.setHorizontalHeaderItem((self.EnvTableWidget.columnCount()-1),QTableWidgetItem(f))
-		self.EnvTableWidget.setVerticalHeaderItem((self.EnvTableWidget.rowCount()-1),QTableWidgetItem(f))
-
-		self.EnvParameterWidget.insertColumn(self.EnvParameterWidget.columnCount())
-		self.EnvParameterWidget.setHorizontalHeaderItem((self.EnvParameterWidget.columnCount()-1),QTableWidgetItem(f))
-		self.EnvParameterWidget.setItem(0,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("1.0"))
-		self.EnvParameterWidget.setItem(1,(self.EnvParameterWidget.columnCount()-1),QTableWidgetItem("gain"))
+	def addFieldFctn(self,listFields,TableWidget,WeighTableWidget):
+		"""base function for AddField()"""
+		TableWidget.insertColumn(TableWidget.columnCount())
+		TableWidget.insertRow(TableWidget.rowCount())
+		TableWidget.setHorizontalHeaderItem((TableWidget.columnCount()-1),QTableWidgetItem(listFields))
+		TableWidget.setVerticalHeaderItem((TableWidget.rowCount()-1),QTableWidgetItem(listFields))
+		##############
+		WeighTableWidget.insertColumn(WeighTableWidget.columnCount())
+		WeighTableWidget.setHorizontalHeaderItem((WeighTableWidget.columnCount()-1),QTableWidgetItem(listFields))
+		WeighTableWidget.setItem(0,(WeighTableWidget.columnCount()-1),QTableWidgetItem("1.0"))
+		WeighTableWidget.setItem(1,(WeighTableWidget.columnCount()-1),QTableWidgetItem("gain"))
 		return 0
 
+
+	def addField(self,listFields=''):
+		"""Add field to table in GUI"""
+		if listFields=='':
+			listFields=self.EnvlistFieldsCBox.currentText()
+		self.addFieldFctn(listFields,self.EnvTableWidget,self.EnvParameterWidget)
+		return 0
 
 	def CompleteMatrix(self):
 		"""Autocomplete matrix of  pairwise comparison"""
@@ -433,41 +445,9 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
 		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
 			os.remove(os.path.join(currentDir,"histogram.png"))
-		try:
-			import matplotlib.pyplot as plt
-			import numpy as np
-			self.BuildGraphIstogram(currentDir)
-		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-			QCoreApplication.translate('geoWeightedSum', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
-		return 0
-
-
-
-	def BuildGraphIstogram(self,currentDir):
-		"""Build Istogram graph using pyplot"""
-
-		geoWSMValue=self.ExtractAttributeValue('geoWSM')
-		fig = plt.figure()
-		fig.subplots_adjust(bottom=0.2)
-		fig.subplots_adjust()
-		ax = fig.add_subplot(111)
-		ax.margins(0.05, None)
-		#xpos = np.arange(len(SuitValue))    # the x locations for the groups
-		xpos = range(len(geoWSMValue))    # the x locations for the groups
-		width = 0.8     # the width of the bars: can also be len(x) sequence
-		label=self.LabelListFieldsCBox.currentText()
-		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		plt.ylabel('Scores')
-		plt.title('geoWSM')
-		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		plt.savefig(os.path.join(currentDir,"histogram.png"))
-		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
-		plt.close('all')
 		return 0
 
 	
@@ -489,10 +469,10 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		"""
 		Visualize an About window.
 		"""
-
 		QMessageBox.about(self, "About weighted sum model (WSM)",
 		"""
 			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
+			 <p>web site <a href="http://maplab.alwaysdata.net/geomcda.html"> www.maplab.alwaysdata.net</a></p>
 		""")
 
 	def open_help(self):

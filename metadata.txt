@@ -25,7 +25,8 @@ version=1.0.6
 tags=Sustainability assessment, Geographic MCDA, Vector
 category=vector
 
-changelog=1.0.6 bug in geoRULES solved (mistake in coding parsingRules fnct )
+changelog=1.0.8 bug in geoWeightedSum (missing button for pairwise comparison)
+	1.0.6 bug in geoRULES solved (mistake in coding parsingRules fnct )
 	1.0.4 bug in geoRULES solved (incorrect rules shown)
 	1.0.2 improved add and delete field in criterion's table
 	1.0.1 bug in geoRULES solved (incorect decision field)

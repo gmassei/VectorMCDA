@@ -158,6 +158,14 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			self.addPopup()
 			
 
+	def addPopup(self):
+		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		difference=set(Envfields)-set(criteria)
+		for f in difference:
+			self.addField(f)
+			
+			
 	def removePopup(self):
 		selected = sorted(self.EnvParameterWidget.selectionModel().selectedColumns(),reverse=True)
 		if len(selected) > 0:
@@ -176,14 +184,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.removeRow(i)
 		self.EnvParameterWidget.removeColumn(i)
 		return 0
-
-
-	def addPopup(self):
-		Envfields=self.GetFieldNames(self.activeLayer) #field list
-		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
-		difference=set(Envfields)-set(criteria)
-		for f in difference:
-			self.addField(f)
 
 
 	def addField(self,f=''):

@@ -1,10 +1,10 @@
 PLUGINNAME = VectorMCDA
 
-PY_FILES = VectorMCDA.py geoWeightedSum.py geoTOPSIS.py geoFuzzy.py geoPromethee.py geoElectre.py geoRSDB.py geoXMCDA.py htmlGraph.py geoXMCDA.py fuzzify.py DOMLEM.py geoRULES.py __init__.py
+PY_FILES = VectorMCDA.py geoWeightedSum.py geoTOPSIS.py geoFuzzy.py geoPromethee.py geoElectre.py geoRULES.py geoXMCDA.py htmlGraph.py geoXMCDA.py fuzzify.py DOMLEM.py geoRULES.py __init__.py
 
 EXTRAS = metadata.txt icons/ images/ Doc/
 
-UI_FILES = ui_geoXMCDA.py ui_geoWeightedSum.py ui_geoTOPSIS.py ui_geoRSDB.py ui_geoPromethee.py ui_geoFuzzy.py ui_geoElectre.py ui_geoRULES.py
+UI_FILES = ui_geoXMCDA.py ui_geoWeightedSum.py ui_geoTOPSIS.py ui_geoRULES.py ui_geoPromethee.py ui_geoFuzzy.py ui_geoElectre.py ui_geoRULES.py
 
 RESOURCE_FILES = resources.py
 #geoXMCDA.ui geoWeightedSum.ui geoTOPSIS.ui geoRSDB.ui geoPromethee.ui  geoFuzzy.ui  geoElectre.ui  geoRULES.ui

@@ -32,7 +32,6 @@ import shutil
 import csv
 
 try:
-	import matplotlib.pyplot as plt
 	import numpy as np
 except ImportError, e:
 	QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
@@ -512,45 +511,9 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 	def BuildOutput(self):
 		"""General function for all graphical and tabula output"""
 		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
-		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
-			os.remove(os.path.join(currentDir,"histogram.png"))
-		try:
-			import matplotlib.pyplot as plt
-			import numpy as np
-			#self.BuildGraphPnt(currentDir)
-			self.BuildGraphIstogram(currentDir)
-		except ImportError, e:
-			QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
-			QCoreApplication.translate('geoTOPSIS', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		self.setModal(False)
-		return 0
-
-
-
-	def BuildGraphIstogram(self,currentDir):
-		"""Build Istogram graph using pyplot"""
-
-		geoWSMValue=self.ExtractAttributeValue('geoTOPSIS')
-		fig = plt.figure()
-		fig.subplots_adjust(bottom=0.2)
-		fig.subplots_adjust()
-		ax = fig.add_subplot(111)
-		ax.margins(0.05, None)
-		#xpos = np.arange(len(SuitValue))    # the x locations for the groups
-		xpos = range(len(geoWSMValue))    # the x locations for the groups
-		width = 0.8     # the width of the bars: can also be len(x) sequence
-		label=self.LabelListFieldsCBox.currentText()
-		labels=self.ExtractAttributeValue(label)
-		p1 = plt.bar((xpos), geoWSMValue, width=width, color='g',align='center') # yerr=womenStd)
-		plt.ylabel('Scores')
-		plt.title('geoTOPSIS')
-		plt.xticks((xpos), tuple(labels),rotation=90,fontsize=6 )
-		#plt.legend((p1[0]), ('geoTOPSIS'))
-		plt.savefig(os.path.join(currentDir,"histogram.png"))
-		self.LblGraphic.setPixmap(QtGui.QPixmap(os.path.join(currentDir,"histogram.png")))
-		plt.close('all')
 		return 0
 
 	
