@@ -20,16 +20,21 @@ email                : g_massa@libero.it
  *																		 *
  ***************************************************************************/
 """
+from __future__ import absolute_import
 
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtGui
+from builtins import zip
+from builtins import str
+from builtins import map
+from builtins import range
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from qgis.PyQt import QtGui
 
 from qgis.core import *
 from qgis.gui import *
 
-from ui_geoRULES import Ui_Dialog
+from .ui_geoRULES import Ui_Dialog
 
 import numpy as np
 import webbrowser
@@ -37,7 +42,7 @@ import matplotlib
 import pickle
 import os
 
-import DOMLEM
+from . import DOMLEM
 
 
 class geoRULESDialog(QDialog, Ui_Dialog):
@@ -49,14 +54,15 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 
 		self.activeLayer = self.iface.activeLayer()
 		
-		QObject.connect(self.SettingButtonBox, SIGNAL("accepted()"),self.fieldToClasses)
+		self.SettingButtonBox.accepted.connect(self.fieldToClasses)
 		QObject.connect(self.SettingButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		# imposto l'azione da eseguire al click sui pulsanti
 	#	QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.addField)
-		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.extractRules)
+		self.CritExtractBtn.clicked.connect(self.extractRules)
 	#	QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		QObject.connect(self.applyRulesBtn, SIGNAL("clicked()"),self.parsingRules)
+		self.applyRulesBtn.clicked.connect(self.parsingRules)
 		QObject.connect(self.reclassButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		self.CritHelpBtn.clicked.connect(self.open_help) 
 
 		msg="Use  selected features only (%s)" % (len(self.activeLayer.selectedFeatures()))
 		self.checkSelected.setText(msg)
@@ -106,13 +112,13 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				provider = layer.dataProvider()
 				field_min.append(provider.minimumValue( layer.fieldNameIndex(str(field.name())) ))
 				field_max.append(provider.maximumValue( layer.fieldNameIndex(str(field.name())) ))
-		f=zip(field_list,field_type,field_min,field_max)
+		f=list(zip(field_list,field_type,field_min,field_max))
 		#self.CritTEdit.setText(str(f))
 		return field_list # sorted( field_list, cmp=locale.strcoll )
 
 
 	def popMenu(self,pos):
-		fields=range(10)
+		fields=list(range(10))
 		menu = QMenu()
 		removeAction = menu.addAction("Remove selected fields")
 		reloadAllFields=menu.addAction("Add deleted fields")
@@ -261,7 +267,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 	def writeISFfile(self):
 		""""extract data from attribute table and write idf file for extract rules"""
 		self.retrieveCriteria()
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
 		decision=str(self.DeclistFieldsCBox.currentText())
 		criteria,preference,function=self.retrieveCriteria()
@@ -274,7 +280,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 					out_file.write("+ %s: (%s)\n"  % (c,f))
 				else:
 					values=list(set(self.extractAttributeValue(c)))
-					out_file.write("+ %s: %s\n"  % (c,str(map(int,values))))
+					out_file.write("+ %s: %s\n"  % (c,str(list(map(int,values)))))
 			else:
 				out_file.write("+ %s: %s\n"  % (c,decisionList))
 		out_file.write("decision: %s" % (self.DeclistFieldsCBox.currentText()))
@@ -315,7 +321,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 	def showRules(self):
 		"""show rules in geoRules """
 		try:
-			currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+			currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 			rules=open(currentDIR+"\\rules.rls")
 			R=rules.readlines()
 			self.RulesListWidget.clear()
@@ -339,7 +345,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 	def selectFeatures(self):
 		"""select feature in attribute table based on rules"""
 		layer=self.iface.activeLayer()
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
 		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
 		selectedRule=self.RulesListWidget.currentItem().text()
@@ -368,7 +374,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 
 	def parsingRules(self):
 		layer=self.iface.activeLayer()
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
 		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
 		for R in RULES:
@@ -425,7 +431,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 
 		# create a category for each item in classes
 		categories = []
-		for classes_name, (color, label) in classes.items():
+		for classes_name, (color, label) in list(classes.items()):
 			symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			symbol.setColor(QColor(color))
 			category = QgsRendererCategoryV2(classes_name, symbol, label)
@@ -442,3 +448,20 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		for f in fields:
 			self.Symbolize(f)
 		self.setModal(False)
+		
+		
+###################################################################################################
+	def about(self):
+		"""
+		Visualize an About window.
+		"""
+
+		QMessageBox.about(self, "About geoRules",
+		"""<p>Extract rules from attrubute table using dominance based rough set approach and performs geographic 
+		multi-criteria decision using DOMLEM algorithmGreco S., Matarazzo, B., Słowiński, R., Stefanowski, J.: An Algorithm for Induction of Decision Rules Consistent with the Dominance Principle. In W. Ziarko, Y. Yao (eds.): Rough Sets and Current Trends in Computing. Lecture Notes in Artificial Intelligence 2005 (2001) 304--313. Springer-Verlag).
+		Documents and data 	are available in: <a href="http://maplab.alwaysdata.net/geomcda.html"> www.maplab.alwaysdata.net</a></p>
+			<p>Author:  Gianluca Massei <a href="mailto:g_massa@libero.it">[g_massa at libero.it]</a></p>
+		""")
+
+	def open_help(self):
+		webbrowser.open("http://maplab.alwaysdata.net/geomcda.html")

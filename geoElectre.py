@@ -20,28 +20,32 @@ email			: (g_massa@libero.it)
  *																		 *
  ***************************************************************************/
 """
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtGui
-
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QMenu
+from qgis.PyQt import QtGui
 from qgis.core import *
 from qgis.gui import *
 
 
 import os
 import webbrowser
-import htmlGraph
+from . import htmlGraph
 import csv
 
 try:
 	import matplotlib.pyplot as plt
 	import numpy as np
-except ImportError, e:
+except ImportError as e:
 	QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
 	QCoreApplication.translate('geoConcordance', "Couldn't import Python module. [Message: %s]" % e))
 	
 
-from ui_geoElectre import Ui_Dialog
+from .ui_geoElectre import Ui_Dialog
 
 class geoElectreDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
@@ -54,15 +58,17 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 
-		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
-		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
-		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
+#		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
+		self.SetBtnQuit.clicked.connect(self.reject)
+		self.SetBtnAbout.clicked.connect(self.about)
+		self.SetBtnHelp.clicked.connect(self.open_help) 
 #		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
-		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
-		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
-		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
-		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		self.EnvGetWeightBtn.clicked.connect(self.ElaborateAttributeTable)
+		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
+		self.RenderBtn.clicked.connect(self.RenderLayer)
+		self.GraphBtn.clicked.connect(self.BuildOutput)
+#		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		self.AnlsBtnBox.clicked.connect(self.reject)
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)
@@ -73,7 +79,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.fields()])
 
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
@@ -100,7 +106,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
-		setting=self.csv2setting()
+		#setting=self.csv2setting()
 		try:
 			self.setting2table(setting)
 		except:
@@ -109,15 +115,15 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	def GetFieldNames(self, layer):
 		"""retrive field names from active map/layer"""
-		fieldMap = layer.pendingFields()
-		fieldList=[f.name() for f in fieldMap if f.typeName()!='String']
+		fields = layer.dataProvider().fields()
+		fieldList=[f.name() for f in fields if f.typeName()!='String']
 		return fieldList # sorted( field_list, cmp=locale.strcoll )
 
 
 	def outFile(self):
 		"""Display file dialog for output  file"""
 		self.OutlEdt.clear()
-		outvLayer = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
+		outvLayer, __ = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
 		if not outvLayer.isEmpty():
 			self.OutlEdt.clear()
 			self.OutlEdt.insert(outvLayer)
@@ -147,7 +153,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 
 	def popMenu(self):
-		fields=range(10)
+		fields=list(range(10))
 		menu = QMenu()
 		removeAction = menu.addAction("Remove selected fields")
 		reloadAllFields=menu.addAction("Add deleted fields")
@@ -284,10 +290,10 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		fields = self.activeLayer.pendingFields()
+		provider=self.activeLayer.dataProvider()
 		features= self.activeLayer.getFeatures()
 		for feat in features:
-			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
+			row=[feat.attributes()[provider.fieldNameIndex(name)] for  name in criteria]
 			matrix.append(row)
 		matrix=np.array(matrix, dtype = 'float32')
 		return matrix
@@ -416,16 +422,15 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		
 		concIndx=self.ConcordanceIndex(concordanceMatrix)
 		discIndx=self.DiscordanceIndex(discordanceMatrix)
-		#print concIndx,discIndx
-		self.setting2csv()
-		
-		
-		#feat = QgsFeature()
+		progress=0
+		self.EnvProgressBar.setRange(1,provider.featureCount())
 		self.activeLayer.startEditing()
 		for conc,disc,feat in zip(concIndx,discIndx,self.activeLayer.getFeatures()):
-			features=feat.attributes()
-			self.activeLayer.changeAttributeValue(feat.id(),fldConcValue,round(conc,4))
-			self.activeLayer.changeAttributeValue(feat.id(),fldDiscValue,round(disc,4))
+			progress=progress+1
+			self.activeLayer.changeAttributeValue(feat.id(),fldConcValue,round(float(conc),4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldDiscValue,round(float(disc),4))
+			self.EnvProgressBar.setValue(progress)
+			print(feat.id(),round(conc,4),round(disc,4))
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0
@@ -433,39 +438,39 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 
 
-	def Symbolize(self,field):
+	def Symbolize(self,fieldName):
 		"""Prepare legends """
 		numberOfClasses=self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
-			classes=range(1,numberOfClasses+1)
-		fieldName = field
+			classes=list(range(1,numberOfClasses+1))
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()
-		fieldIndex = layer.fieldNameIndex(fieldName)
+		fieldIndex = layer.fields().indexFromName(fieldName)
 		provider = layer.dataProvider()
 		minimum = provider.minimumValue( fieldIndex )
 		maximum = provider.maximumValue( fieldIndex )
+		print(minimum,maximum)
 		RangeList = []
 		Opacity = 1
-		for c,i in zip(classes,range(len(classes))):
+		for c,i in zip(classes,list(range(len(classes)))):
 		# Crea il simbolo ed il range...
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
-			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+			Symbol = QgsSymbol.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
-			Symbol.setAlpha(Opacity)
-			Range = QgsRendererRangeV2(Min,Max,Symbol,Label)
+			#Symbol.setAlpha(Opacity)
+			Range = QgsRendererRange(Min,Max,Symbol,Label)
 			RangeList.append(Range)
-		Renderer = QgsGraduatedSymbolRendererV2('', RangeList)
-		Renderer.setMode(QgsGraduatedSymbolRendererV2.EqualInterval)
+		Renderer = QgsGraduatedSymbolRenderer('', RangeList)
+		Renderer.setMode(QgsGraduatedSymbolRenderer.EqualInterval)
 		Renderer.setClassAttribute(fieldName)
-		add=QgsVectorLayer(layer.source(),field,'ogr')
-		add.setRendererV2(Renderer)
-		QgsMapLayerRegistry.instance().addMapLayer(add)
+		add=QgsVectorLayer(layer.source(),fieldName,'ogr')
+		add.setRenderer(Renderer)
+		QgsProject.instance().addMapLayer(add)
 
 
 	def RenderLayer(self):
@@ -473,14 +478,14 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		fields=['geoConc','geoDisc']
 		for f in fields:
 			self.Symbolize(f)
-		self.setModal(False)
+		#self.setModal(False)
 
 ###########################################################################################
 
 
 	def ExtractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
-		fields=self.activeLayer.pendingFields()
+		fields=self.activeLayer.fields()
 		provider=self.activeLayer.dataProvider()
 		fid=provider.fieldNameIndex(field)
 		listValue=[]
@@ -499,7 +504,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 	def BuildOutput(self):
 		"""General function for all graphical and tabula output"""
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDir = str(os.path.abspath( os.path.dirname(__file__)))
 		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
 			os.remove(os.path.join(currentDir,"histogram.png"))
 		try:
@@ -507,12 +512,12 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			import numpy as np
 			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
-		except ImportError, e:
+		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
 			QCoreApplication.translate('geoConcordance', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
-		self.setModal(False)
+		#self.setModal(False)
 		return 0
 
 
@@ -562,9 +567,11 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		Visualize an About window.
 		"""
 
-		QMessageBox.about(self, "About concordance and discordance model",
+		QMessageBox.about(self, "About geoConcordance and geoDiscordance models",
 		"""
-			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
+		<p>Performs geographic multi-criteria decision making using concordance and discordance model (Bernard Roy, Classement et choix en presence de points de vue multiples (la methode ELECTRE), in La Revue d'Informatique et de Recherche Operationelle (RIRO), nr 8, 1968, pp. 57-75).
+		Documents and data 	are available in: <a href="http://maplab.alwaysdata.net/geomcda.html"> www.maplab.alwaysdata.net</a></p>
+		<p>Author:  Gianluca Massei <a href="mailto:g_massa@libero.it">[g_massa at libero.it]</a></p>
 		""")
 
 	def open_help(self):

@@ -19,9 +19,13 @@ email			: (g_massa@libero.it)
  *																		 *
  ***************************************************************************/
 """
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtGui
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from qgis.PyQt import QtGui
 
 from qgis.core import *
 from qgis.gui import *
@@ -29,18 +33,18 @@ from qgis.gui import *
 
 import os
 import webbrowser
-import htmlGraph
+from . import htmlGraph
 import csv
 
 try:
 	import numpy as np
 	import matplotlib.pyplot as plt
-except ImportError, e:
+except ImportError as e:
 	QMessageBox.information(None, QCoreApplication.translate('geoPromethee', "Plugin error"), \
 	QCoreApplication.translate('geoPromethee', "Couldn't import Python module. [Message: %s]" % e))
 	
 
-from ui_geoPromethee import Ui_Dialog
+from .ui_geoPromethee import Ui_Dialog
 
 class geoPrometheeDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
@@ -54,13 +58,13 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			self.toolBox.setItemEnabled (i,False)
 
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
-		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
-		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
+		self.SetBtnAbout.clicked.connect(self.about)
+		self.SetBtnHelp.clicked.connect(self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.ElaborateAttributeTable)
-		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
-		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
-		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
+		self.EnvGetWeightBtn.clicked.connect(self.ElaborateAttributeTable)
+		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
+		self.RenderBtn.clicked.connect(self.RenderLayer)
+		self.GraphBtn.clicked.connect(self.BuildOutput)
 		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		
 		sourceIn=str(self.iface.activeLayer().source())
@@ -118,7 +122,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 	def outFile(self):
 		"""Display file dialog for output  file"""
 		self.OutlEdt.clear()
-		outvLayer = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
+		outvLayer, __ = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
 		if not outvLayer.isEmpty():
 			self.OutlEdt.clear()
 			self.OutlEdt.insert(outvLayer)
@@ -148,7 +152,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 		
 	def popMenu(self,pos):
-		fields=range(10)
+		fields=list(range(10))
 		menu = QMenu()
 		removeAction = menu.addAction("Remove selected fields")
 		reloadAllFields=menu.addAction("Add deleted fields")
@@ -434,7 +438,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
-			classes=range(1,numberOfClasses+1)
+			classes=list(range(1,numberOfClasses+1))
 		fieldName = field
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()
@@ -444,7 +448,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		maximum = provider.maximumValue( fieldIndex )
 		RangeList = []
 		Opacity = 1
-		for c,i in zip(classes,range(len(classes))):
+		for c,i in zip(classes,list(range(len(classes)))):
 		# Crea il simbolo ed il range...
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
@@ -494,7 +498,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	def BuildOutput(self):
 		"""General function for all graphical and tabula output"""
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDir = str(os.path.abspath( os.path.dirname(__file__)))
 		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
 			os.remove(os.path.join(currentDir,"histogram.png"))
 		try:
@@ -502,7 +506,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			import numpy as np
 			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
-		except ImportError, e:
+		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
 			QCoreApplication.translate('geoPromethee', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
@@ -559,9 +563,11 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		Visualize an About window.
 		"""
 
-		QMessageBox.about(self, "About concordance and discordance model",
+		QMessageBox.about(self, "About geoPromethee model",
 		"""
-			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
+		<p>Performs geographic multi-criteria decision making using Promethee model (J.P. Brans & P. Vincke - 1985. "A preference ranking organisation method: The PROMETHEE method for MCDM". Management Science).
+		Documents and data 	are available in: <a href="http://maplab.alwaysdata.net/geomcda.html"> www.maplab.alwaysdata.net</a></p>
+		<p>Author:  Gianluca Massei <a href="mailto:g_massa@libero.it">[g_massa at libero.it]</a></p>
 		""")
 
 	def open_help(self):

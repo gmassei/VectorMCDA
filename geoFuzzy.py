@@ -19,10 +19,15 @@ email			: (g_massa@libero.it)
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtGui
-import PyQt4.Qwt5 as Qwt
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from qgis.PyQt import QtGui
+import PyQt5.Qwt5 as Qwt
 
 from qgis.core import *
 from qgis.gui import *
@@ -35,13 +40,13 @@ import csv
 try:
 	import matplotlib.pyplot as plt
 	import numpy as np
-except ImportError, e:
+except ImportError as e:
 	QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
 	QCoreApplication.translate('geoFuzzy', "Couldn't import Python module. [Message: %s]" % e))
 	
-import htmlGraph
+from . import htmlGraph
 
-from ui_geoFuzzy import Ui_Dialog
+from .ui_geoFuzzy import Ui_Dialog
 
 class geoFuzzyDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
@@ -55,16 +60,16 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
-		QObject.connect(self.SetBtnAbout, SIGNAL("clicked()"), self.about)
-		QObject.connect(self.SetBtnHelp, SIGNAL("clicked()"),self.open_help)
+		self.SetBtnAbout.clicked.connect(self.about)
+		self.SetBtnHelp.clicked.connect(self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.EnvCalculateBtn, SIGNAL( "clicked()" ), self.AnalyticHierarchyProcess)
-		QObject.connect(self.EnvGetWeightBtn, SIGNAL( "clicked()" ), self.Elaborate)
-		QObject.connect(self.RenderBtn,SIGNAL("clicked()"), self.RenderLayer)
-		QObject.connect(self.GraphBtn, SIGNAL("clicked()"), self.BuildOutput)
+		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
+		self.EnvGetWeightBtn.clicked.connect(self.Elaborate)
+		self.RenderBtn.clicked.connect(self.RenderLayer)
+		self.GraphBtn.clicked.connect(self.BuildOutput)
 		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		QObject.connect(self.FzyFieldBtn, SIGNAL("clicked()"), self.getFzyGraph)
-		QObject.connect(self.FzfyListFieldsCBox, SIGNAL("currentIndexChanged(int)"), self.setqwtPlot)
+		self.FzyFieldBtn.clicked.connect(self.getFzyGraph)
+		self.FzfyListFieldsCBox.currentIndexChanged.connect(self.setqwtPlot)
 		self.qwtPlot.setAutoReplot()
 		self.qwtPlot.setAxisScale(0,0,1,0.1)
 		self.picker = Qwt.QwtPlotPicker(Qwt.QwtPlot.xBottom,
@@ -139,7 +144,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 	def outFile(self):
 		"""Display file dialog for output  file"""
 		self.OutlEdt.clear()
-		outvLayer = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
+		outvLayer, __ = QFileDialog.getSaveFileName(self, "Output map",".", "ESRI Shapefile (*.shp)")
 		self.OutlEdt.insert(outvLayer)
 		return outvLayer
 		
@@ -194,7 +199,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 
 
 	def popMenu(self,pos):
-		fields=range(10)
+		fields=list(range(10))
 		menu = QMenu()
 		removeAction = menu.addAction("Remove selected fields")
 		reloadAllFields=menu.addAction("Add deleted fields")
@@ -279,7 +284,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		X=[self.qwtPlot.invTransform(2,p.x()) for p in aQPointF]
 		self.pickedTable.setColumnCount(2)
 		self.pickedTable.setHorizontalHeaderLabels(['X','Y'])
-		rows=range(len(X))
+		rows=list(range(len(X)))
 		self.pickedTable.setRowCount(len(X))
 		for x,y,r in zip(X,Y,rows):
 			#self.pickedTable.setColumnWidth(r,  10);
@@ -318,8 +323,9 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 				
 	def RegressionGraph(self):
 		polyFittValue=self.spinBoxFitting.value()
-		rows=range(self.pickedTable.rowCount())
-		print rows
+		rows=list(range(self.pickedTable.rowCount()))
+		# fix_print_with_import
+		print(rows)
 		self.Xgraph=[float(self.pickedTable.item(r, 0).text()) for r in rows]
 		self.Ygraph=[float(self.pickedTable.item(r, 1).text()) for r in rows]
 		try:  
@@ -330,7 +336,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			fit=np.polyfit(Xvalues, Yvalues, polyFittValue)
 			valuer = np.poly1d(fit)
 			return valuer
-		except ImportError, e:
+		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
 			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'numpy' from scipy. [Message: %s]" % e))  
 	
@@ -341,7 +347,8 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		valuer=self.RegressionGraph()
 		self.plotGraph(valuer,field)
 		self.fzyValuer[field]=valuer
-		print self.fzyValuer
+		# fix_print_with_import
+		print(self.fzyValuer)
 		self.checkTableField()
 
 	
@@ -371,7 +378,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			for i in range(len(weight)):
 				self.EnvParameterWidget.setItem(1,i,QTableWidgetItem(str(round(weight[i],2))))
 			return weight, eigenvalues, eigenvector
-		except ImportError, e:
+		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
 			QCoreApplication.translate('geoFuzzy', "Couldn't import Python module 'numpy'.  You can install 'numpy' \
 			with the following command: sudo easy_install numpy'.<br> or you can use 32bit version of QGS. [Message: %s]" % e))
@@ -528,7 +535,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
-			classes=range(1,numberOfClasses+1)
+			classes=list(range(1,numberOfClasses+1))
 		fieldName = field
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()
@@ -538,7 +545,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		maximum = provider.maximumValue( fieldIndex )
 		RangeList = []
 		Opacity = 1
-		for c,i in zip(classes,range(len(classes))):
+		for c,i in zip(classes,list(range(len(classes)))):
 		# Crea il simbolo ed il range...
 			Min = minimum + ( maximum - minimum ) / numberOfClasses * i
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
@@ -576,7 +583,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		if fields[fid].typeName()=='Real' or fields[fid].typeName()=='Integer':
 			for feat in self.activeLayer.getFeatures():
 				attribute=feat.attributes()[fid]
-				listValue.append(float(attribute))
+				listValue.append(attribute)
 		else:
 			for feat in self.activeLayer.getFeatures():
 				attribute=feat.attributes()[fid]
@@ -585,7 +592,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 
 	def BuildOutput(self):
 		"""General function for all graphical and tabula output"""
-		currentDir = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDir = str(os.path.abspath( os.path.dirname(__file__)))
 		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
 			os.remove(os.path.join(currentDir,"histogram.png"))
 		try:
@@ -593,7 +600,7 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 			import numpy as np
 			#self.BuildGraphPnt(currentDir)
 			self.BuildGraphIstogram(currentDir)
-		except ImportError, e:
+		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoFuzzy', "Plugin error"), \
 			QCoreApplication.translate('geoFuzzy', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
@@ -648,9 +655,11 @@ class geoFuzzyDialog(QDialog, Ui_Dialog):
 		Visualize an About window.
 		"""
 
-		QMessageBox.about(self, "About Fuzzy MCDA model",
+		QMessageBox.about(self, "About geoFuzzy MCDA model",
 		"""
-			 <p>Please report any bug to <a href="mailto:g_massa@libero.it">g_massa@libero.it</a></p>
+			<p>Performs geographic multi-criteria decision making using Fuzzy MCDA model (Yager R. - 1977 - Multiple objective decision making using fuzzy set, International Journal of Man-Machine Studies, 12, 299-322).
+			Documents and data 	are available in: <a href="http://maplab.alwaysdata.net/geomcda.html"> www.maplab.alwaysdata.net</a></p>
+			<p>Author:  Gianluca Massei <a href="mailto:g_massa@libero.it">[g_massa at libero.it]</a></p>
 		""")
 
 	def open_help(self):

@@ -1,31 +1,22 @@
-# This file contains metadata for your plugin. Beginning
-# with version 1.8 this is the preferred way to supply information about a
-# plugin. The current method of embedding metadata in __init__.py will
-# be supported until version 2.0
-
-# This file should be included when you package your plugin.
-
-# Mandatory items:
-
 [general]
 name=VectorMCDA
-qgisMinimumVersion=2.0
-#qgisMaximumVersion=2.99
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.99
 description=Performs geographic multi-criteria decision making.
-version=1.0.6
+version=2.99
+author=author=Gianluca Massei
+email=g_massa@libero
 
-# end of mandatory metadata
+about=VectorMCDA is a QGIS plugin that uses different MCDA algorithms to perform a multicriteria analysis in a geographic environmental
 
-# Optional items:
+tracker=http://hub.qgis.org/projects/vectormcda
+repository=https://github.com/gmassei/VectorMCDA
 
-# Uncomment the following line and add your changelog entries:
-# changelog= new social tab and rules extraction tabs
-
-# tags are comma separated with spaces allowed
-tags=Sustainability assessment, Geographic MCDA, Vector
-category=vector
-
-changelog=1.0.8 bug in geoWeightedSum (missing button for pairwise comparison)
+changelog=
+	2.99 porting in QGIS3
+	1.1.2 bug in geoWeightedSum (missing button for pairwise comparison)
+	1.1.0 improvements in the "a" and "help" buttons
+	1.0.8 bug in geoWeightedSum (missing button for pairwise comparison)
 	1.0.6 bug in geoRULES solved (mistake in coding parsingRules fnct )
 	1.0.4 bug in geoRULES solved (incorrect rules shown)
 	1.0.2 improved add and delete field in criterion's table
@@ -39,23 +30,11 @@ changelog=1.0.8 bug in geoWeightedSum (missing button for pairwise comparison)
 	0.2 several bugs in geoPromethee are corrected
 	0.1 first release
 
+tags=geometry, layers, Sustainability assessment, Geographic MCDA, shapefile
 
 homepage=http://maplab.alwaysdata.net/geomcda.html
-tracker=http://hub.qgis.org/projects/vectormcda
-repository=https://github.com/gmassei/VectorMCDA
 category=Vector
 icon=icons/Tree.png
-# experimental flag
-experimental=False
 
-# deprecated flag (applies to the whole plugin, not just a single version
+experimental=True
 deprecated=False
-
-about= VectorMCDA is a QGIS plugin that uses different MCDA algorithms to perform a multicriteria analysis in a geographic environmental
-
-
-# Author contact information
-author= Gianluca Massei
-email=g_massa@libero.it
-
-

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
-    <height>591</height>
+    <width>607</width>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>geoRules</string>
+   <string>geoXMCDA</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
@@ -28,8 +28,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>465</width>
-        <height>543</height>
+        <width>589</width>
+        <height>538</height>
        </rect>
       </property>
       <attribute name="label">
@@ -156,7 +156,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>--&gt; XMCDA file</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="CritHelpBtn">
+      <widget class="QPushButton" name="SetHelpBtn">
        <property name="geometry">
         <rect>
          <x>280</x>
@@ -277,7 +277,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
   <tabstop>CritRemoveFieldBtn</tabstop>
   <tabstop>CritWeighTableWidget</tabstop>
   <tabstop>CritExtractBtn</tabstop>
-  <tabstop>CritHelpBtn</tabstop>
+  <tabstop>SetHelpBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -68,7 +68,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <enum>QFrame::Plain</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="EnvironmentaleQTbox">
       <property name="geometry">
@@ -87,7 +87,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <rect>
          <x>88</x>
          <y>62</y>
-         <width>421</width>
+         <width>401</width>
          <height>22</height>
         </rect>
        </property>
@@ -137,9 +137,9 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>460</y>
-         <width>361</width>
-         <height>31</height>
+         <y>430</y>
+         <width>531</width>
+         <height>51</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -165,8 +165,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="SetBtnHelp">
        <property name="geometry">
         <rect>
-         <x>500</x>
-         <y>460</y>
+         <x>580</x>
+         <y>470</y>
          <width>71</width>
          <height>24</height>
         </rect>
@@ -208,8 +208,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <rect>
          <x>14</x>
          <y>105</y>
-         <width>655</width>
-         <height>331</height>
+         <width>651</width>
+         <height>301</height>
         </rect>
        </property>
        <property name="currentIndex">
@@ -224,7 +224,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
           <rect>
            <x>10</x>
            <y>21</y>
-           <width>630</width>
+           <width>621</width>
            <height>141</height>
           </rect>
          </property>
@@ -268,7 +268,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <widget class="QPushButton" name="EnvGetWeightBtn">
          <property name="geometry">
           <rect>
-           <x>573</x>
+           <x>560</x>
            <y>190</y>
            <width>71</width>
            <height>24</height>
@@ -308,8 +308,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <widget class="QPushButton" name="EnvCalculateBtn">
          <property name="geometry">
           <rect>
-           <x>529</x>
-           <y>260</y>
+           <x>520</x>
+           <y>240</y>
            <width>111</width>
            <height>24</height>
           </rect>
@@ -338,8 +338,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
           <rect>
            <x>10</x>
            <y>15</y>
-           <width>630</width>
-           <height>231</height>
+           <width>621</width>
+           <height>211</height>
           </rect>
          </property>
          <property name="sizePolicy">
@@ -363,7 +363,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="EnvAddFieldBtn">
        <property name="geometry">
         <rect>
-         <x>541</x>
+         <x>520</x>
          <y>62</y>
          <width>121</width>
          <height>24</height>
@@ -382,8 +382,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="SetBtnAbout">
        <property name="geometry">
         <rect>
-         <x>590</x>
-         <y>460</y>
+         <x>580</x>
+         <y>440</y>
          <width>71</width>
          <height>24</height>
         </rect>
@@ -407,8 +407,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QDialogButtonBox" name="SetBtnQuit">
        <property name="geometry">
         <rect>
-         <x>410</x>
-         <y>460</y>
+         <x>580</x>
+         <y>410</y>
          <width>71</width>
          <height>24</height>
         </rect>
@@ -432,19 +432,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <set>QDialogButtonBox::Cancel</set>
        </property>
       </widget>
-      <widget class="QLabel" name="LblWeighGraph">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>380</y>
-         <width>541</width>
-         <height>71</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
       <zorder>EnvAddFieldBtn</zorder>
       <zorder>EnvlistFieldsCBox</zorder>
       <zorder>EnvLbl</zorder>
@@ -456,7 +443,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <zorder>EnvTabWidget</zorder>
       <zorder>SetBtnAbout</zorder>
       <zorder>SetBtnQuit</zorder>
-      <zorder>LblWeighGraph</zorder>
      </widget>
      <widget class="QWidget" name="AnalysisQTBox">
       <property name="geometry">

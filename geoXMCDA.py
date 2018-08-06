@@ -21,14 +21,17 @@ email			: (g_massa@libero.it)
 """
 
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import QtGui
+from builtins import zip
+from builtins import str
+from builtins import range
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from qgis.PyQt import QtGui
 
 from qgis.core import *
 from qgis.gui import *
 
-from ui_geoXMCDA import Ui_Dialog
+from .ui_geoXMCDA import Ui_Dialog
 
 import numpy as np
 import webbrowser
@@ -47,11 +50,12 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 		self.iface = iface	# salvo il riferimento alla interfaccia di QGis
 		self.activeLayer = self.iface.activeLayer()
 		# imposto l'azione da eseguire al click sui pulsanti
-		QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		QObject.connect(self.CritRemoveFieldBtn, SIGNAL( "clicked()" ), self.RemoveField)
-		QObject.connect(self.CritExtractBtn, SIGNAL( "clicked()" ), self.ExtractData)
+		self.CritAddFieldBtn.clicked.connect(self.AddField)
+		self.CritRemoveFieldBtn.clicked.connect(self.RemoveField)
+		self.CritExtractBtn.clicked.connect(self.ExtractData)
 		QObject.connect(self.toXMXCDAButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		QObject.connect(self.btnOutput, SIGNAL("clicked()"), self.outFile)
+		self.btnOutput.clicked.connect(self.outFile)
+		self.SetHelpBtn.clicked.connect(self.open_help) 
 		
 		self.CritMapNameLbl.setText(self.activeLayer.name())
 
@@ -78,7 +82,7 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 	def outFile(self):
 		"Display file dialog for output XMCDA file"
 		self.lineOutput.clear()
-		outName = QFileDialog.getSaveFileName(self, "xMCDA output file",".", "xMCDA (*.xml)")
+		outName, __ = QFileDialog.getSaveFileName(self, "xMCDA output file",".", "xMCDA (*.xml)")
 		self.lineOutput.clear()
 		self.lineOutput.insert(outName)
 		return outName
@@ -96,7 +100,7 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 				provider = layer.dataProvider()
 				field_min.append(provider.minimumValue( layer.fieldNameIndex(str(field.name())) ))
 				field_max.append(provider.maximumValue( layer.fieldNameIndex(str(field.name())) ))
-		f=zip(field_list,field_type,field_min,field_max)
+		f=list(zip(field_list,field_type,field_min,field_max))
 		#self.CritTEdit.setText(str(f))
 		return field_list # sorted( field_list, cmp=locale.strcoll )
 
@@ -207,4 +211,17 @@ class geoXMCDADialog(QDialog, Ui_Dialog):
 		#self.setModal(False)
 		#self.matrix2csv(matrix)
 
+###################################################################################################
+	def about(self):
+		"""
+		Visualize an About window.
+		"""
 
+		QMessageBox.about(self, "About geoXMCDA",
+		"""
+			Export attribute data in a 'near' XMCDA format (http://www.decision-deck.org/xmcda) - (C)- 2008-2016, Decision Deck Consortium.
+			<p>Author:  Gianluca Massei <a href="mailto:g_massa@libero.it">[g_massa at libero.it]</a></p>
+		""")
+
+	def open_help(self):
+		webbrowser.open("http://maplab.alwaysdata.net/geomcda.html")

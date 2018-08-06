@@ -22,5 +22,5 @@ email                : g_massa@libero.it
 """
 
 def classFactory(iface):	# inizializza il plugin
-	from VectorMCDA import vMCDA	# importiamo la classe che realizza il plugin
+	from .VectorMCDA import vMCDA	# importiamo la classe che realizza il plugin
 	return vMCDA(iface)	# creiamo una istanza del plugin

@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>693</width>
-    <height>657</height>
+    <height>609</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -79,7 +79,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <x>0</x>
         <y>0</y>
         <width>675</width>
-        <height>579</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -448,108 +448,125 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>675</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
        <string>Analysis</string>
       </attribute>
-      <widget class="QPushButton" name="GraphBtn">
+      <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
         <rect>
-         <x>570</x>
-         <y>120</y>
-         <width>90</width>
-         <height>24</height>
+         <x>19</x>
+         <y>259</y>
+         <width>631</width>
+         <height>211</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Graph</string>
+       <property name="title">
+        <string>Buld charts</string>
        </property>
+       <widget class="QComboBox" name="LabelListFieldsCBox">
+        <property name="geometry">
+         <rect>
+          <x>105</x>
+          <y>88</y>
+          <width>241</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>22</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="GraphBtn">
+        <property name="geometry">
+         <rect>
+          <x>470</x>
+          <y>90</y>
+          <width>90</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load charts</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>90</y>
+          <width>64</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Label field</string>
+        </property>
+       </widget>
       </widget>
-      <widget class="QLabel" name="LblGraphic">
+      <widget class="QGroupBox" name="groupBox_2">
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>170</y>
-         <width>518</width>
-         <height>251</height>
+         <y>30</y>
+         <width>631</width>
+         <height>211</height>
         </rect>
        </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
+       <property name="title">
+        <string>Load thematic maps</string>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="RenderBtn">
-       <property name="geometry">
-        <rect>
-         <x>570</x>
-         <y>40</y>
-         <width>90</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Load maps</string>
-       </property>
-      </widget>
-      <widget class="Line" name="line">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>90</y>
-         <width>644</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="LabelListFieldsCBox">
-       <property name="geometry">
-        <rect>
-         <x>107</x>
-         <y>123</y>
-         <width>419</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>22</height>
-        </size>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>22</x>
-         <y>125</y>
-         <width>64</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Label field</string>
-       </property>
+       <widget class="QLabel" name="label_7">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>80</y>
+          <width>161</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Classes in maps</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="RenderBtn">
+        <property name="geometry">
+         <rect>
+          <x>460</x>
+          <y>80</y>
+          <width>90</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Load maps</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="spinBoxClasNum">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>80</y>
+          <width>42</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="value">
+         <number>5</number>
+        </property>
+       </widget>
       </widget>
       <widget class="QDialogButtonBox" name="AnlsBtnBox">
        <property name="geometry">
         <rect>
-         <x>560</x>
-         <y>504</y>
+         <x>520</x>
+         <y>490</y>
          <width>110</width>
          <height>23</height>
         </rect>
@@ -570,56 +587,29 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <set>QDialogButtonBox::Cancel</set>
        </property>
       </widget>
-      <widget class="QLabel" name="label_4">
+      <widget class="QPushButton" name="AnlsSetBtnAbout">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>161</width>
-         <height>16</height>
+         <x>420</x>
+         <y>490</y>
+         <width>91</width>
+         <height>24</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="text">
-        <string>Load thematic maps</string>
-       </property>
-      </widget>
-      <widget class="Line" name="line_14">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>10</y>
-         <width>644</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="spinBoxClasNum">
-       <property name="geometry">
-        <rect>
-         <x>360</x>
-         <y>40</y>
-         <width>42</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="value">
-        <number>5</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_7">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>40</y>
-         <width>111</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Classes in maps</string>
+        <string>About</string>
        </property>
       </widget>
      </widget>
@@ -631,11 +621,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
  <tabstops>
   <tabstop>EnvAddFieldBtn</tabstop>
   <tabstop>EnvTEdit</tabstop>
-  <tabstop>GraphBtn</tabstop>
   <tabstop>SetBtnHelp</tabstop>
   <tabstop>EnvlistFieldsCBox</tabstop>
-  <tabstop>RenderBtn</tabstop>
-  <tabstop>LabelListFieldsCBox</tabstop>
   <tabstop>AnlsBtnBox</tabstop>
  </tabstops>
  <resources/>

@@ -1,24 +1,4 @@
-from builtins import str
-from builtins import range
-import os
-import operator
-
-def BuilHTMLGraph(ListValue,labels,legend):
-	header=["label"]+legend
-	data=[]
-	for i in range(len(labels)):
-		row=[]
-		row.append(labels[i])
-		for j in ListValue[i]:
-			row.append(j)
-		data.append(row)
-	currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
-	data = sorted(data, key=operator.itemgetter(-1),reverse=True)
-	log=open(os.path.join(currentDIR,"log.html"),"w")
-	log.write(currentDIR)
-	HTMLfile=open(os.path.join(currentDIR,"barGraph.html"),"w")
-
-	HTMLfile.write("""<!DOCTYPE html>
+<!DOCTYPE html>
 	<html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -32,22 +12,32 @@ def BuilHTMLGraph(ListValue,labels,legend):
 			google.load("visualization", "1", {packages:["corechart"]});
 			google.setOnLoadCallback(drawChart);
 			function drawChart() {
-				var dataBar = google.visualization.arrayToDataTable([\n""")
-	HTMLfile.write(str(header)+",\n")
-	for r in range(len(data)):
-		HTMLfile.write(str(data[r])+",\n") #last doesn't printed
-	HTMLfile.write(str(data[r]))
-	HTMLfile.write("\n]);\n")
-	HTMLfile.write("""	var optionsBar = {
+				var dataBar = google.visualization.arrayToDataTable([
+['label', 'geoConcordance', 'geoDiscordance'],
+['Castiglione del Lago', -45.0, 2.3614],
+['Gualdo Tadino', -15.0, 1.8326],
+['Perugia', 85.0, 1.6549],
+['Gubbio', -13.0, 1.5062],
+['Foligno', 15.0, 1.1405],
+['Bastia Umbra', -4.0, 0.7564],
+['Todi', -7.0, 0.5271],
+['Corciano', 12.0, 0.4434],
+['Spoleto', 47.0, 0.2257],
+['Orvieto', 30.0, -0.3184],
+['Umbertide', -9.0, -1.3925],
+['Citta di Castello', -14.0, -2.4889],
+['Marsciano', -43.0, -3.1081],
+['Narni', -39.0, -3.1405],
+['Narni', -39.0, -3.1405]
+]);
+	var optionsBar = {
 			  title: 'bars of rating',
 			  legend:{position:'in'},
 			};
 				var chartBar = new google.visualization.ColumnChart(document.getElementById('bar_div'));
 			chartBar.draw(dataBar, optionsBar);
 		}
-		</script>""")
-		
-	HTMLfile.write("""
+		</script>
 	  </head>
 	  <body>
 	  <div id="logo" class="container"><h1>Graph of rating</h1>
@@ -59,6 +49,4 @@ def BuilHTMLGraph(ListValue,labels,legend):
 		powered by VectorMCDA in QGIS</a>
 		<hr>
 	  </body>
-	</html>""")
-	HTMLfile.close()
-	log.close()
+	</html>

@@ -2,7 +2,7 @@ PLUGINNAME = VectorMCDA
 
 PY_FILES = VectorMCDA.py geoWeightedSum.py geoTOPSIS.py geoFuzzy.py geoPromethee.py geoElectre.py geoRULES.py geoXMCDA.py htmlGraph.py geoXMCDA.py fuzzify.py DOMLEM.py geoRULES.py __init__.py
 
-EXTRAS = metadata.txt icons/ images/ Doc/
+EXTRAS = metadata.txt LICENCE.txt icons/ images/ Doc/
 
 UI_FILES = ui_geoXMCDA.py ui_geoWeightedSum.py ui_geoTOPSIS.py ui_geoRULES.py ui_geoPromethee.py ui_geoFuzzy.py ui_geoElectre.py ui_geoRULES.py
 
@@ -10,6 +10,7 @@ RESOURCE_FILES = resources.py
 #geoXMCDA.ui geoWeightedSum.ui geoTOPSIS.ui geoRSDB.ui geoPromethee.ui  geoFuzzy.ui  geoElectre.ui  geoRULES.ui
 # 
 #resources.py
+#pyuic4 -o  ui_geoElectre.py geoElectre.ui
 
 QGISDIR=.qgis2
 
@@ -22,7 +23,7 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 
 %.py : %.ui
 	pyuic4 -o $@ $<
-#pyuic4 -o  ui_geoRULES.py geoRULES.ui
+# 	
 
 deploy: compile
 	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)

@@ -9,12 +9,18 @@ COPYRIGHT:	c) 2012 Gianluca Massei and Antonio Boggia. This program is
 			free software under the GNU General Public License (>=v2).
 ########################################################################
 '''
+from __future__ import print_function
 
 
+from builtins import str
+from builtins import zip
+from builtins import map
+from builtins import range
 import sys,os
 import collections
 import pickle
 from time import time, ctime
+from functools import reduce
 
 
 
@@ -25,11 +31,11 @@ def collect_examples(data):
 	start=(data.index(['**EXAMPLES'])+1)
 	end=data.index(['**END'])
 	for i in range(start, end):
-		data[i]=(map(float, data[i]))
+		data[i]=(list(map(float, data[i])))
 		matrix.append(data[i])
 	#matrix=[list(i) for i in set(tuple(j) for j in matrix)] #remove duplicate example ---TODO---
-	key=range(1,len(matrix)+1)
-	examples=dict(zip(key,matrix))
+	key=list(range(1,len(matrix)+1))
+	examples=dict(list(zip(key,matrix)))
 	return examples
 	
 	
@@ -66,7 +72,8 @@ def file2infosystem(isf):
 		infile.close()
 		infosystem={'attributes':collect_attributes (data),'examples':collect_examples(data)}
 	except TypeError:
-		print "\n\n Computing error or input file %s is not readeable. Exiting" % isf
+		# fix_print_with_import
+		print("\n\n Computing error or input file %s is not readeable. Exiting" % isf)
 		sys.exit(0)
 	return infosystem
 	
@@ -75,7 +82,7 @@ def union_classes(infosystem):
 	decision_class=[]
 	all_class=[]
 	matrix=infosystem['examples']
-	for k,v in matrix.iteritems():
+	for k,v in matrix.items():
 		decision_class.append(int(v[-1]))
 	decision_class=list(set(decision_class))
 	return decision_class
@@ -87,7 +94,7 @@ def downward_union_classes(infosystem,decision_class):
 	downward_union=[]
 	matrix=infosystem['examples']
 	for c in decision_class:
-		tmplist={k:v for k,v in matrix.iteritems() if int(v[-1])<=c} 
+		tmplist={k:v for k,v in matrix.items() if int(v[-1])<=c} 
 		downward_union.append(tmplist)
 	return downward_union
 
@@ -97,7 +104,7 @@ def upward_union_class (infosystem,decision_class):
 	upward_union=[]
 	matrix=infosystem['examples']
 	for c in decision_class:
-		tmplist={k:v for k,v in matrix.iteritems() if int(v[-1])>=c}
+		tmplist={k:v for k,v in matrix.items() if int(v[-1])>=c}
 		upward_union.append(tmplist)
 	return upward_union
 
@@ -116,8 +123,8 @@ def dominating_set(infosystem):
 	matrix=infosystem['examples']
 	preference=[s['preference'] for s in infosystem['attributes'] ]
 	dominating=[]
-	for key,value in matrix.iteritems():
-		examples=[{k:v} for k,v in matrix.iteritems() if  is_better(v[:-1], value[:-1], preference[:-1])]
+	for key,value in matrix.items():
+		examples=[{k:v} for k,v in matrix.items() if  is_better(v[:-1], value[:-1], preference[:-1])]
 		dominating.append({'object':key, 'examples':examples})
 	return dominating #objects dominating obj key
 
@@ -126,8 +133,8 @@ def dominated_set(infosystem):
 	matrix=infosystem['examples']
 	preference=[s['preference'] for s in infosystem['attributes'] ]
 	dominated=[]
-	for key,value in matrix.iteritems():
-		examples=[{k:v} for k,v in matrix.iteritems() if  is_worst(v[:-1], value[:-1], preference[:-1])]
+	for key,value in matrix.items():
+		examples=[{k:v} for k,v in matrix.items() if  is_worst(v[:-1], value[:-1], preference[:-1])]
 		dominated.append({'object':key, 'examples':examples})
 	return dominated #objects dominated obj key
 
@@ -140,7 +147,7 @@ def lower_approximation(union_class, dominance, decision_class):
 		temp=[]
 		union_set=set(union.keys())
 		for d in dominance:
-			dominance_set=set(sum([k.keys() for k in d['examples']],[])) #extract keys object
+			dominance_set=set(sum([list(k.keys()) for k in d['examples']],[])) #extract keys object
 			if union_set.issuperset(dominance_set):
 				temp.append(d['object'])
 		single={'class':decision_class[c], 'objects':temp} #dictionary for lower approximation  
@@ -158,7 +165,7 @@ def upper_approximation(union_class, dominance, decision_class):
 		temp=[]
 		union_set=set(union.keys())  #single union class
 		for d in dominance:
-			dominance_set=set(sum([k.keys() for k in d['examples']],[])) #extract keys object
+			dominance_set=set(sum([list(k.keys()) for k in d['examples']],[])) #extract keys object
 			if len(dominance_set & set(union_set)) >0:
 			   temp.append(d['object'])
 		single={'class':decision_class[c],'objects':list(set(temp))}
@@ -194,7 +201,7 @@ def QualityOfQpproximation(DownwardBoundary,  infosystem):
 
 def filter_infosystem(INFOSYS,keys):
 	'''filter INFOSYS with list of keys'''
-	return dict((k,v) for k,v in INFOSYS.items() if k in keys)   
+	return dict((k,v) for k,v in list(INFOSYS.items()) if k in keys)   
 		
 		
 def flatten(x):
@@ -211,14 +218,14 @@ def element_cover(INFOSYS,elem,rule_type):	#elem is a 'singleton' in a complex
 	'''find objects covered by single element'''
 	if rule_type=="one":
 		if elem['preference']=='gain':
-			return dict((key,value) for key,value in INFOSYS.items() if value[elem['criterion']]>=elem['condition'])
+			return dict((key,value) for key,value in list(INFOSYS.items()) if value[elem['criterion']]>=elem['condition'])
 		else:
-			return dict((key,value) for key,value in INFOSYS.items() if value[elem['criterion']]<=elem['condition'])
+			return dict((key,value) for key,value in list(INFOSYS.items()) if value[elem['criterion']]<=elem['condition'])
 	elif rule_type=="three":
 		if elem['preference']=='gain':
-			return dict((key,value) for key,value in INFOSYS.items() if value[elem['criterion']]<=elem['condition'])
+			return dict((key,value) for key,value in list(INFOSYS.items()) if value[elem['criterion']]<=elem['condition'])
 		else:
-			return dict((key,value) for key,value in INFOSYS.items() if value[elem['criterion']]>=elem['condition'])
+			return dict((key,value) for key,value in list(INFOSYS.items()) if value[elem['criterion']]>=elem['condition'])
 	else:
 		return 0		
 
@@ -226,9 +233,9 @@ def element_cover(INFOSYS,elem,rule_type):	#elem is a 'singleton' in a complex
 def complex_cover(INFOSYS,e,rule_type):
 	'''find objects covered by complex e'''
 	covered=[[element_cover(INFOSYS,elem,rule_type)] for elem in e]
-	covered=[o.keys() for row in covered for o in row]
+	covered=[list(o.keys()) for row in covered for o in row]
 	if len(covered)>0:
-		return list(reduce(set.intersection,map(set,covered))) #Reduce apply intersection of two arguments cumulatively to the items of iterable.
+		return list(reduce(set.intersection,list(map(set,covered)))) #Reduce apply intersection of two arguments cumulatively to the items of iterable.
 	else:
 		return []
 
@@ -354,7 +361,8 @@ def format_rules(rules,RULES,header):
 				else:
 					e['sign']='>='
 			else:
-				print " ERROR! "
+				# fix_print_with_import
+				print(" ERROR! ")
 		RULES.append(E)
 	return RULES	
 
@@ -377,7 +385,7 @@ def print_rules(RULES,infosystem):
 	label_classes=['n.c','very low', 'low','medium','high','very high']
 	EXAMPLES=infosystem['examples']
 	j=1
-	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+	currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 	outfile=open(os.path.join(currentDIR,"rules.rls"),"w")
 	#outfile.write("\n##  AT LEAST {>= Class} - Type 1 rules and  AT MOST {<= Class} - Type 3 rules\n")
 	#outfile.write('\t[RULES:]\n')
@@ -396,7 +404,7 @@ def print_rules(RULES,infosystem):
 	return 0
 		
 def saveToPickle(RULES):
-	currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+	currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 	rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'wb')
 	pickle.dump(RULES,rulesPKL) #save RULES dict in a file for use it in geoRULES module
 	rulesPKL.close()
@@ -407,9 +415,10 @@ def main(currentDIR):
 	"""main function for stand alone program"""
 	try:
 		start=time()
-		print 'start:', ctime(time())
+		# fix_print_with_import
+		print('start:', ctime(time()))
 
-		currentDIR = unicode(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 		infosystem=file2infosystem(os.path.join(currentDIR,"example.isf"))
 		decision_class=union_classes(infosystem)
 		downward_union_classes(infosystem,decision_class)
@@ -444,10 +453,12 @@ def main(currentDIR):
 		print_rules(RULES,infosystem)
 		saveToPickle(RULES)
 		end=time()
-		print "Time -> %.4f s" % (end-start)
+		# fix_print_with_import
+		print("Time -> %.4f s" % (end-start))
 		return 0
 	except TypeError:
-		print "\n\t Computing error. Exiting"
+		# fix_print_with_import
+		print("\n\t Computing error. Exiting")
 		sys.exit(0)
 
 ###########execute the script##########################

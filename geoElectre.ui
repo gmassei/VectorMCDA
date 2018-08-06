@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>595</height>
+    <width>687</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -28,7 +28,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>geo Concordance</string>
+   <string>geoConcordance</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -68,15 +68,15 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <enum>QFrame::Plain</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="EnvironmentaleQTbox">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>676</width>
-        <height>517</height>
+        <width>669</width>
+        <height>520</height>
        </rect>
       </property>
       <attribute name="label">
@@ -137,7 +137,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>480</y>
+         <y>420</y>
          <width>530</width>
          <height>81</height>
         </rect>
@@ -166,7 +166,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>560</x>
-         <y>510</y>
+         <y>450</y>
          <width>102</width>
          <height>24</height>
         </rect>
@@ -204,7 +204,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>440</y>
+         <y>390</y>
          <width>660</width>
          <height>15</height>
         </rect>
@@ -218,8 +218,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <rect>
          <x>14</x>
          <y>105</y>
-         <width>655</width>
-         <height>321</height>
+         <width>651</width>
+         <height>301</height>
         </rect>
        </property>
        <property name="currentIndex">
@@ -315,8 +315,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <widget class="QPushButton" name="EnvCalculateBtn">
          <property name="geometry">
           <rect>
-           <x>529</x>
-           <y>260</y>
+           <x>530</x>
+           <y>240</y>
            <width>111</width>
            <height>24</height>
           </rect>
@@ -346,7 +346,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
            <x>10</x>
            <y>15</y>
            <width>630</width>
-           <height>231</height>
+           <height>211</height>
           </rect>
          </property>
          <property name="sizePolicy">
@@ -390,7 +390,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>560</x>
-         <y>540</y>
+         <y>480</y>
          <width>102</width>
          <height>24</height>
         </rect>
@@ -415,7 +415,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>560</x>
-         <y>480</y>
+         <y>420</y>
          <width>102</width>
          <height>24</height>
         </rect>
@@ -454,8 +454,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>676</width>
-        <height>517</height>
+        <width>669</width>
+        <height>520</height>
        </rect>
       </property>
       <attribute name="label">

@@ -2,8 +2,8 @@
 
 """
 /***************************************************************************
-Name            : geoTOPSIS
-Description     : geographical MCDA 
+Name            : geoTemplate
+Description     : generic GUI for geographical MCDA 
 Date            : June 27, 2014
 copyright		: Gianluca Massei  (developper) 
 email			: (g_massa@libero.it)
@@ -19,14 +19,15 @@ email			: (g_massa@libero.it)
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import print_function
 from __future__ import absolute_import
 from builtins import zip
 from builtins import str
 from builtins import range
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QDialog,QMessageBox, QTableWidget, QTableWidgetItem, QMenu
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from qgis.PyQt import QtGui
+
 from qgis.core import *
 from qgis.gui import *
 	
@@ -36,19 +37,27 @@ import shutil
 import csv
 
 try:
+	from pymcda import *
+except ImportError as e:
+	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
+	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % e))
+	
+
+
+try:
 	import numpy as np
 except ImportError as e:
-	QMessageBox.information(None, QCoreApplication.translate('geoTOPSIS', "Plugin error"), \
-	QCoreApplication.translate('geoTOPSIS', "Couldn't import Python module. [Message: %s]" % e))
+	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
+	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 
 #import DOMLEM
 from . import htmlGraph
 
-from .ui_geoTOPSIS import Ui_Dialog
+from .ui_geoTEMPLATE import Ui_Dialog
 
-class geoTOPSISDialog(QDialog, Ui_Dialog):
+class geoTEMPLATEDialog(QDialog, Ui_Dialog):
 	def __init__(self, iface):
 		'''costruttore'''
 		QDialog.__init__(self, iface.mainWindow())
@@ -57,29 +66,27 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		self.activeLayer = self.iface.activeLayer()
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
-		#QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
-		self.SetBtnQuit.clicked.connect(self.reject)
+		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		self.SetBtnAbout.clicked.connect(self.about)
 		self.AnlsSetBtnAbout.clicked.connect(self.about)
 		self.SetBtnHelp.clicked.connect(self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)	
-		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
-		self.EnvGetWeightBtn.clicked.connect(self.Elaborate)
-		self.RenderBtn.clicked.connect(self.RenderLayer)
-		self.GraphBtn.clicked.connect(self.BuildOutput)
-		#QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		self.AnlsBtnBox.clicked.connect(self.reject)
+		self.EnvCalculateBtn.clicked.connect(self.analyticHierarchyProcess)
+		self.EnvGetWeightBtn.clicked.connect(self.elaborate)
+		self.RenderBtn.clicked.connect(self.renderLayer)
+		self.GraphBtn.clicked.connect(self.buildOutput)
+		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
-		outputFile="geoTOPSIS.shp"
+		outputFile="geoTEMPLATE.shp"
 		sourceOut=os.path.join(pathSource,outputFile)
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
-		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.fields()])
+		self.EnvlistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
 #################################################################################
-		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		Envfields=self.getFieldNames(self.activeLayer) #field list
 		self.EnvTableWidget.setColumnCount(len(Envfields))
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
@@ -87,14 +94,14 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		EnvSetLabel=["Weigths","Preference","Ideal point", "Worst point "]
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
-		self.EnvParameterWidget.setRowCount(4)
+		self.EnvParameterWidget.setRowCount(len(EnvSetLabel))
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
+		self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
 		self.updateTable()
 		try:
-			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
 		except:
 			pass
 ###############################ContextMenu########################################
@@ -111,12 +118,14 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		except:
 			pass
 
-	def GetFieldNames(self, layer):
+	def getFieldNames(self, layer):
 		"""retrive field names from active map/layer"""
 		fields = layer.dataProvider().fields()
-		fieldList=[f.name() for f in fields if f.typeName()!='String']
-		return fieldList # sorted( field_list, cmp=locale.strcoll )
-
+		field_list = []
+		for field in fields:
+			if field.typeName()!='String':
+				field_list.append(str(field.name()))
+		return field_list
 
 
 	def outFile(self):
@@ -129,7 +138,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		
 	def updateTable(self):
 		"""Prepare and compile table in GUI"""
-		fields=self.GetFieldNames(self.activeLayer)
+		fields=self.getFieldNames(self.activeLayer)
 		#fields = [field.name() for field in self.activeLayer.pendingFields() ]
 		pathSource=os.path.dirname(str(self.activeLayer.source()))
 		self.EnvTableWidget.setColumnCount(len(fields))
@@ -144,11 +153,11 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		for r in range(len(fields)):
 			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
 			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
-		self.updateGUIIdealPoint()
+		self.updateGUI()
 		return 0
 
 
-	def updateGUIIdealPointFctn(self,TableWidget,WeighTableWidget,provider):
+	def updateGUIFctn(self,TableWidget,WeighTableWidget,provider):
 		"""base function for updateGUIIdealPoint()"""
 		criteria=[TableWidget.verticalHeaderItem(f).text() for f in range(TableWidget.columnCount())]
 		preference=[str(WeighTableWidget.item(1, c).text()) for c in range(WeighTableWidget.columnCount())]
@@ -166,10 +175,9 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				WeighTableWidget.setItem(2,r,QTableWidgetItem("0"))
 				WeighTableWidget.setItem(3,r,QTableWidgetItem("0"))
 	
-	def updateGUIIdealPoint(self):
+	def updateGUI(self):
 		provider=self.activeLayer.dataProvider() #provider=self.active_layer.dataProvider() 
-		##Environmental
-		self.updateGUIIdealPointFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
+		self.updateGUIFctn(self.EnvTableWidget,self.EnvParameterWidget,provider)
 		return 0
 
 
@@ -198,7 +206,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		
 		
 	def addPopup(self):
-		Envfields=self.GetFieldNames(self.activeLayer) #field list
+		Envfields=self.getFieldNames(self.activeLayer) #field list
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		difference=set(Envfields)-set(criteria)
 		for f in difference:
@@ -235,7 +243,7 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		return 0
 		
 
-	def CompleteMatrix(self):
+	def completeMatrix(self):
 		"""Autocomplete matrix of  pairwise comparison"""
 		try:
 			cell=self.EnvTableWidget.currentItem()
@@ -244,12 +252,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
 			return 0
 		except ValueError:
-			QMessageBox.warning(self.iface.mainWindow(), "geoTOPSYS",
+			QMessageBox.warning(self.iface.mainWindow(), "geoTEMPLATE",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
 
-	def ChangeValue(self):
+	def changeValue(self):
 		"""Event for change gain/cost"""
 		cell=self.EnvParameterWidget.currentItem()
 		r=cell.row()
@@ -267,18 +275,33 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.setItem(2,c, QTableWidgetItem(second))
 			self.EnvParameterWidget.setItem(3,c, QTableWidgetItem(first))
 
+	def setting2csv(self):
+		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
+		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
+		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		idealPoint=[str(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		worstPoint=[str(self.EnvParameterWidget.item(3, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
+		csvFile=open(os.path.join(currentDIR,'setTEMPLATE.csv'),"wb")
+		write=csv.writer(csvFile,delimiter=";",quotechar='"',quoting=csv.QUOTE_NONNUMERIC)
+		write.writerow(criteria)
+		write.writerow(weight)
+		write.writerow(preference)
+		write.writerow(idealPoint)
+		write.writerow(worstPoint)
+		csvFile.close()
 		
 	def csv2setting(self):
 		currentDIR = (os.path.dirname(str(self.activeLayer.source())))
 		setting=[]
 		try:
-			with open(os.path.join(currentDIR,'setTOPSIS.csv')) as csvFile:
+			with open(os.path.join(currentDIR,'setTEMPLATE.csv')) as csvFile:
 				csvReader = csv.reader(csvFile, delimiter=";", quotechar='"')
 				for row in csvReader:
 					setting.append(row)
 			return setting
 		except:
-			QgsMessageLog.logMessage("Problem in reading setting file","geo")
+			QgsMessageLog.logMessage("Problem in reading setting file","geo",QgsMessageLog.WARNING)
 
 	def setting2table(self,setting):
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
@@ -291,10 +314,8 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 					self.EnvParameterWidget.setItem(3,i,QTableWidgetItem(str(setting[4][l])))
 
 			
-	def Elaborate(self):
-		matrix=self.StandardizationIdealPoint()
-		self.RelativeCloseness(matrix)
-		#self.OveralValue()
+	def elaborate(self):
+		matrix=self.getAttributeMatrix()
 		self.setModal(True)
 		return 0
 #############################################################################################################
@@ -315,12 +336,12 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				self.EnvParameterWidget.setItem(0,i,QTableWidgetItem(str(round(weight[i],2))))
 			return weight, eigenvalues, eigenvector
 		except ImportError as e:
-			QMessageBox.information(None, QCoreApplication.translate('geoTOPSYS', "Plugin error"), \
+			QMessageBox.information(None, QCoreApplication.translate('geoTEMPLATE', "Plugin error"), \
 			QCoreApplication.translate('geoTOPSYS', "Couldn't import Python module 'numpy'.  You can install 'numpy' \
 			with the following command: sudo easy_install numpy'.<br> or you can use 32bit version of QGS. [Message: %s]" % e))
 			return
 
-	def Consistency(self,weight,eigenvalues):
+	def consistency(self,weight,eigenvalues):
 		"Calculete Consistency index in accord with Saaty (1977)"
 		try:
 			RI=[0.00, 0.00, 0.00,0.52,0.90,1.12,1.24,1.32,1.41]     #order of matrix: 0,1,2,3,4,5,6,7,8
@@ -330,25 +351,25 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 		except:
 			return 1.41
 
-	def AnalyticHierarchyProcess(self):
+	def analyticHierarchyProcess(self):
 		"""Calculate weight from matrix of pairwise comparison """
 			
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		pairwise=[[float(self.EnvTableWidget.item(r, c).text()) for r in range(len(criteria))] for c in range(len(criteria))]
 		weight, eigenvalues, eigenvector=self.calculateWeight(pairwise)
-		consistency=self.Consistency(weight,eigenvalues)
+		consistency=self.consistency(weight,eigenvalues)
 		self.ReportLog(eigenvalues,eigenvector, weight, consistency)
 		return 0
 
 
-	def ReportLog(self, eigenvalues,eigenvector, weight, consistency):
+	def reportLog(self, eigenvalues,eigenvector, weight, consistency):
 		"Make a log output"
 		log=" Weights: %s \n Consistency: %s" % (str([round(w,2) for w in weight]),consistency)
 		self.EnvTEdit.setText(log)
 		return 0
 
 
-	def AddDecisionField(self,layer,Label):
+	def addDecisionField(self,layer,Label):
 		"""Add field on attribute table"""
 		caps = layer.dataProvider().capabilities()
 		if caps & QgsVectorDataProvider.AddAttributes:
@@ -357,97 +378,85 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 
 
 ###########################################################################################
-	def ExtractFieldSumSquare(self,field):
-		"""Retrive single field value from attributes table"""
-		provider=self.activeLayer.dataProvider()
-		fid=provider.fieldNameIndex(field)
-		listValue=[]
-		for feat in self.activeLayer.getFeatures():
-			attribute=feat.attributes()[fid]
-			listValue.append(attribute)
-		listValue=[pow(l,2) for l in listValue]
-		return (sum(listValue)**(0.5))
 	
-	def StandardizationIdealPoint(self):
-		"""Perform STEP 1 and STEP 2 of TOPSIS algorithm"""
+	def getAttributeMatrix(self):
+		"""  """
 		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		weight=[ round(w/sum(weight),4) for w in weight ]
+		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		for c,w in zip(list(range(len(criteria))),weight):
 			self.EnvParameterWidget.setItem(0,c,QTableWidgetItem(str(w))) 
 		self.EnvGetWeightBtn.setEnabled(False)
 		provider=self.activeLayer.dataProvider()
 		feat = QgsFeature()
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-		#self.EnvTEdit.append(str(dict(zip(fids,[(field) for field in criteria]))))
-		sumSquareColumn=[self.ExtractFieldSumSquare(field) for field in criteria]
-		
 		matrix=[]
 		for feat in self.activeLayer.getFeatures():
-			row=[feat.attributes()[self.activeLayer.dataProvider().fieldNameIndex(name)] for  name in criteria]
+			row=[feat.id()]+[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
 			matrix.append(row)
-		matrix=np.array(matrix, dtype = 'float32')
-		matrixStd=[]
-		for row in matrix:
-			rowStd=[]
-			for f,w,sSq in zip(row,weight,sumSquareColumn): #N.B. verifica corretto allineamento con i pesi
-				value=(float(f)/float(sSq))*w   # TOPSIS algorithm: STEP 1 and STEP 2
-				rowStd.append(value)
-			matrixStd.append(rowStd)
-		return matrixStd
+		matrix=np.array(matrix) #, dtype = 'float32')
+		np.savetxt('SI.out',matrix,delimiter=';',fmt='%1.4f')
+		self.pyMCDA(weight,preference)
+		return 0
 		
+	def pyMCDA(self,weight,preference):
+		mat=support.inputFromTxt('SI.out')
+		criteriaLabel=support.getCriteriaLabels(mat)
+		alternativesLabel=support.getAlternativesLabels(mat)
+		
+		# fix_print_with_import
+		print("Alternatives name:", support.getAlternativesLabels(mat,2)) # 2 is the field with alternatives name
+		normalize.overAllstd(mat,preference)
+		# fix_print_with_import
+		print(mat['stdMat'])
+		critTest=support.extractColumn(mat,0) #pick up first criterion
+		# fix_print_with_import
+		print("minVector", support.minColumns(mat))
+		# fix_print_with_import
+		print("maxVector", support.maxColumns(mat))
+		ws=weightedsum.weightedsum()
+		# fix_print_with_import
+		print([1 for i in range(len(criteriaLabel))])
+		rank=ws.runWeightedsum(mat['stdMat'],[1 for i in range(len(criteriaLabel))])
+		for alt,r in zip(alternativesLabel,rank):
+			# fix_print_with_import
+			print("alternativa %s: %s" %(alt,r)) 
 			
-	def RelativeCloseness(self, matrix):
-		"""  distance from ideal point"""
-		criteria=[self.EnvParameterWidget.horizontalHeaderItem(f).text() for f in range(self.EnvParameterWidget.columnCount())]
-		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		idealPoint=[float(self.EnvParameterWidget.item(2, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		sumSquareColumnList=[self.ExtractFieldSumSquare(field) for field in criteria]
-		idealPoint=[float(self.EnvParameterWidget.item(2, c).text())/sumSquareColumnList[c]*weight[c] \
-			for c in range(self.EnvParameterWidget.columnCount())]
-		worstPoint=[float(self.EnvParameterWidget.item(3, c).text())/sumSquareColumnList[c]*weight[c] \
-			for c in range(self.EnvParameterWidget.columnCount())]
+	def alterTable(self,rankList):
+		"""Standardization fields values in range [0-1]"""
 		provider=self.activeLayer.dataProvider()
-
-		if provider.fieldNameIndex("geoTOPSYS")==-1:
-			self.AddDecisionField(self.activeLayer,"geoTOPSYS")
-		fldValue = provider.fieldNameIndex("geoTOPSYS") #obtain classify field index from its name
-		self.EnvTEdit.append("done") #   setText
-		#self.EnvTEdit.append(str(idealPoint)+"#"+str(worstPoint))
-		features=provider.featureCount() #Number of features in the layer.
-		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
-		##################################################################
-		self.activeLayer.startEditing()
-		self.EnvProgressBar.setRange(1,features)
+		if provider.fieldNameIndex("geoWSM")==-1:
+			self.AddDecisionField(self.activeLayer,"geoWSM")
+		fldValue = provider.fieldNameIndex("geoWSM") #obtain classify field index from its name
+			
+		feat = QgsFeature()
+		self.EnvProgressBar.setRange(1,provider.featureCount())
 		progress=0
-		relativeClosenessList=[]
-		for row in matrix:
-			IP=WP=0
-			for f,idp,wrp in zip(row,idealPoint,worstPoint):
-				IP =IP+(float(f-idp)**2)   # TOPSIS algorithm: STEP 4
-				WP =WP+(float(f-wrp)**2)
-			relativeClosenessList.append((WP**(0.5))/((WP**(0.5))+(IP**(0.5))))
-		for feat,relativeCloseness in zip(self.activeLayer.getFeatures(),relativeClosenessList):
+		self.activeLayer.startEditing()
+		for rnk,feat in zip(rankList,self.activeLayer.getFeatures()):
 			progress=progress+1
-			self.activeLayer.changeAttributeValue(feat.id(), fldValue, round(float(relativeCloseness),4))
+			features=feat.attributes()
+			self.activeLayer.changeAttributeValue(feat.id(),fldValue,round(rnk,4))
 			self.EnvProgressBar.setValue(progress)
 		self.activeLayer.commitChanges()
-		self.EnvProgressBar.setValue(1)
-		##################################################################
+		self.EnvTEdit.append("done")
+		#self.EnvGetWeightBtn.setEnabled(False)
 		return 0
 
 ###########################################################################################
 
-	def Symbolize(self,fieldName):
+	def symbolize(self,field):
 		"""Prepare legends """
 		numberOfClasses=self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
 			classes=list(range(1,numberOfClasses+1))
+		fieldName = field
 		layer = self.iface.activeLayer()
+		fieldIndex = layer.fieldNameIndex(fieldName)
 		provider = layer.dataProvider()
-		fieldIndex=provider.fieldNameIndex(fieldName)
 		minimum = provider.minimumValue( fieldIndex )
 		maximum = provider.maximumValue( fieldIndex )
 		RangeList = []
@@ -458,32 +467,32 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
-			Symbol = QgsSymbol.defaultSymbol(layer.geometryType())
+			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
-			#Symbol.setAlpha(Opacity)
-			Range = QgsRendererRange(Min,Max,Symbol,Label)
+			Symbol.setAlpha(Opacity)
+			Range = QgsRendererRangeV2(Min,Max,Symbol,Label)
 			RangeList.append(Range)
-		Renderer = QgsGraduatedSymbolRenderer('', RangeList)
-		Renderer.setMode(QgsGraduatedSymbolRenderer.EqualInterval)
+		Renderer = QgsGraduatedSymbolRendererV2('', RangeList)
+		Renderer.setMode(QgsGraduatedSymbolRendererV2.EqualInterval)
 		Renderer.setClassAttribute(fieldName)
-		add=QgsVectorLayer(layer.source(),fieldName,'ogr')
-		add.setRenderer(Renderer)
-		QgsProject.instance().addMapLayer(add)
+		add=QgsVectorLayer(layer.source(),field,'ogr')
+		add.setRendererV2(Renderer)
+		QgsMapLayerRegistry.instance().addMapLayer(add)
 
 
 		
-	def RenderLayer(self):
+	def renderLayer(self):
 		""" Load thematic layers in canvas """
 		fields=['geoTOPSYS']
 		for f in fields:
-			self.Symbolize(f)
-		#self.setModal(False)
+			self.symbolize(f)
+		self.setModal(False)
 
 ###########################################################################################
 	
-	def ExtractAttributeValue(self,field):
+	def extractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
-		fields=self.activeLayer.fields()
+		fields=self.activeLayer.pendingFields()
 		provider=self.activeLayer.dataProvider()
 		fid=provider.fieldNameIndex(field)
 		listValue=[]
@@ -497,20 +506,20 @@ class geoTOPSISDialog(QDialog, Ui_Dialog):
 				listValue.append(str(attribute))
 		return listValue
 
-	def BuildOutput(self):
+	def buildOutput(self):
 		"""General function for all graphical and tabula output"""
 		currentDir = str(os.path.abspath( os.path.dirname(__file__)))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
-		#self.setModal(False)
+		self.setModal(False)
 		return 0
 
 	
-	def BuildHTML(self):
-		geoTOPSISValue=self.ExtractAttributeValue('geoTOPSIS')
+	def buildHTML(self):
+		geoTOPSISValue=self.extractAttributeValue('geoTOPSIS')
 		geoTOPSISValue=[[A] for (A) in geoTOPSISValue]
 		label=self.LabelListFieldsCBox.currentText()
-		labels=self.ExtractAttributeValue(label)
+		labels=self.extractAttributeValue(label)
 		labels=[str(l) for l in labels]
 		legend=['geoTOPSIS']
 		htmlGraph.BuilHTMLGraph(geoTOPSISValue,labels,legend)
