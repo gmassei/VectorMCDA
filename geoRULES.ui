@@ -35,16 +35,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <attribute name="label">
        <string>Criteria</string>
       </attribute>
-      <widget class="QComboBox" name="CritListFieldsCBox">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>30</y>
-         <width>181</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="EnvLbl">
        <property name="geometry">
         <rect>
@@ -56,19 +46,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        </property>
        <property name="text">
         <string>Active layer     </string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="CritFieldsLbl">
-       <property name="geometry">
-        <rect>
-         <x>2</x>
-         <y>32</y>
-         <width>81</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Active field</string>
        </property>
       </widget>
       <widget class="QLabel" name="CritMapNameLbl">
@@ -119,22 +96,22 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <widget class="QPushButton" name="CritExtractBtn">
        <property name="geometry">
         <rect>
-         <x>390</x>
-         <y>80</y>
-         <width>75</width>
-         <height>231</height>
+         <x>384</x>
+         <y>40</y>
+         <width>81</width>
+         <height>271</height>
         </rect>
        </property>
        <property name="text">
-        <string> Extract</string>
+        <string>Pick rules</string>
        </property>
       </widget>
       <widget class="QPushButton" name="CritHelpBtn">
        <property name="geometry">
         <rect>
-         <x>390</x>
+         <x>384</x>
          <y>330</y>
-         <width>75</width>
+         <width>81</width>
          <height>24</height>
         </rect>
        </property>
@@ -142,26 +119,13 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <string>Help</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="CritAddFieldBtn">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>30</y>
-         <width>71</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Add</string>
-       </property>
-      </widget>
       <widget class="QTableWidget" name="critTableWiget">
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>70</y>
+         <y>30</y>
          <width>371</width>
-         <height>291</height>
+         <height>331</height>
         </rect>
        </property>
        <property name="font">
@@ -409,8 +373,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>CritListFieldsCBox</tabstop>
-  <tabstop>CritAddFieldBtn</tabstop>
   <tabstop>CritExtractBtn</tabstop>
   <tabstop>CritHelpBtn</tabstop>
  </tabstops>

@@ -29,8 +29,9 @@ from builtins import map
 from builtins import range
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from qgis.PyQt import QtGui
+from PyQt5.QtWidgets import QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QMenu
 
+from qgis.PyQt import QtGui
 from qgis.core import *
 from qgis.gui import *
 
@@ -55,13 +56,10 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.activeLayer = self.iface.activeLayer()
 		
 		self.SettingButtonBox.accepted.connect(self.fieldToClasses)
-		QObject.connect(self.SettingButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		# imposto l'azione da eseguire al click sui pulsanti
-	#	QObject.connect(self.CritAddFieldBtn, SIGNAL( "clicked()" ), self.addField)
+		self.SettingButtonBox.clicked.connect(self.reject)
 		self.CritExtractBtn.clicked.connect(self.extractRules)
-	#	QObject.connect(self.RulesBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		self.applyRulesBtn.clicked.connect(self.parsingRules)
-		QObject.connect(self.reclassButtonBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		self.reclassButtonBox.clicked.connect(self.reclass)
 		self.CritHelpBtn.clicked.connect(self.open_help) 
 
 		msg="Use  selected features only (%s)" % (len(self.activeLayer.selectedFeatures()))
@@ -70,7 +68,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.CritMapNameLbl.setText(self.activeLayer.name())
 		self.CritMapNameLbl_2.setText(self.activeLayer.name())
 
-		self.CritListFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
+		#self.CritListFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
 		fields=self.getFieldNames(self.activeLayer) #field list
 		self.DeclistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
 		
@@ -100,7 +98,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		
 
 	def getFieldNames(self, layer):
-		field_map = layer.dataProvider().fields()
+		provider=layer.dataProvider()
+		field_map = provider.fields()
 		field_list = []
 		field_type=[]
 		field_min=[]
@@ -110,8 +109,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 				field_list.append(str(field.name()))
 				field_type.append(str(field.typeName()))
 				provider = layer.dataProvider()
-				field_min.append(provider.minimumValue( layer.fieldNameIndex(str(field.name())) ))
-				field_max.append(provider.maximumValue( layer.fieldNameIndex(str(field.name())) ))
+				field_min.append(provider.minimumValue( provider.fieldNameIndex(str(field.name())) ))
+				field_max.append(provider.maximumValue( provider.fieldNameIndex(str(field.name())) ))
 		f=list(zip(field_list,field_type,field_min,field_max))
 		#self.CritTEdit.setText(str(f))
 		return field_list # sorted( field_list, cmp=locale.strcoll )
@@ -184,18 +183,18 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 	
 	def extractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
-		fields=self.activeLayer.pendingFields()
-		fid = self.activeLayer.fieldNameIndex(field)
+		"""Retrive single field value from attributes table"""
+		fields=self.activeLayer.fields()
+		provider=self.activeLayer.dataProvider()
+		fid=provider.fieldNameIndex(field)
 		listValue=[]
-		if self.checkSelected.isChecked():
-			features=self.activeLayer.selectedFeatures()
-		else:
-			features=self.activeLayer.getFeatures()
-		for feat in features:
-			attribute=feat.attributes()[fid]
-			if fields[fid].typeName()=='Real' or fields[fid].typeName()=='Integer':
+		if fields[fid].typeName()=='Real' or fields[fid].typeName()=='Integer':
+			for feat in self.activeLayer.getFeatures():
+				attribute=feat.attributes()[fid]
 				listValue.append(float(attribute))
-			else:
+		else:
+			for feat in self.activeLayer.getFeatures():
+				attribute=feat.attributes()[fid]
 				listValue.append(str(attribute))
 		return listValue
 		
@@ -352,24 +351,35 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		selectedRule=int(selectedRule.split(":")[0])
 		R=RULES[selectedRule-1]
 		exp=self.queryByRule(R)
-		idf=[f.id() for f in  self.whereExpression(layer, exp)]
+		idf=[f.id() for f in  self.extractFeaturesByExp(layer, exp)]
 		layer.setSelectedFeatures(idf)
 		rulesPKL.close()
 		return 0
 
+
+	def extractFeaturesByExp(self,layer,exp):
+		features = [feat for feat in layer.getFeatures()]
+		context = QgsExpressionContext()
+		scope = QgsExpressionContextScope()
+		listOfResults = []
+		for feat in features:
+			scope.setFeature(feat)
+			context.appendScope(scope)
+			exp = QgsExpression(exp)
+			listOfResults.append(exp.evaluate(context))
+		return listOfResults
 		
-		
-	def whereExpression(self,layer, exp):
-		exp = QgsExpression(exp)
-		if exp.hasParserError():
-			raise Exception(exp.parserErrorString())
-		exp.prepare(layer.pendingFields())
-		for feature in layer.getFeatures():
-			value = exp.evaluate(feature)
-			if exp.hasEvalError():
-				raise ValueError(exp.evalErrorString())
-			if bool(value):
-				yield feature
+	#def whereExpression(self,layer, exp):
+		#exp = QgsExpression(exp)
+		#if exp.hasParserError():
+			#raise Exception(exp.parserErrorString())
+		#exp.prepare(layer.pendingFields())
+		#for feature in layer.getFeatures():
+			#value = exp.evaluate(feature)
+			#if exp.hasEvalError():
+				#raise ValueError(exp.evalErrorString())
+			#if bool(value):
+				#yield feature
 
 
 	def parsingRules(self):
