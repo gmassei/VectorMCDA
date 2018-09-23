@@ -3,6 +3,7 @@
 """
 /***************************************************************************
 Name			: geoPromethee
+
 Description		: geographical MCDA with geoPromethee model 
 Date			: June 20, 2014
 copyright		: Gianluca Massei  (developper) 
@@ -25,6 +26,7 @@ from builtins import str
 from builtins import range
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QMenu
 from qgis.PyQt import QtGui
 
 from qgis.core import *
@@ -57,15 +59,17 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,False)
 
-		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
+#		QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
+		self.SetBtnQuit.clicked.connect(self.reject)
 		self.SetBtnAbout.clicked.connect(self.about)
 		self.SetBtnHelp.clicked.connect(self.open_help)
-		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
+#		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
 		self.EnvGetWeightBtn.clicked.connect(self.ElaborateAttributeTable)
 		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
 		self.RenderBtn.clicked.connect(self.RenderLayer)
 		self.GraphBtn.clicked.connect(self.BuildOutput)
-		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+#		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
+		self.AnlsBtnBox.clicked.connect(self.reject)
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		#self.baseLbl.setText(sourceIn)
@@ -76,7 +80,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
 		self.EnvlistFieldsCBox.addItems(self.GetFieldNames(self.activeLayer))
-		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.pendingFields()])
+		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.fields()])
 
 #################################################################################
 		Envfields=self.GetFieldNames(self.activeLayer) #field list
@@ -105,7 +109,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 #################################################################################
 		for i in range(1,self.toolBox.count()):
 			self.toolBox.setItemEnabled (i,True)
-		setting=self.csv2setting()
+		#setting=self.csv2setting()
 		try:
 			self.setting2table(setting)
 		except:
@@ -114,7 +118,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 	def GetFieldNames(self, layer):
 		"""retrive field names from active map/layer"""
-		fieldMap = layer.pendingFields()
+		fieldMap = layer.fields()
 		fieldList=[f.name() for f in fieldMap if f.typeName()!='String']
 		return fieldList # sorted( field_list, cmp=locale.strcoll )
 
@@ -297,10 +301,11 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
 		preference=[str(self.EnvParameterWidget.item(1, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
-		fields = self.activeLayer.pendingFields()
+		provider=self.activeLayer.dataProvider()
+		fields = self.activeLayer.fields()
 		features= self.activeLayer.getFeatures()
 		for feat in features:
-			row=[feat.attributes()[self.activeLayer.fieldNameIndex(name)] for  name in criteria]
+			row=[feat.attributes()[provider.fieldNameIndex(name)] for  name in criteria]
 			matrix.append(row)
 		matrix=np.array(matrix, dtype = 'float32')
 		return matrix
@@ -410,21 +415,23 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		fids=[provider.fieldNameIndex(c) for c in criteria]  #obtain array fields index from its name
 		minField=[provider.minimumValue( f ) for f in fids]
 		maxField=[provider.maximumValue( f ) for f in fids]
-
 		matrix= self.Attributes2Matrix()
-		
 		matrix=self.StandardizeMatrix(preference,weight,matrix,minField,maxField)
 		preferenceMatrix=self.PreferenceMatrix(matrix,criteria,weight)
 		positiveFlow=self.PoisitiveFlow(preferenceMatrix) 
 		negativeFlow=self.NegativeFlow(preferenceMatrix)  
-		self.setting2csv()
+#		self.setting2csv()
 		
+		progress=0
+		self.EnvProgressBar.setRange(1,provider.featureCount())
 		#feat = QgsFeature()
 		self.activeLayer.startEditing()
 		for posF,negF,feat in zip(positiveFlow,negativeFlow,self.activeLayer.getFeatures()):
+			progress=progress+1
 			features=feat.attributes()
-			self.activeLayer.changeAttributeValue(feat.id(),fldPositiveFlux,round(posF,4))
-			self.activeLayer.changeAttributeValue(feat.id(),fldNegativeFlux,round(negF,4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldPositiveFlux,round(float(posF),4))
+			self.activeLayer.changeAttributeValue(feat.id(),fldNegativeFlux,round(float(negF),4))
+			self.EnvProgressBar.setValue(progress)
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0
@@ -432,17 +439,16 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 
 
 
-	def Symbolize(self,field):
+	def Symbolize(self,fieldName):
 		"""Prepare legends """
 		numberOfClasses=self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
 			classes=['very low', 'low','medium','high','very high']
 		else:
 			classes=list(range(1,numberOfClasses+1))
-		fieldName = field
 		numberOfClasses=len(classes)
 		layer = self.iface.activeLayer()
-		fieldIndex = layer.fieldNameIndex(fieldName)
+		fieldIndex = layer.fields().indexFromName(fieldName)
 		provider = layer.dataProvider()
 		minimum = provider.minimumValue( fieldIndex )
 		maximum = provider.maximumValue( fieldIndex )
@@ -454,17 +460,17 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			Max = minimum + ( maximum - minimum ) / numberOfClasses * ( i + 1 )
 			Label = "%s [%.2f - %.2f]" % (c,Min,Max)
 			Colour = QColor(255-255*i/numberOfClasses,255*i/numberOfClasses,0) #red to green
-			Symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+			Symbol = QgsSymbol.defaultSymbol(layer.geometryType())
 			Symbol.setColor(Colour)
-			Symbol.setAlpha(Opacity)
-			Range = QgsRendererRangeV2(Min,Max,Symbol,Label)
+			#Symbol.setAlpha(Opacity)
+			Range = QgsRendererRange(Min,Max,Symbol,Label)
 			RangeList.append(Range)
-		Renderer = QgsGraduatedSymbolRendererV2('', RangeList)
-		Renderer.setMode(QgsGraduatedSymbolRendererV2.EqualInterval)
+		Renderer = QgsGraduatedSymbolRenderer('', RangeList)
+		Renderer.setMode(QgsGraduatedSymbolRenderer.EqualInterval)
 		Renderer.setClassAttribute(fieldName)
-		add=QgsVectorLayer(layer.source(),field,'ogr')
-		add.setRendererV2(Renderer)
-		QgsMapLayerRegistry.instance().addMapLayer(add)
+		add=QgsVectorLayer(layer.source(),fieldName,'ogr')
+		add.setRenderer(Renderer)
+		QgsProject.instance().addMapLayer(add)
 
 
 	def RenderLayer(self):
@@ -472,14 +478,14 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 		fields=['geoFlux[+]','geoFlux[-]']
 		for f in fields:
 			self.Symbolize(f)
-		self.setModal(False)
+		#self.setModal(False)
 
 ###########################################################################################
 
 
 	def ExtractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
-		fields=self.activeLayer.pendingFields()
+		fields=self.activeLayer.fields()
 		provider=self.activeLayer.dataProvider()
 		fid=provider.fieldNameIndex(field)
 		listValue=[]
@@ -511,7 +517,7 @@ class geoPrometheeDialog(QDialog, Ui_Dialog):
 			QCoreApplication.translate('geoPromethee', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
 		self.BuildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
-		self.setModal(False)
+		#self.setModal(False)
 		return 0
 
 

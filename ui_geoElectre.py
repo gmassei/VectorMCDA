@@ -263,3 +263,13 @@ class Ui_Dialog(object):
         self.label_7.setText(_translate("Dialog", "Classes in maps"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.AnalysisQTBox), _translate("Dialog", "Analysis"))
 
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Dialog = QtWidgets.QDialog()
+    ui = Ui_Dialog()
+    ui.setupUi(Dialog)
+    Dialog.show()
+    sys.exit(app.exec_())
+

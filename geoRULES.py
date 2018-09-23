@@ -42,6 +42,7 @@ import webbrowser
 import matplotlib
 import pickle
 import os
+import pdb
 
 from . import DOMLEM
 
@@ -59,7 +60,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		self.SettingButtonBox.clicked.connect(self.reject)
 		self.CritExtractBtn.clicked.connect(self.extractRules)
 		self.applyRulesBtn.clicked.connect(self.parsingRules)
-		self.reclassButtonBox.clicked.connect(self.reclass)
+		self.reclassButtonBox.clicked.connect(self.reject)
 		self.CritHelpBtn.clicked.connect(self.open_help) 
 
 		msg="Use  selected features only (%s)" % (len(self.activeLayer.selectedFeatures()))
@@ -93,8 +94,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
 		headers.customContextMenuRequested.connect(self.popMenu)
 		#################################################################################
-		self.CritListFieldsCBox.setContextMenuPolicy(Qt.CustomContextMenu)
-		self.CritListFieldsCBox.customContextMenuRequested.connect(self.addPopup)
+
 		
 
 	def getFieldNames(self, layer):
@@ -134,6 +134,8 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		difference=set(Envfields)-set(criteria)
 		for f in difference:
 			self.addField(f)
+		self.DeclistFieldsCBox.clear() 
+		self.DeclistFieldsCBox.addItems(Envfields)
 		
 	def addField(self,f=''):
 		"""Add field to table in GUI"""
@@ -152,7 +154,10 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		if len(selected) > 0:
 			for s in selected:
 				self.removeField(s.row())
+			criteria=[self.critTableWiget.verticalHeaderItem(f).text() for f in range(self.critTableWiget.rowCount())]
 			self.critTableWiget.setCurrentCell(-1,-1)
+			self.DeclistFieldsCBox.clear() 
+			self.DeclistFieldsCBox.addItems(criteria)
 		else:
 			QMessageBox.warning(self.iface.mainWindow(), "geoRULES",
 			("column must to be selected"), QMessageBox.Ok, QMessageBox.Ok)
@@ -265,8 +270,9 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		
 	def writeISFfile(self):
 		""""extract data from attribute table and write idf file for extract rules"""
-		self.retrieveCriteria()
-		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+		#self.retrieveCriteria()
+		#currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = QgsProject.instance().readPath("./")
 		out_file = open(os.path.join(currentDIR,"example.isf"),"w")
 		decision=str(self.DeclistFieldsCBox.currentText())
 		criteria,preference,function=self.retrieveCriteria()
@@ -309,24 +315,25 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 
 	def extractRules(self):
 		"""run DOMLEM algorithms"""
-		pathSource=os.path.dirname(str(self.iface.activeLayer().source()))
+		pathSource=QgsProject.instance().readPath("./")#os.path.dirname(str(self.iface.activeLayer().source()))
 		self.writeISFfile()
 		DOMLEM.main(pathSource)
-		self.setModal(False)
+		#self.setModal(False)
 		self.showRules()
 		return 0
 
 
 	def showRules(self):
 		"""show rules in geoRules """
+		currentDIR = QgsProject.instance().readPath("./")
 		try:
-			currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
-			rules=open(currentDIR+"\\rules.rls")
+			rules=open(os.path.join(currentDIR,"rules.rls"))
 			R=rules.readlines()
 			self.RulesListWidget.clear()
 			for E in R:
 				self.RulesListWidget.addItem(E)
 			self.RulesListWidget.itemClicked.connect(self.selectFeatures)
+			rules.close()
 		except:
 			QMessageBox.critical(self.iface.mainWindow(), "Error", "No rules extracted")
 		return 0
@@ -341,50 +348,31 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		return exp
 
 
+	def extractFeaturesByExp(self,layer,exp):
+		exp = QgsExpression(exp)
+		it=layer.getFeatures(QgsFeatureRequest(exp))
+		listOfResults=[i.id() for i in it]
+		return listOfResults
+
 	def selectFeatures(self):
 		"""select feature in attribute table based on rules"""
-		layer=self.iface.activeLayer()
-		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+		layer= self.iface.activeLayer()
+		currentDIR = QgsProject.instance().readPath("./")
 		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
 		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
+		rulesPKL.close()
 		selectedRule=self.RulesListWidget.currentItem().text()
 		selectedRule=int(selectedRule.split(":")[0])
 		R=RULES[selectedRule-1]
 		exp=self.queryByRule(R)
-		idf=[f.id() for f in  self.extractFeaturesByExp(layer, exp)]
-		layer.setSelectedFeatures(idf)
-		rulesPKL.close()
+		idSel=self.extractFeaturesByExp(layer,exp)
+		layer.selectByIds(idSel)
 		return 0
-
-
-	def extractFeaturesByExp(self,layer,exp):
-		features = [feat for feat in layer.getFeatures()]
-		context = QgsExpressionContext()
-		scope = QgsExpressionContextScope()
-		listOfResults = []
-		for feat in features:
-			scope.setFeature(feat)
-			context.appendScope(scope)
-			exp = QgsExpression(exp)
-			listOfResults.append(exp.evaluate(context))
-		return listOfResults
 		
-	#def whereExpression(self,layer, exp):
-		#exp = QgsExpression(exp)
-		#if exp.hasParserError():
-			#raise Exception(exp.parserErrorString())
-		#exp.prepare(layer.pendingFields())
-		#for feature in layer.getFeatures():
-			#value = exp.evaluate(feature)
-			#if exp.hasEvalError():
-				#raise ValueError(exp.evalErrorString())
-			#if bool(value):
-				#yield feature
-
-
+		
 	def parsingRules(self):
 		layer=self.iface.activeLayer()
-		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+		currentDIR = QgsProject.instance().readPath("./")
 		rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'rb')
 		RULES=pickle.load(rulesPKL) #save RULES dict in a file for use it in geoRULES module
 		for R in RULES:
@@ -407,9 +395,9 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		fidAM = layer.fieldNameIndex('AT_MOST')
 		
 		idf=[f.id() for f in  self.whereExpression(layer, exp)]
-		layer.setSelectedFeatures(idf)
+		layer.selectByIds(idf)
 		if(layer):
-			selectedId = layer.selectedFeaturesIds()
+			selectedId = layer.selectedFeatureIds()
 			layer.startEditing()
 			for i in selectedId:
 				if rule=="three": #AT MOST
@@ -457,7 +445,7 @@ class geoRULESDialog(QDialog, Ui_Dialog):
 		fields=['AT_LEAST','AT_MOST']
 		for f in fields:
 			self.Symbolize(f)
-		self.setModal(False)
+		#self.setModal(False)
 		
 		
 ###################################################################################################

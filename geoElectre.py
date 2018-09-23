@@ -3,10 +3,9 @@
 """
 /***************************************************************************
 Name			: geoConcordance
-Description		: geographical MCDA with Electre model (ranking with concordance 
-					and discordance index)
+Description		: geographical MCDA with Electre model (ranking with concordance and discordance index)
 Date			: June 20, 2014
-copyright		: Gianluca Massei  (developper) 
+copyright		: (C) 2018 by Gianluca Massei
 email			: (g_massa@libero.it)
 
  ***************************************************************************/
@@ -63,10 +62,10 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		self.SetBtnAbout.clicked.connect(self.about)
 		self.SetBtnHelp.clicked.connect(self.open_help) 
 #		QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)
-		self.EnvGetWeightBtn.clicked.connect(self.ElaborateAttributeTable)
-		self.EnvCalculateBtn.clicked.connect(self.AnalyticHierarchyProcess)
-		self.RenderBtn.clicked.connect(self.RenderLayer)
-		self.GraphBtn.clicked.connect(self.BuildOutput)
+		self.EnvGetWeightBtn.clicked.connect(self.elaborateAttributeTable)
+		self.EnvCalculateBtn.clicked.connect(self.analyticHierarchyProcess)
+		self.RenderBtn.clicked.connect(self.renderLayer)
+		self.GraphBtn.clicked.connect(self.buildOutput)
 #		QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
 		self.AnlsBtnBox.clicked.connect(self.reject)
 		
@@ -97,8 +96,8 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			self.EnvParameterWidget.setItem(0,r,QTableWidgetItem("1.0"))
 			self.EnvParameterWidget.setItem(1,r,QTableWidgetItem("gain"))
 		#retrieve signal for modified cell
-		self.EnvTableWidget.cellChanged[(int,int)].connect(self.CompleteMatrix)
-		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.ChangeValue)
+		self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
+		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
 ###############################ContextMenu########################################
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -209,7 +208,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 
 
-	def CompleteMatrix(self):
+	def completeMatrix(self):
 		"""Autocomplete matrix of  pairwise comparison"""
 		try:
 			cell=self.EnvTableWidget.currentItem()
@@ -223,7 +222,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
 
-	def ChangeValue(self):
+	def changeValue(self):
 		"""Event for change gain/cost"""
 		cell=self.EnvParameterWidget.currentItem()
 		val=cell.text()
@@ -260,7 +259,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		except:
 			return 1.41
 
-	def AnalyticHierarchyProcess(self):
+	def analyticHierarchyProcess(self):
 		"""Calculate weight from matrix of pairwise comparison """
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		pairwise=[[float(self.EnvTableWidget.item(r, c).text()) for r in range(len(criteria))] for c in range(len(criteria))]
@@ -396,7 +395,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 	
 
 		
-	def ElaborateAttributeTable(self):
+	def elaborateAttributeTable(self):
 		"""Standardization fields values in range [0-1]"""
 		criteria=[self.EnvTableWidget.verticalHeaderItem(f).text() for f in range(self.EnvTableWidget.columnCount())]
 		weight=[float(self.EnvParameterWidget.item(0, c).text()) for c in range(self.EnvParameterWidget.columnCount())]
@@ -430,7 +429,6 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			self.activeLayer.changeAttributeValue(feat.id(),fldConcValue,round(float(conc),4))
 			self.activeLayer.changeAttributeValue(feat.id(),fldDiscValue,round(float(disc),4))
 			self.EnvProgressBar.setValue(progress)
-			print(feat.id(),round(conc,4),round(disc,4))
 		self.activeLayer.commitChanges()
 		self.EnvTEdit.append("done") 
 		return 0
@@ -438,7 +436,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 
 
-	def Symbolize(self,fieldName):
+	def symbolize(self,fieldName):
 		"""Prepare legends """
 		numberOfClasses=self.spinBoxClasNum.value()
 		if(numberOfClasses==5):
@@ -473,17 +471,17 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		QgsProject.instance().addMapLayer(add)
 
 
-	def RenderLayer(self):
+	def renderLayer(self):
 		""" Load thematic layers in canvas """
 		fields=['geoConc','geoDisc']
 		for f in fields:
-			self.Symbolize(f)
+			self.symbolize(f)
 		#self.setModal(False)
 
 ###########################################################################################
 
 
-	def ExtractAttributeValue(self,field):
+	def extractAttributeValue(self,field):
 		"""Retrive single field value from attributes table"""
 		fields=self.activeLayer.fields()
 		provider=self.activeLayer.dataProvider()
@@ -502,7 +500,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 
 
 
-	def BuildOutput(self):
+	def buildOutput(self):
 		"""General function for all graphical and tabula output"""
 		currentDir = str(os.path.abspath( os.path.dirname(__file__)))
 		if os.path.isfile(os.path.join(currentDir,"histogram.png"))==True:
@@ -511,21 +509,21 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 			import matplotlib.pyplot as plt
 			import numpy as np
 			#self.BuildGraphPnt(currentDir)
-			self.BuildGraphIstogram(currentDir)
+			self.buildGraphIstogram(currentDir)
 		except ImportError as e:
 			QMessageBox.information(None, QCoreApplication.translate('geoConcordance', "Plugin error"), \
 			QCoreApplication.translate('geoConcordance', "Couldn't import Python modules 'matplotlib' and 'numpy'. [Message: %s]" % e))
-		self.BuildHTML()
+		self.buildHTML()
 		webbrowser.open(os.path.join(currentDir,"barGraph.html"))
 		#self.setModal(False)
 		return 0
 
 
 
-	def BuildGraphIstogram(self,currentDir):
+	def buildGraphIstogram(self,currentDir):
 		"""Build Istogram graph using pyplot"""
-		geoConcValue=self.ExtractAttributeValue('geoConc')
-		geoDiscValue=self.ExtractAttributeValue('geoDisc')
+		geoConcValue=self.extractAttributeValue('geoConc')
+		geoDiscValue=self.extractAttributeValue('geoDisc')
 		fig = plt.figure()
 		fig.subplots_adjust(bottom=0.2)
 		fig.subplots_adjust()
@@ -534,7 +532,7 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		xpos = np.arange(len(geoConcValue))    # the x locations for the groups
 		width = 0.35    # the width of the bars: can also be len(x) sequence
 		label=self.LabelListFieldsCBox.currentText()
-		labels=self.ExtractAttributeValue(label)
+		labels=self.extractAttributeValue(label)
 		p1 = plt.bar((xpos), geoConcValue, width, color='g',align='center') 
 		p2 = plt.bar((xpos+width), geoDiscValue, width, color='r', align='center') 
 		plt.ylabel('Scores')
@@ -547,12 +545,12 @@ class geoElectreDialog(QDialog, Ui_Dialog):
 		return 0
 
 	
-	def BuildHTML(self):
-		geoConcValue=self.ExtractAttributeValue('geoConc')
-		geoDiscValue=self.ExtractAttributeValue('geoDisc')
+	def buildHTML(self):
+		geoConcValue=self.extractAttributeValue('geoConc')
+		geoDiscValue=self.extractAttributeValue('geoDisc')
 		geoConcordanceValue=[[A,B] for (A,B) in zip(geoConcValue,geoDiscValue)]
 		label=self.LabelListFieldsCBox.currentText()
-		labels=self.ExtractAttributeValue(label)
+		labels=self.extractAttributeValue(label)
 		labels=[str(l) for l in labels]
 		legend=['geoConcordance','geoDiscordance']
 		htmlGraph.BuilHTMLGraph(geoConcordanceValue,labels,legend)

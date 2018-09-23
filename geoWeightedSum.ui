@@ -82,22 +82,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <attribute name="label">
        <string>Criteria</string>
       </attribute>
-      <widget class="QComboBox" name="EnvlistFieldsCBox">
-       <property name="geometry">
-        <rect>
-         <x>88</x>
-         <y>62</y>
-         <width>401</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>22</height>
-        </size>
-       </property>
-      </widget>
       <widget class="QLabel" name="EnvLbl">
        <property name="geometry">
         <rect>
@@ -149,19 +133,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         </sizepolicy>
        </property>
       </widget>
-      <widget class="QLabel" name="EnvFieldsLbl">
-       <property name="geometry">
-        <rect>
-         <x>9</x>
-         <y>62</y>
-         <width>34</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Fields</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="SetBtnHelp">
        <property name="geometry">
         <rect>
@@ -207,7 +178,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <property name="geometry">
         <rect>
          <x>14</x>
-         <y>105</y>
+         <y>85</y>
          <width>651</width>
          <height>301</height>
         </rect>
@@ -300,7 +271,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
        </widget>
        <widget class="QWidget" name="tab_6">
         <attribute name="title">
-         <string>Advanced</string>
+         <string>Standard</string>
         </attribute>
         <attribute name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;colun vs row&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -360,25 +331,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         </widget>
        </widget>
       </widget>
-      <widget class="QPushButton" name="EnvAddFieldBtn">
-       <property name="geometry">
-        <rect>
-         <x>520</x>
-         <y>62</y>
-         <width>121</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Add field</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="SetBtnAbout">
        <property name="geometry">
         <rect>
@@ -432,17 +384,6 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <set>QDialogButtonBox::Cancel</set>
        </property>
       </widget>
-      <zorder>EnvAddFieldBtn</zorder>
-      <zorder>EnvlistFieldsCBox</zorder>
-      <zorder>EnvLbl</zorder>
-      <zorder>EnvMapNameLbl</zorder>
-      <zorder>EnvTEdit</zorder>
-      <zorder>EnvFieldsLbl</zorder>
-      <zorder>SetBtnHelp</zorder>
-      <zorder>line_2</zorder>
-      <zorder>EnvTabWidget</zorder>
-      <zorder>SetBtnAbout</zorder>
-      <zorder>SetBtnQuit</zorder>
      </widget>
      <widget class="QWidget" name="AnalysisQTBox">
       <property name="geometry">
@@ -589,7 +530,7 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>210</x>
           <y>90</y>
-          <width>171</width>
+          <width>69</width>
           <height>22</height>
          </rect>
         </property>
@@ -639,10 +580,8 @@ font: 75 italic 10pt &quot;MS Shell Dlg 2&quot;;</string>
  </widget>
  <layoutdefault spacing="6" margin="9"/>
  <tabstops>
-  <tabstop>EnvAddFieldBtn</tabstop>
   <tabstop>EnvTEdit</tabstop>
   <tabstop>SetBtnHelp</tabstop>
-  <tabstop>EnvlistFieldsCBox</tabstop>
   <tabstop>AnlsBtnQuit</tabstop>
  </tabstops>
  <resources/>

@@ -5,7 +5,7 @@
 Name            : geoTOPSIS
 Description     : geographical MCDA 
 Date            : June 27, 2014
-copyright		: Gianluca Massei  (developper) 
+copyright		: (C) 2018 by Gianluca Massei
 email			: (g_massa@libero.it)
 
  ***************************************************************************/

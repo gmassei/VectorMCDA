@@ -5,7 +5,7 @@
 Name            : geoTemplate
 Description     : generic GUI for geographical MCDA 
 Date            : June 27, 2014
-copyright		: Gianluca Massei  (developper) 
+copyright		: (C) 2018 by Gianluca Massei 
 email			: (g_massa@libero.it)
 
  ***************************************************************************/
@@ -88,7 +88,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
-		outputFile="geoTEMPLATE.shp"
+		outputFile="geoWeightedSum.shp"
 		sourceOut=os.path.join(pathSource,outputFile)
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
@@ -100,19 +100,19 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
-		EnvSetLabel=["Weigths","Preference","Ideal point", "Worst point "]
+		EnvSetLabel=["Weigths","Preference"]
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvParameterWidget.setRowCount(4)
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-		self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
-		self.updateTable()
 		try:
+			self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
 			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
 		except:
 			pass
+		self.updateTable()
 ###############################ContextMenu########################################
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -132,8 +132,6 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		fields = layer.dataProvider().fields()
 		fieldList=[f.name() for f in fields if f.typeName()!='String']
 		return fieldList # sorted( field_list, cmp=locale.strcoll )
-
-
 
 	def outFile(self):
 		"""Display file dialog for output  file"""
@@ -255,10 +253,11 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			cell=self.EnvTableWidget.currentItem()
 			if cell.text()!=None and type(float(cell.text())==float):
 				val=round(float(cell.text())**(-1),2)
+				print(cell.column(),cell.row(), val)
 				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
 			return 0
 		except ValueError:
-			QMessageBox.warning(self.iface.mainWindow(), "geoTEMPLATE",
+			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
 
