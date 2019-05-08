@@ -79,12 +79,16 @@ class vMCDA(object):
 		self.actionXMCDA = QAction( "geoXMCDA", self.iface.mainWindow() )
 		self.actionXMCDA.triggered.connect(self.runGeoXMCDA )
 		
-		self.actionTEMPLATE = QAction( "geoTEMPLATE", self.iface.mainWindow() )
-		self.actionTEMPLATE.triggered.connect(self.runGeoTEMPLATE )
+		self.actionUmbriaSuit = QAction( "geoUmbriaSUIT", self.iface.mainWindow() )
+		self.actionUmbriaSuit.triggered.connect(self.runGeoUmbriaSuit )
+		self.actionFuzzy.setDisabled(True)
+		
+		#self.actionTEMPLATE = QAction( "geoTEMPLATE", self.iface.mainWindow() )
+		#self.actionTEMPLATE.triggered.connect(self.runGeoTEMPLATE )
 
 		# aggiunge il plugin alla toolbar
 		self.geoMCDAmenu.addActions([self.actionWeightedSum,self.actionTOPSIS,self.actionFuzzy,\
-			self.actionElectre,self.actionPromethee,self.actionRSDB,self.actionXMCDA,self.actionTEMPLATE])
+			self.actionElectre,self.actionPromethee,self.actionRSDB,self.actionXMCDA,self.actionUmbriaSuit])
 		self.menu = self.iface.pluginMenu()
 		self.menu.addMenu( self.geoMCDAmenu )
 
@@ -99,7 +103,8 @@ class vMCDA(object):
 		self.iface.removePluginMenu( "&geoRSDB", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoRULES", self.actionRSDB )
 		self.iface.removePluginMenu( "&geoXMCDA", self.actionXMCDA )
-		self.iface.removePluginMenu( "&geoTEMPLATE", self.actionTEMPLATE )
+		self.iface.removePluginMenu( "&geoUmbriaSuit", self.actionUmbriaSuit )
+		#self.iface.removePluginMenu( "&geoTEMPLATE", self.actionTEMPLATE )
 
 
 	def runGeoWeightedSum(self):	# richiamato al click sull'azione
@@ -206,7 +211,20 @@ class vMCDA(object):
 		else:
 			dlg = geoXMCDADialog(self.iface)
 			dlg.exec_()
-			
+	def runGeoUmbriaSuit(self):
+		from .geoSUIT import geoSUITDialog
+		self.activeLayer = self.iface.activeLayer()
+		if ((self.activeLayer == None) or (self.activeLayer.type() != QgsMapLayer.VectorLayer)):
+			result=QMessageBox.question(self.iface.mainWindow(), "geoUmbriaSUIT in VectorMCDA",
+			("No active layer found\n" "Please make active one or more vector layer\n" \
+            "Do you need documents or data ?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+			if result  == QMessageBox.Yes:
+				webbrowser.open("http://maplab.alwaysdata.net/geoUmbriaSUIT.html")
+		else:
+			dlg = geoSUITDialog(self.iface)
+			dlg.exec_()
+	
+	
 	def runGeoTEMPLATE(self):	# richiamato al click sull'azione
 		from .geoTEMPLATE import geoTEMPLATEDialog
 		self.activeLayer = self.iface.activeLayer()

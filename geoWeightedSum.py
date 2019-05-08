@@ -40,8 +40,8 @@ try:
 	from .pymcda import *
 except ImportError as e:
 	mods = [m.__name__ for m in sys.modules.values() if m]
-	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
-	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % (e)))
+	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
+	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % (e)))
 	
 
 	
@@ -49,14 +49,14 @@ try:
 	import numpy as np
 except ImportError as e:
 	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
-	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % e))
+	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 
 #import DOMLEM
 from . import htmlGraph
 
-from .ui_geoTEMPLATE import Ui_Dialog
+from .ui_geoWeightedSum import Ui_Dialog
 
 #QObject.connect(self.action, SIGNAL("triggered()"), self.run)
 #your_object.name_of_signal.connect(your_function_slot)
@@ -76,7 +76,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		#QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		self.SetBtnQuit.clicked.connect(self.reject)
 		self.SetBtnAbout.clicked.connect(self.about)
-		self.AnlsSetBtnAbout.clicked.connect(self.about)
+		self.AnsytBtnAbout.clicked.connect(self.about)
 		self.SetBtnHelp.clicked.connect(self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)	
 		self.EnvCalculateBtn.clicked.connect(self.analyticHierarchyProcess)
@@ -84,7 +84,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.RenderBtn.clicked.connect(self.renderLayer)
 		self.GraphBtn.clicked.connect(self.buildOutput)
 		#QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		self.AnlsBtnBox.clicked.connect(self.reject)
+		#self.AnlsBtnBox.clicked.connect(self.reject)
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
@@ -92,7 +92,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		sourceOut=os.path.join(pathSource,outputFile)
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
-		self.EnvlistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
+		#self.EnvlistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
 		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.fields()])
 #################################################################################
 		Envfields=self.getFieldNames(self.activeLayer) #field list
@@ -107,11 +107,9 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvParameterWidget.setVerticalHeaderLabels(EnvSetLabel)
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
-		try:
-			self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
-			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
-		except:
-			pass
+		self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
+		#self.EnvTableWidget.itemChanged.connect(self.completeMatrix)
+		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
 		self.updateTable()
 ###############################ContextMenu########################################
 		headers = self.EnvParameterWidget.horizontalHeader()
@@ -252,15 +250,13 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		try:
 			cell=self.EnvTableWidget.currentItem()
 			if cell.text()!=None and type(float(cell.text())==float):
-				val=round(float(cell.text())**(-1),2)
-				print(cell.column(),cell.row(), val)
-				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
-			return 0
+				val=str(round(float(cell.text())**(-1),2))
+				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(val))
 		except ValueError:
 			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
-
+		return 0
 			
 
 	def changeValue(self):

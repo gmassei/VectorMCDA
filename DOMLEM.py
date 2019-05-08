@@ -380,12 +380,12 @@ def refactoring_label(RULES,currentDIR):
 		return RULES
 	
 	
-def print_rules(RULES,infosystem):
+def print_rules(RULES,infosystem,currentDIR):
 	"""Print rls output file"""
 	label_classes=['n.c','very low', 'low','medium','high','very high']
 	EXAMPLES=infosystem['examples']
 	j=1
-	currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+	#currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 	outfile=open(os.path.join(currentDIR,"rules.rls"),"w")
 	#outfile.write("\n##  AT LEAST {>= Class} - Type 1 rules and  AT MOST {<= Class} - Type 3 rules\n")
 	#outfile.write('\t[RULES:]\n')
@@ -403,8 +403,8 @@ def print_rules(RULES,infosystem):
 	outfile.close()
 	return 0
 		
-def saveToPickle(RULES):
-	currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+def saveToPickle(RULES,currentDIR):
+	#currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 	rulesPKL = open(os.path.join(currentDIR,"RULES.pkl"), 'wb')
 	pickle.dump(RULES,rulesPKL) #save RULES dict in a file for use it in geoRULES module
 	rulesPKL.close()
@@ -417,8 +417,7 @@ def main(currentDIR):
 		start=time()
 		# fix_print_with_import
 		print('start:', ctime(time()))
-
-		currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
+		#currentDIR = str(os.path.abspath( os.path.dirname(__file__)))
 		infosystem=file2infosystem(os.path.join(currentDIR,"example.isf"))
 		decision_class=union_classes(infosystem)
 		downward_union_classes(infosystem,decision_class)
@@ -450,8 +449,8 @@ def main(currentDIR):
 			rules=find_rules(EXAMPLES,lower,header,"one")
 			RULES=format_rules(rules,RULES,header)
 		refactoring_label(RULES,currentDIR)
-		print_rules(RULES,infosystem)
-		saveToPickle(RULES)
+		print_rules(RULES,infosystem,currentDIR)
+		saveToPickle(RULES,currentDIR)
 		end=time()
 		# fix_print_with_import
 		print("Time -> %.4f s" % (end-start))
