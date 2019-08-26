@@ -3,7 +3,7 @@ name=VectorMCDA
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.99
 description=Performs geographic multi-criteria decision making.
-version=2.99
+version=3.0.0
 author=author=Gianluca Massei
 email=g_massa@libero
 
@@ -13,6 +13,7 @@ tracker=http://hub.qgis.org/projects/vectormcda
 repository=https://github.com/gmassei/VectorMCDA
 
 changelog=
+	3.0.0 test period ended for qgis3 porting. Solved bug in WSM module (Permission denied trying to write on SI.out)
 	2.99 porting in QGIS3
 	1.1.2 bug in geoWeightedSum (missing button for pairwise comparison)
 	1.1.0 improvements in the "a" and "help" buttons

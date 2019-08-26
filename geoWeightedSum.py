@@ -40,8 +40,8 @@ try:
 	from .pymcda import *
 except ImportError as e:
 	mods = [m.__name__ for m in sys.modules.values() if m]
-	QMessageBox.information(None, QCoreApplication.translate('geoWeightedSum', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % (e)))
+	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
+	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % (e)))
 	
 
 	
@@ -49,14 +49,14 @@ try:
 	import numpy as np
 except ImportError as e:
 	QMessageBox.information(None, QCoreApplication.translate('geoTemplate', "Plugin error"), \
-	QCoreApplication.translate('geoWeightedSum', "Couldn't import Python module. [Message: %s]" % e))
+	QCoreApplication.translate('geoTemplate', "Couldn't import Python module. [Message: %s]" % e))
 	
 
 
 #import DOMLEM
 from . import htmlGraph
 
-from .ui_geoWeightedSum import Ui_Dialog
+from .ui_geoTEMPLATE import Ui_Dialog
 
 #QObject.connect(self.action, SIGNAL("triggered()"), self.run)
 #your_object.name_of_signal.connect(your_function_slot)
@@ -76,7 +76,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		#QObject.connect(self.SetBtnQuit, SIGNAL("clicked()"),self, SLOT("reject()"))
 		self.SetBtnQuit.clicked.connect(self.reject)
 		self.SetBtnAbout.clicked.connect(self.about)
-		self.AnsytBtnAbout.clicked.connect(self.about)
+		self.AnlsSetBtnAbout.clicked.connect(self.about)
 		self.SetBtnHelp.clicked.connect(self.open_help)
 		#QObject.connect(self.EnvAddFieldBtn, SIGNAL( "clicked()" ), self.AddField)	
 		self.EnvCalculateBtn.clicked.connect(self.analyticHierarchyProcess)
@@ -84,15 +84,15 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.RenderBtn.clicked.connect(self.renderLayer)
 		self.GraphBtn.clicked.connect(self.buildOutput)
 		#QObject.connect(self.AnlsBtnBox, SIGNAL("rejected()"),self, SLOT("reject()"))
-		#self.AnlsBtnBox.clicked.connect(self.reject)
+		self.AnlsBtnBox.clicked.connect(self.reject)
 		
 		sourceIn=str(self.iface.activeLayer().source())
 		pathSource=os.path.dirname(sourceIn)
-		outputFile="geoWeightedSum.shp"
+		outputFile="geoTEMPLATE.shp"
 		sourceOut=os.path.join(pathSource,outputFile)
 		#self.OutlEdt.setText(str(sourceOut))
 		self.EnvMapNameLbl.setText(self.activeLayer.name())
-		#self.EnvlistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
+		self.EnvlistFieldsCBox.addItems(self.getFieldNames(self.activeLayer))
 		self.LabelListFieldsCBox.addItems([str(f.name()) for f in self.activeLayer.fields()])
 #################################################################################
 		Envfields=self.getFieldNames(self.activeLayer) #field list
@@ -100,7 +100,7 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		self.EnvTableWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvTableWidget.setRowCount(len(Envfields))
 		self.EnvTableWidget.setVerticalHeaderLabels(Envfields)
-		EnvSetLabel=["Weigths","Preference"]
+		EnvSetLabel=["Weigths","Preference","Ideal point", "Worst point "]
 		self.EnvParameterWidget.setColumnCount(len(Envfields))
 		self.EnvParameterWidget.setHorizontalHeaderLabels(Envfields)
 		self.EnvParameterWidget.setRowCount(4)
@@ -108,9 +108,11 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		for r in range(len(Envfields)):
 			self.EnvTableWidget.setItem(r,r,QTableWidgetItem("1.0"))
 		self.EnvTableWidget.cellChanged[(int,int)].connect(self.completeMatrix)
-		#self.EnvTableWidget.itemChanged.connect(self.completeMatrix)
-		self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
 		self.updateTable()
+		try:
+			self.EnvParameterWidget.cellClicked[(int,int)].connect(self.changeValue)
+		except:
+			pass
 ###############################ContextMenu########################################
 		headers = self.EnvParameterWidget.horizontalHeader()
 		headers.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -130,6 +132,8 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		fields = layer.dataProvider().fields()
 		fieldList=[f.name() for f in fields if f.typeName()!='String']
 		return fieldList # sorted( field_list, cmp=locale.strcoll )
+
+
 
 	def outFile(self):
 		"""Display file dialog for output  file"""
@@ -250,13 +254,14 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		try:
 			cell=self.EnvTableWidget.currentItem()
 			if cell.text()!=None and type(float(cell.text())==float):
-				val=str(round(float(cell.text())**(-1),2))
-				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(val))
+				val=round(float(cell.text())**(-1),2)
+				self.EnvTableWidget.setItem(cell.column(),cell.row(),QTableWidgetItem(str(val)))
+			return 0
 		except ValueError:
-			QMessageBox.warning(self.iface.mainWindow(), "geoWeightedSum",
+			QMessageBox.warning(self.iface.mainWindow(), "geoTEMPLATE",
 			("Input error\n" "Please insert numeric value "\
 			"active"), QMessageBox.Ok, QMessageBox.Ok)
-		return 0
+
 			
 
 	def changeValue(self):
@@ -393,7 +398,10 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 			matrix.append(row)
 		matrix=np.array(matrix) # dtype = 'float32'
 		criteriaLabel="id_;"+";".join([str(i) for i in criteria])
-		np.savetxt("SI.out",matrix, header=criteriaLabel, delimiter=';',fmt='%1.4f')
+		activeLayerPath=self.activeLayer.dataProvider().dataSourceUri()
+		(activeDirectoryName,nameFile) = os.path.split(activeLayerPath)
+		np.savetxt(os.path.join(activeDirectoryName, "SI.out"),matrix, header=criteriaLabel, delimiter=';',fmt='%1.4f')
+        
 		self.pyMCDA(weight,preference)
 		return 0
 		
