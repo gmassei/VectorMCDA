@@ -401,12 +401,13 @@ class geoWeightedSumDialog(QDialog, Ui_Dialog):
 		activeLayerPath=self.activeLayer.dataProvider().dataSourceUri()
 		(activeDirectoryName,nameFile) = os.path.split(activeLayerPath)
 		np.savetxt(os.path.join(activeDirectoryName, "SI.out"),matrix, header=criteriaLabel, delimiter=';',fmt='%1.4f')
-        
 		self.pyMCDA(weight,preference)
 		return 0
 		
 	def pyMCDA(self,weight,preference):
-		mat=support.inputFromTxt('SI.out')
+		activeLayerPath=self.activeLayer.dataProvider().dataSourceUri()
+		(activeDirectoryName,nameFile) = os.path.split(activeLayerPath)
+		mat=support.inputFromTxt(os.path.join(activeDirectoryName, "SI.out"))
 		criteriaLabel=support.getCriteriaLabels(mat)
 		alternativesLabel=support.getAlternativesLabels(mat)
 		print("MAT:",mat)

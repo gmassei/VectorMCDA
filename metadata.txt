@@ -3,16 +3,17 @@ name=VectorMCDA
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.99
 description=Performs geographic multi-criteria decision making.
-version=3.0.0
+version=3.0.1
 author=author=Gianluca Massei
 email=g_massa@libero
 
 about=VectorMCDA is a QGIS plugin that uses different MCDA algorithms to perform a multicriteria analysis in a geographic environmental
 
-tracker=http://hub.qgis.org/projects/vectormcda
+tracker=https://github.com/gmassei/VectorMCDA/issues/
 repository=https://github.com/gmassei/VectorMCDA
 
 changelog=
+	3.0.1 bug in geoWeightedSum "OSError: SI.out not found." Solved
 	3.0.0 test period ended for qgis3 porting. Solved bug in WSM module (Permission denied trying to write on SI.out)
 	2.99 porting in QGIS3
 	1.1.2 bug in geoWeightedSum (missing button for pairwise comparison)
